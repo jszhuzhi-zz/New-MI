@@ -23,14 +23,9 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
-  // CORS - allow all membership portals
+  // CORS - allow all origins in development
   app.enableCors({
-    origin: [
-      configService.get<string>('app.customerPortalUrl', 'http://localhost:3001'),
-      configService.get<string>('app.mallPortalUrl', 'http://localhost:3002'),
-      configService.get<string>('app.groupPortalUrl', 'http://localhost:3003'),
-      configService.get<string>('app.merchantPortalUrl', 'http://localhost:3004'),
-    ],
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: [

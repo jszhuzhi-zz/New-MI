@@ -42,7 +42,7 @@ export class TriggerEngineService {
   /**
    * Find triggers matching an event type
    */
-  private async findMatchingTriggers(eventType: string) {
+  private async findMatchingTriggers(eventType: string): Promise<any[]> {
     // TODO: Query database for active triggers with matching event type
     return [];
   }
@@ -121,7 +121,7 @@ export class TriggerEngineService {
   /**
    * Select A/B test variant for member
    */
-  private async selectVariant(trigger: any, memberId: string) {
+  private async selectVariant(trigger: any, memberId: string): Promise<any> {
     if (!trigger.abTest) return null;
     // TODO: Deterministic variant selection based on member ID hash
     // Ensures same member always gets same variant
