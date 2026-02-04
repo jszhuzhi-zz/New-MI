@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "commonjs",
+    "lib": ["ES2021"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "@link-reit/types": ["packages/shared/types/src"],
+      "@link-reit/i18n": ["packages/shared/i18n/src"],
+      "@link-reit/utils": ["packages/shared/utils/src"],
+      "@link-reit/api-client": ["packages/shared/api-client/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build"]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "link-reit-membership",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Link REIT Membership System - 領展會員系統",
+  "scripts": {
+    "dev:backend": "pnpm --filter @link-reit/backend dev",
+    "dev:group-admin": "pnpm --filter @link-reit/group-admin dev",
+    "dev:mall-admin": "pnpm --filter @link-reit/mall-admin dev",
+    "dev:merchant-portal": "pnpm --filter @link-reit/merchant-portal dev",
+    "dev:customer-mobile": "pnpm --filter @link-reit/customer-mobile dev",
+    "dev:mini-program": "pnpm --filter @link-reit/mini-program dev",
+    "build": "turbo run build",
+    "build:backend": "pnpm --filter @link-reit/backend build",
+    "build:shared": "turbo run build --filter=./packages/*",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "db:migrate": "pnpm --filter @link-reit/backend prisma:migrate",
+    "db:seed": "pnpm --filter @link-reit/backend prisma:seed",
+    "db:studio": "pnpm --filter @link-reit/backend prisma:studio"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.1.0"
+}

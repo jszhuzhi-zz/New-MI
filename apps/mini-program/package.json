@@ -1,0 +1,31 @@
+{
+  "name": "@link-reit/mini-program",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Link REIT WeChat Mini Program - Customer-facing membership experience",
+  "scripts": {
+    "dev": "uni",
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "@dcloudio/uni-app": "3.0.0-alpha-4010120250114001",
+    "@dcloudio/uni-components": "3.0.0-alpha-4010120250114001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-alpha-4010120250114001",
+    "pinia": "^2.1.7",
+    "axios-miniprogram-adapter": "^0.3.5",
+    "@link-reit/types": "workspace:*",
+    "@link-reit/i18n": "workspace:*"
+  },
+  "devDependencies": {
+    "@dcloudio/vite-plugin-uni": "3.0.0-alpha-4010120250114001",
+    "@dcloudio/uni-cli-shared": "3.0.0-alpha-4010120250114001",
+    "vite": "^5.4.0",
+    "typescript": "^5.5.0",
+    "@types/node": "^20.14.0",
+    "vue-tsc": "^2.0.0",
+    "@dcloudio/types": "^3.4.0"
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "Link 會員",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark"
+      }
+    },
+    {
+      "path": "pages/stamp/index",
+      "style": {
+        "navigationBarTitleText": "印花",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/scan/index",
+      "style": {
+        "navigationBarTitleText": "掃碼",
+        "navigationBarBackgroundColor": "#1A1A2E",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/offers/index",
+      "style": {
+        "navigationBarTitleText": "優惠",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages/stamp",
+      "pages": [
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "印花詳情"
+          }
+        },
+        {
+          "path": "rules",
+          "style": {
+            "navigationBarTitleText": "印花規則"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/offers",
+      "pages": [
+        {
+          "path": "campaign-detail",
+          "style": {
+            "navigationBarTitleText": "活動詳情"
+          }
+        },
+        {
+          "path": "coupon-list",
+          "style": {
+            "navigationBarTitleText": "我的優惠券"
+          }
+        },
+        {
+          "path": "coupon-detail",
+          "style": {
+            "navigationBarTitleText": "優惠券詳情"
+          }
+        },
+        {
+          "path": "lucky-draw",
+          "style": {
+            "navigationBarTitleText": "幸運抽獎",
+            "navigationBarBackgroundColor": "#FF6B35",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "gift-catalog",
+          "style": {
+            "navigationBarTitleText": "印花商城"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/profile",
+      "pages": [
+        {
+          "path": "edit",
+          "style": {
+            "navigationBarTitleText": "編輯資料"
+          }
+        },
+        {
+          "path": "tier",
+          "style": {
+            "navigationBarTitleText": "會員等級"
+          }
+        },
+        {
+          "path": "messages",
+          "style": {
+            "navigationBarTitleText": "消息中心",
+            "enablePullDownRefresh": true
+          }
+        },
+        {
+          "path": "settings",
+          "style": {
+            "navigationBarTitleText": "設置"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/auth",
+      "pages": [
+        {
+          "path": "login",
+          "style": {
+            "navigationBarTitleText": "登錄",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "bindPhone",
+          "style": {
+            "navigationBarTitleText": "綁定手機"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/mall",
+      "pages": [
+        {
+          "path": "directory",
+          "style": {
+            "navigationBarTitleText": "商場導覽"
+          }
+        },
+        {
+          "path": "merchant",
+          "style": {
+            "navigationBarTitleText": "商戶詳情"
+          }
+        },
+        {
+          "path": "services",
+          "style": {
+            "navigationBarTitleText": "服務指引"
+          }
+        },
+        {
+          "path": "parking",
+          "style": {
+            "navigationBarTitleText": "泊車服務"
+          }
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "Link 會員",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F6FA",
+    "backgroundTextStyle": "dark",
+    "rpxCalcMaxDeviceWidth": 750,
+    "rpxCalcBaseDeviceWidth": 375
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#00A651",
+    "borderStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首頁",
+        "iconPath": "assets/tab-home.png",
+        "selectedIconPath": "assets/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/stamp/index",
+        "text": "印花",
+        "iconPath": "assets/tab-stamp.png",
+        "selectedIconPath": "assets/tab-stamp-active.png"
+      },
+      {
+        "pagePath": "pages/scan/index",
+        "text": "掃碼",
+        "iconPath": "assets/tab-scan.png",
+        "selectedIconPath": "assets/tab-scan-active.png"
+      },
+      {
+        "pagePath": "pages/offers/index",
+        "text": "優惠",
+        "iconPath": "assets/tab-offers.png",
+        "selectedIconPath": "assets/tab-offers-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "assets/tab-profile.png",
+        "selectedIconPath": "assets/tab-profile-active.png"
+      }
+    ]
+  }
+}

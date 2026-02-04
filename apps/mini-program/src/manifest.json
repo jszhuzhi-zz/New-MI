@@ -1,0 +1,46 @@
+{
+  "name": "Link 會員",
+  "appid": "__UNI__LINKREIT",
+  "description": "Link REIT Membership - 領展會員計劃",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "locale": "zh-Hant",
+  "mp-weixin": {
+    "appid": "wx_YOUR_APPID_HERE",
+    "setting": {
+      "urlCheck": true,
+      "es6": true,
+      "enhance": true,
+      "postcss": true,
+      "minified": true,
+      "bigPackageSizeSupport": true
+    },
+    "usingComponents": true,
+    "lazyCodeLoading": "requiredComponents",
+    "permission": {
+      "scope.camera": {
+        "desc": "用於掃描小票及會員二維碼"
+      },
+      "scope.userLocation": {
+        "desc": "用於查詢附近商場及提供定位服務"
+      },
+      "scope.userInfo": {
+        "desc": "用於獲取您的暱稱及頭像"
+      }
+    },
+    "requiredPrivateInfos": [
+      "getLocation",
+      "chooseLocation"
+    ],
+    "optimization": {
+      "subPackages": true
+    }
+  },
+  "networkTimeout": {
+    "request": 30000,
+    "connectSocket": 30000,
+    "uploadFile": 60000,
+    "downloadFile": 60000
+  }
+}

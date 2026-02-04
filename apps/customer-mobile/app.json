@@ -1,0 +1,83 @@
+{
+  "expo": {
+    "name": "Link Mall",
+    "slug": "link-mall",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#00694B"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.linkreit.linkmall",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "We need camera access to scan receipts and QR codes for stamp collection.",
+        "NSPhotoLibraryUsageDescription": "We need photo library access to upload receipt images.",
+        "NSLocationWhenInUseUsageDescription": "We need your location to show nearby malls and offers.",
+        "CFBundleLocalizations": ["en", "zh-Hans", "zh-Hant"],
+        "CFBundleDevelopmentRegion": "zh-Hant",
+        "CFBundleDisplayName": "領展商場"
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#00694B"
+      },
+      "package": "com.linkreit.linkmall",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-image-picker",
+      "expo-barcode-scanner",
+      "expo-location",
+      "expo-notifications",
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": []
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "https://api.linkmall.hk/v1",
+      "wechatAppId": "wx_linkreit_prod",
+      "supportedLocales": ["zh-TW", "zh-CN", "en"],
+      "defaultLocale": "zh-TW",
+      "eas": {
+        "projectId": "link-mall-customer"
+      }
+    },
+    "locales": {
+      "zh-Hant": "./locales/zh-TW.json",
+      "zh-Hans": "./locales/zh-CN.json",
+      "en": "./locales/en.json"
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#00694B",
+      "androidMode": "default"
+    }
+  }
+}
