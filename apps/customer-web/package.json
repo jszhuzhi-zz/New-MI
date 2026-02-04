@@ -1,0 +1,32 @@
+{
+  "name": "@link-reit/customer-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Link Mall - Customer Web H5 App (顾客端)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "antd-mobile": "^5.34.0",
+    "antd-mobile-icons": "^0.3.0",
+    "axios": "^1.6.2",
+    "zustand": "^4.4.7",
+    "dayjs": "^1.11.10",
+    "qrcode.react": "^3.1.0",
+    "@link-reit/types": "workspace:*",
+    "@link-reit/i18n": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.3.2",
+    "@types/react": "^18.2.41",
+    "@types/react-dom": "^18.2.17"
+  }
+}
