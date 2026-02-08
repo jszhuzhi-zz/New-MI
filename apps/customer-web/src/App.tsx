@@ -15,6 +15,7 @@ import TierPage from './pages/profile/tier';
 import SettingsPage from './pages/profile/settings';
 import MallDirectory from './pages/mall/directory';
 import MerchantDetail from './pages/mall/merchant-detail';
+import CheckInPage from './pages/checkin';
 import { useAuthStore } from './store/auth';
 
 const globalStyles = `
@@ -129,6 +130,7 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/mall" element={<MallDirectory />} />
           <Route path="/merchant/:id" element={<MerchantDetail />} />
+          <Route path="/checkin" element={<CheckInPage />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>
