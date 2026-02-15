@@ -1,4 +1,4 @@
-import type { Locale } from '../store/settings';
+import { useSettingsStore, type Locale } from '../store/settings';
 
 type TranslationKeys = {
   // Common
@@ -117,7 +117,6 @@ type TranslationKeys = {
 
 const translations: Record<Locale, TranslationKeys> = {
   'zh-TW': {
-    // Common
     'common.home': '首頁',
     'common.stamp': '印花',
     'common.scan': '掃碼',
@@ -131,8 +130,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'common.success': '成功',
     'common.error': '錯誤',
     'common.viewAll': '查看全部',
-
-    // Home
     'home.hello': '你好',
     'home.member': '會員',
     'home.availableStamps': '可用印花',
@@ -143,8 +140,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'home.gifts': '禮品',
     'home.hotEvents': '熱門活動',
     'home.latestNews': '最新消息',
-
-    // Scan/Collect
     'scan.title': '印花收集',
     'scan.showMemberCode': '出示會員碼',
     'scan.forMerchant': '給商戶掃描',
@@ -167,8 +162,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'scan.monthlyEarned': '本月獲得',
     'scan.transactions': '交易次數',
     'scan.recentRecords': '最近記錄',
-
-    // Profile
     'profile.title': '我的',
     'profile.editProfile': '編輯資料',
     'profile.settings': '設置',
@@ -189,8 +182,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.registerBirthday': '登記生日',
     'profile.completed': '已完成',
     'profile.earnStamps': '完善資料賺印花',
-
-    // Offers
     'offers.title': '優惠',
     'offers.myCoupons': '我的優惠券',
     'offers.available': '可用',
@@ -198,8 +189,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'offers.expired': '已過期',
     'offers.validUntil': '有效期至',
     'offers.useNow': '立即使用',
-
-    // Gifts
     'gifts.title': '禮品',
     'gifts.stampMall': '印花商城',
     'gifts.search': '搜尋禮品',
@@ -217,8 +206,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'gifts.redeemSuccess': '兌換成功',
     'gifts.viewCoupon': '查看優惠券',
     'gifts.onlyLeft': '僅剩',
-
-    // Settings
     'settings.title': '設置',
     'settings.languageSettings': '語言設置',
     'settings.themeSettings': '主題風格',
@@ -232,7 +219,6 @@ const translations: Record<Locale, TranslationKeys> = {
   },
 
   'zh-CN': {
-    // Common
     'common.home': '首页',
     'common.stamp': '印花',
     'common.scan': '扫码',
@@ -246,8 +232,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'common.success': '成功',
     'common.error': '错误',
     'common.viewAll': '查看全部',
-
-    // Home
     'home.hello': '你好',
     'home.member': '会员',
     'home.availableStamps': '可用印花',
@@ -258,8 +242,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'home.gifts': '礼品',
     'home.hotEvents': '热门活动',
     'home.latestNews': '最新消息',
-
-    // Scan/Collect
     'scan.title': '印花收集',
     'scan.showMemberCode': '出示会员码',
     'scan.forMerchant': '给商户扫描',
@@ -282,8 +264,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'scan.monthlyEarned': '本月获得',
     'scan.transactions': '交易次数',
     'scan.recentRecords': '最近记录',
-
-    // Profile
     'profile.title': '我的',
     'profile.editProfile': '编辑资料',
     'profile.settings': '设置',
@@ -304,8 +284,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.registerBirthday': '登记生日',
     'profile.completed': '已完成',
     'profile.earnStamps': '完善资料赚印花',
-
-    // Offers
     'offers.title': '优惠',
     'offers.myCoupons': '我的优惠券',
     'offers.available': '可用',
@@ -313,8 +291,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'offers.expired': '已过期',
     'offers.validUntil': '有效期至',
     'offers.useNow': '立即使用',
-
-    // Gifts
     'gifts.title': '礼品',
     'gifts.stampMall': '印花商城',
     'gifts.search': '搜索礼品',
@@ -332,8 +308,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'gifts.redeemSuccess': '兑换成功',
     'gifts.viewCoupon': '查看优惠券',
     'gifts.onlyLeft': '仅剩',
-
-    // Settings
     'settings.title': '设置',
     'settings.languageSettings': '语言设置',
     'settings.themeSettings': '主题风格',
@@ -347,7 +321,6 @@ const translations: Record<Locale, TranslationKeys> = {
   },
 
   en: {
-    // Common
     'common.home': 'Home',
     'common.stamp': 'Stamps',
     'common.scan': 'Scan',
@@ -361,8 +334,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'common.success': 'Success',
     'common.error': 'Error',
     'common.viewAll': 'View All',
-
-    // Home
     'home.hello': 'Hello',
     'home.member': 'Member',
     'home.availableStamps': 'Available Stamps',
@@ -373,8 +344,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'home.gifts': 'Gifts',
     'home.hotEvents': 'Hot Events',
     'home.latestNews': 'Latest News',
-
-    // Scan/Collect
     'scan.title': 'Collect Stamps',
     'scan.showMemberCode': 'Show Member Code',
     'scan.forMerchant': 'For Merchant to Scan',
@@ -397,8 +366,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'scan.monthlyEarned': 'Monthly Earned',
     'scan.transactions': 'Transactions',
     'scan.recentRecords': 'Recent Records',
-
-    // Profile
     'profile.title': 'Profile',
     'profile.editProfile': 'Edit Profile',
     'profile.settings': 'Settings',
@@ -419,8 +386,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.registerBirthday': 'Register Birthday',
     'profile.completed': 'Completed',
     'profile.earnStamps': 'Complete profile to earn stamps',
-
-    // Offers
     'offers.title': 'Offers',
     'offers.myCoupons': 'My Coupons',
     'offers.available': 'Available',
@@ -428,8 +393,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'offers.expired': 'Expired',
     'offers.validUntil': 'Valid until',
     'offers.useNow': 'Use Now',
-
-    // Gifts
     'gifts.title': 'Gifts',
     'gifts.stampMall': 'Stamp Mall',
     'gifts.search': 'Search gifts',
@@ -447,8 +410,6 @@ const translations: Record<Locale, TranslationKeys> = {
     'gifts.redeemSuccess': 'Redeemed Successfully',
     'gifts.viewCoupon': 'View Coupon',
     'gifts.onlyLeft': 'Only',
-
-    // Settings
     'settings.title': 'Settings',
     'settings.languageSettings': 'Language Settings',
     'settings.themeSettings': 'Theme Settings',
@@ -462,20 +423,19 @@ const translations: Record<Locale, TranslationKeys> = {
   },
 };
 
-export const useTranslation = () => {
-  // Import inline to avoid circular dependency
-  const { useSettingsStore } = require('../store/settings');
-  const locale = useSettingsStore((s: { locale: Locale }) => s.locale) as Locale;
+export type TranslationKey = keyof TranslationKeys;
 
-  const t = (key: keyof TranslationKeys): string => {
+export const useTranslation = () => {
+  const locale = useSettingsStore((s) => s.locale);
+
+  const t = (key: TranslationKey): string => {
     return translations[locale]?.[key] || translations['zh-TW'][key] || key;
   };
 
   return { t, locale };
 };
 
-// For components that need translations without hooks
-export const getTranslation = (locale: Locale, key: keyof TranslationKeys): string => {
+export const getTranslation = (locale: Locale, key: TranslationKey): string => {
   return translations[locale]?.[key] || translations['zh-TW'][key] || key;
 };
 
