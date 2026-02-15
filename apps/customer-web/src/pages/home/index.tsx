@@ -19,7 +19,7 @@ const quickActions = [
   { icon: '📷', label: '掃碼換印花', path: '/scan' },
   { icon: '🎟️', label: '我的優惠券', path: '/offers' },
   { icon: '🏬', label: '商場導覽', path: '/mall' },
-  { icon: '🎁', label: '印花商城', path: '/offers' },
+  { icon: '🎁', label: '印花商城', path: '/gifts' },
 ];
 
 const campaigns = [
@@ -94,7 +94,7 @@ export default function Home() {
               </div>
             </div>
             <div style={{ marginTop: 16, display: 'flex', alignItems: 'baseline' }}>
-              <span style={{ fontSize: 36, fontWeight: 800, color: GOLD }}>2,580</span>
+              <span style={{ fontSize: 36, fontWeight: 800, color: GOLD }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
               <span style={{ fontSize: 14, marginLeft: 6, opacity: 0.8 }}>印花</span>
             </div>
           </div>

@@ -13,9 +13,12 @@ import CouponDetail from './pages/offers/coupon-detail';
 import ProfilePage from './pages/profile';
 import TierPage from './pages/profile/tier';
 import SettingsPage from './pages/profile/settings';
+import ProfileEditPage from './pages/profile/edit';
 import MallDirectory from './pages/mall/directory';
 import MerchantDetail from './pages/mall/merchant-detail';
 import CheckInPage from './pages/checkin';
+import LoginPage from './pages/auth/login';
+import GiftsPage from './pages/gifts';
 import { useAuthStore } from './store/auth';
 
 const globalStyles = `
@@ -128,9 +131,12 @@ export default function App() {
           <Route path="/coupon/:id" element={<CouponDetail />} />
           <Route path="/tier" element={<TierPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/mall" element={<MallDirectory />} />
           <Route path="/merchant/:id" element={<MerchantDetail />} />
           <Route path="/checkin" element={<CheckInPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/gifts" element={<GiftsPage />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

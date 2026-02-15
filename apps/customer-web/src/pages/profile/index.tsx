@@ -10,7 +10,9 @@ const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 const menuItems = [
+  { label: '編輯資料', icon: '✏️', path: '/profile/edit', badge: 0 },
   { label: '我的等級', icon: '🏆', path: '/tier', badge: 0 },
+  { label: '印花商城', icon: '🎁', path: '/gifts', badge: 0 },
   { label: '消息中心', icon: '🔔', path: '', badge: 3 },
   { label: '收藏商鋪', icon: '❤️', path: '', badge: 0 },
   { label: '語言設置', icon: '🌐', path: '/settings', badge: 0 },
@@ -53,8 +55,12 @@ export default function ProfilePage() {
           color: '#fff',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
+          onClick={() => navigate('/profile/edit')}
+        >
           <Avatar
+            src={user?.avatar || undefined}
             style={{
               '--size': '64px',
               '--border-radius': '32px',
@@ -62,9 +68,9 @@ export default function ProfilePage() {
               fontSize: 28,
             } as React.CSSProperties}
           >
-            陳
+            {user?.name?.charAt(0) || '陳'}
           </Avatar>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{user?.name || '陳小明'}</div>
             <div
               style={{
@@ -77,9 +83,10 @@ export default function ProfilePage() {
                 marginTop: 4,
               }}
             >
-              Gold 金卡會員
+              {user?.tierName || 'Gold 金卡會員'}
             </div>
           </div>
+          <RightOutline style={{ fontSize: 18, opacity: 0.6 }} />
         </div>
 
         {/* Stats Row */}
@@ -93,16 +100,18 @@ export default function ProfilePage() {
           }}
         >
           {[
-            { label: '印花', value: '2,580' },
-            { label: '優惠券', value: '5' },
-            { label: '收藏', value: '12' },
+            { label: '印花', value: (user?.stampBalance || 2580).toLocaleString(), path: '/stamp' },
+            { label: '優惠券', value: '5', path: '/offers' },
+            { label: '禮品', value: '🎁', path: '/gifts' },
           ].map((stat, i) => (
             <div
               key={i}
+              onClick={() => stat.path && navigate(stat.path)}
               style={{
                 flex: 1,
                 textAlign: 'center',
                 borderRight: i < 2 ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                cursor: stat.path ? 'pointer' : 'default',
               }}
             >
               <div style={{ fontSize: 22, fontWeight: 700 }}>{stat.value}</div>

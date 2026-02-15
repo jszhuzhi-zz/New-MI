@@ -41,6 +41,12 @@ const ClearingReport = lazy(() => import('./pages/reports/ClearingReport'));
 const DownloadCenter = lazy(() => import('./pages/DownloadCenter'));
 const OperationLog = lazy(() => import('./pages/OperationLog'));
 
+// Operations
+const MallManagement = lazy(() => import('./pages/operations/MallManagement'));
+const MerchantManagement = lazy(() => import('./pages/operations/MerchantManagement'));
+const GiftManagement = lazy(() => import('./pages/operations/GiftManagement'));
+const QRCodeManagement = lazy(() => import('./pages/operations/QRCodeManagement'));
+
 const PageLoading: React.FC = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
     <Spin size="large" />
@@ -105,6 +111,12 @@ const App: React.FC = () => {
           <Route path="/reports/clearing" element={<ClearingReport />} />
           <Route path="/downloads" element={<DownloadCenter />} />
           <Route path="/operation-log" element={<OperationLog />} />
+
+          {/* Operations */}
+          <Route path="/operations/malls" element={<MallManagement />} />
+          <Route path="/operations/merchants" element={<MerchantManagement />} />
+          <Route path="/operations/gifts" element={<GiftManagement />} />
+          <Route path="/operations/qrcodes" element={<QRCodeManagement />} />
 
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

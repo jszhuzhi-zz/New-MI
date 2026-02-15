@@ -33,6 +33,9 @@ import {
   ExclamationCircleOutlined,
   ToolOutlined,
   UnorderedListOutlined,
+  ShopOutlined,
+  GiftOutlined,
+  QrcodeOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/app';
@@ -150,6 +153,33 @@ const MainLayout: React.FC = () => {
             key: '/stamp-system/upper-limit-rules',
             icon: <VerticalAlignTopOutlined />,
             label: t('stamp.upperLimitRule'),
+          },
+        ],
+      },
+      {
+        key: '/operations',
+        icon: <ShopOutlined />,
+        label: '營運管理',
+        children: [
+          {
+            key: '/operations/malls',
+            icon: <BankOutlined />,
+            label: '商場管理',
+          },
+          {
+            key: '/operations/merchants',
+            icon: <ShopOutlined />,
+            label: '商戶管理',
+          },
+          {
+            key: '/operations/gifts',
+            icon: <GiftOutlined />,
+            label: '禮品管理',
+          },
+          {
+            key: '/operations/qrcodes',
+            icon: <QrcodeOutlined />,
+            label: '二維碼管理',
           },
         ],
       },
