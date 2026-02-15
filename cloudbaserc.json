@@ -1,0 +1,26 @@
+{
+  "envId": "georgezhu-0gnrnw9ae9fca59a",
+  "version": "2.0",
+  "framework": {
+    "name": "link-reit-membership",
+    "plugins": {
+      "client": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "apps/customer-web/dist",
+          "cloudPath": "/"
+        }
+      },
+      "server": {
+        "use": "@cloudbase/framework-plugin-container",
+        "inputs": {
+          "serviceName": "link-reit-backend",
+          "servicePath": "/api",
+          "containerPort": 3000,
+          "dockerfilePath": "apps/backend/Dockerfile",
+          "buildDir": "."
+        }
+      }
+    }
+  }
+}

@@ -4,7 +4,9 @@
       "command": "npx",
       "args": ["@cloudbase/cloudbase-mcp@latest"],
       "env": {
-        "INTEGRATION_IDE": "ClaudeCode"
+        "INTEGRATION_IDE": "ClaudeCode",
+        "TCB_ENV_ID": "georgezhu-0gnrnw9ae9fca59a",
+        "PRIVATE_KEY_ID": "1dbe4b36-113d-48ea-9864-31f491783181"
       }
     }
   }
