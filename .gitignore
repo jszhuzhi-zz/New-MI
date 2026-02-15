@@ -16,6 +16,7 @@ tmp/
 .vscode/
 *.swp
 *.swo
+.env.tencent
 
 # TypeScript build artifacts in src directories
 packages/shared/*/src/*.js
