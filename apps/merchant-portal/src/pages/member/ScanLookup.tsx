@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Card,
   Button,
@@ -11,13 +11,14 @@ import {
   Empty,
   Spin,
   message,
+  Input,
+  Divider,
 } from 'antd';
 import {
   ScanOutlined,
-  CreditCardOutlined,
-  GiftOutlined,
   HistoryOutlined,
   SendOutlined,
+  VideoCameraOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
@@ -28,7 +29,8 @@ const { Title, Text } = Typography;
 
 const labels: Record<string, Record<string, string>> = {
   title: { 'zh-CN': '扫码查询', 'zh-TW': '掃碼查詢', en: 'Scan QR Lookup' },
-  scanBtn: { 'zh-CN': '扫描会员二维码', 'zh-TW': '掃描會員二維碼', en: 'Scan Member QR Code' },
+  scanBtn: { 'zh-CN': '开始扫描', 'zh-TW': '開始掃描', en: 'Start Scanning' },
+  stopScan: { 'zh-CN': '取消', 'zh-TW': '取消', en: 'Cancel' },
   scanning: { 'zh-CN': '正在扫描...', 'zh-TW': '正在掃描...', en: 'Scanning...' },
   memberInfo: { 'zh-CN': '会员信息', 'zh-TW': '會員信息', en: 'Member Information' },
   recentStamps: { 'zh-CN': '近期印花记录', 'zh-TW': '近期印花記錄', en: 'Recent Stamp History' },
@@ -43,6 +45,12 @@ const labels: Record<string, Record<string, string>> = {
   redeem: { 'zh-CN': '兑换', 'zh-TW': '兌換', en: 'Redeemed' },
   memberFound: { 'zh-CN': '已找到会员信息', 'zh-TW': '已找到會員信息', en: 'Member found' },
   scanHint: { 'zh-CN': '将会员出示的二维码对准扫描框', 'zh-TW': '將會員出示的二維碼對準掃描框', en: 'Align the member QR code with the scanner' },
+  scanMemberQR: { 'zh-CN': '扫描会员二维码', 'zh-TW': '掃描會員二維碼', en: 'Scan Member QR Code' },
+  orManualInput: { 'zh-CN': '或', 'zh-TW': '或', en: 'Or' },
+  enterMemberNo: { 'zh-CN': '输入会员卡号', 'zh-TW': '輸入會員卡號', en: 'Enter Member Card No.' },
+  search: { 'zh-CN': '查询', 'zh-TW': '查詢', en: 'Search' },
+  rescan: { 'zh-CN': '重新扫描', 'zh-TW': '重新掃描', en: 'Rescan' },
+  cameraError: { 'zh-CN': '无法启动相机', 'zh-TW': '無法啟動相機', en: 'Cannot start camera' },
 };
 
 const mockMember = {
@@ -80,16 +88,53 @@ const ScanLookup: React.FC = () => {
   const navigate = useNavigate();
   const [member, setMember] = useState<typeof mockMember | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [manualCode, setManualCode] = useState('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const getLabel = (key: string) => labels[key]?.[locale] || labels[key]?.en || key;
 
-  const handleScan = () => {
-    setScanning(true);
-    setTimeout(() => {
-      setScanning(false);
-      setMember(mockMember);
-      message.success(getLabel('memberFound'));
-    }, 2000);
+  const startScanner = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setScanning(true);
+
+      // Simulate QR detection after 2 seconds
+      setTimeout(() => {
+        stopScanner();
+        setMember(mockMember);
+        message.success(getLabel('memberFound'));
+      }, 2000);
+    } catch (err) {
+      message.error(getLabel('cameraError'));
+    }
+  };
+
+  const stopScanner = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    setScanning(false);
+  };
+
+  const handleManualSearch = () => {
+    if (!manualCode.trim()) {
+      message.warning(getLabel('enterMemberNo'));
+      return;
+    }
+    setMember(mockMember);
+    message.success(getLabel('memberFound'));
+    setManualCode('');
+  };
+
+  const handleReset = () => {
+    setMember(null);
   };
 
   const columns: ColumnsType<StampRecord> = [
@@ -139,31 +184,72 @@ const ScanLookup: React.FC = () => {
         <Col xs={24} md={10}>
           {/* Scan Area */}
           <Card
+            title={<><VideoCameraOutlined /> {getLabel('scanMemberQR')}</>}
             bordered={false}
-            style={{
-              borderRadius: 8,
-              textAlign: 'center',
-              minHeight: 200,
-              marginBottom: 16,
-            }}
+            style={{ borderRadius: 8, marginBottom: 16 }}
           >
             {scanning ? (
-              <Spin size="large" tip={getLabel('scanning')}>
-                <div style={{ padding: 60 }} />
-              </Spin>
-            ) : (
-              <Space direction="vertical" size="large" style={{ padding: '20px 0' }}>
-                <ScanOutlined style={{ fontSize: 64, color: '#1890ff' }} />
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<ScanOutlined />}
-                  onClick={handleScan}
-                >
-                  {getLabel('scanBtn')}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    style={{
+                      width: '100%',
+                      maxWidth: 280,
+                      height: 220,
+                      objectFit: 'cover',
+                      borderRadius: 12,
+                      background: '#000',
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 160,
+                    height: 160,
+                    border: '3px solid #1890ff',
+                    borderRadius: 12,
+                  }} />
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <Spin tip={getLabel('scanning')} />
+                </div>
+                <Button style={{ marginTop: 12 }} onClick={stopScanner}>
+                  {getLabel('stopScan')}
                 </Button>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                <ScanOutlined style={{ fontSize: 56, color: '#1890ff', marginBottom: 16 }} />
+                <div>
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<ScanOutlined />}
+                    onClick={startScanner}
+                    style={{ marginBottom: 16 }}
+                  >
+                    {getLabel('scanBtn')}
+                  </Button>
+                </div>
                 <Text type="secondary">{getLabel('scanHint')}</Text>
-              </Space>
+                <Divider>{getLabel('orManualInput')}</Divider>
+                <Space.Compact style={{ width: '90%' }}>
+                  <Input
+                    placeholder={getLabel('enterMemberNo')}
+                    value={manualCode}
+                    onChange={e => setManualCode(e.target.value)}
+                    onPressEnter={handleManualSearch}
+                  />
+                  <Button type="primary" onClick={handleManualSearch}>
+                    {getLabel('search')}
+                  </Button>
+                </Space.Compact>
+              </div>
             )}
           </Card>
 
@@ -171,16 +257,20 @@ const ScanLookup: React.FC = () => {
           {member ? (
             <div>
               <MemberCard member={member} />
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                block
-                size="large"
-                style={{ marginTop: 16 }}
-                onClick={() => navigate('/stamp/issue')}
-              >
-                {getLabel('issueStamp')}
-              </Button>
+              <Space direction="vertical" style={{ width: '100%', marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  icon={<SendOutlined />}
+                  block
+                  size="large"
+                  onClick={() => navigate('/stamp/issue')}
+                >
+                  {getLabel('issueStamp')}
+                </Button>
+                <Button block onClick={handleReset}>
+                  {getLabel('rescan')}
+                </Button>
+              </Space>
             </div>
           ) : (
             <Card bordered={false} style={{ borderRadius: 8 }}>

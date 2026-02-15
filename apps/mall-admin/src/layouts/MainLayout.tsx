@@ -16,6 +16,8 @@ import {
   MenuUnfoldOutlined,
   DashboardOutlined,
   KeyOutlined,
+  ScanOutlined,
+  CustomerServiceOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import LocaleSwitcher from '../components/LocaleSwitcher';
@@ -123,6 +125,14 @@ const MainLayout: React.FC = () => {
         icon: <FileTextOutlined />,
         label: t('report.operationLog'),
       },
+      {
+        key: 'service',
+        icon: <CustomerServiceOutlined />,
+        label: t('common.details') === '详情' ? '服务中心' : t('common.details') === '詳情' ? '服務中心' : 'Service Center',
+        children: [
+          { key: 'service-scan-verify', icon: <ScanOutlined />, label: t('common.details') === '详情' ? '扫码核销' : t('common.details') === '詳情' ? '掃碼核銷' : 'Scan & Verify' },
+        ],
+      },
     ],
     [t]
   );
@@ -154,6 +164,7 @@ const MainLayout: React.FC = () => {
     'report-clearing': '/reports/clearing',
     'download-center': '/download-center',
     'operation-log': '/operation-log',
+    'service-scan-verify': '/service/scan-verify',
   };
 
   const pathToMenuKey = useMemo(() => {

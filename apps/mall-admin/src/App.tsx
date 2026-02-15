@@ -44,6 +44,9 @@ const ClearingReport = lazy(() => import('./pages/reports/ClearingReport'));
 const DownloadCenter = lazy(() => import('./pages/DownloadCenter'));
 const OperationLog = lazy(() => import('./pages/OperationLog'));
 
+// Service pages
+const ScanVerify = lazy(() => import('./pages/service/ScanVerify'));
+
 const Loading: React.FC = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 300 }}>
     <Spin size="large" />
@@ -114,6 +117,9 @@ const App: React.FC = () => {
           {/* Utilities */}
           <Route path="/download-center" element={<DownloadCenter />} />
           <Route path="/operation-log" element={<OperationLog />} />
+
+          {/* Service */}
+          <Route path="/service/scan-verify" element={<ScanVerify />} />
         </Route>
 
         {/* Fallback */}

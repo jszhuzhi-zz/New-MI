@@ -11,6 +11,27 @@
           "cloudPath": "/"
         }
       },
+      "mall-admin": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "apps/mall-admin/dist",
+          "cloudPath": "/mall-admin"
+        }
+      },
+      "merchant-portal": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "apps/merchant-portal/dist",
+          "cloudPath": "/merchant-portal"
+        }
+      },
+      "group-admin": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "apps/group-admin/dist",
+          "cloudPath": "/group-admin"
+        }
+      },
       "server": {
         "use": "@cloudbase/framework-plugin-container",
         "inputs": {

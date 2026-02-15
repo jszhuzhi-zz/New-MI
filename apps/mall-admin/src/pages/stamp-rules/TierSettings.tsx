@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Typography, Table, Tag, Button, Space, Modal, Form, Input, InputNumber, ColorPicker, Row, Col, Descriptions, List, message } from 'antd';
+import { Card, Typography, Table, Tag, Button, Space, Modal, Form, Input, InputNumber, ColorPicker, Row, Col, Descriptions, List, message, Select } from 'antd';
 import { PlusOutlined, EditOutlined, CrownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useLocale } from '../../hooks/useLocale';
