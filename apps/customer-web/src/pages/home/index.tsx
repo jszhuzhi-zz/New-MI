@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Swiper, Grid, Card, Tag, PullToRefresh, Toast } from 'antd-mobile';
 import { RightOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
+import { getMallById, getMerchantsByMall } from '../../data/malls';
+import MallSelector from '../../components/MallSelector';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -16,37 +18,36 @@ const banners = [
 const quickActions = [
   { icon: '📷', label: '掃碼換印花', path: '/scan' },
   { icon: '🎟️', label: '我的優惠券', path: '/offers' },
-  { icon: '🏬', label: '附近商場', path: '/mall' },
+  { icon: '🏬', label: '商場導覽', path: '/mall' },
   { icon: '🎁', label: '印花商城', path: '/offers' },
 ];
 
 const campaigns = [
   { id: 'c1', title: '新春印花三倍賞', mall: '又一城', type: '印花加倍', date: '2/1 - 2/28', color: PRIMARY },
-  { id: 'c2', title: '新年幸運大抽獎', mall: '九龍城廣場', type: '抽獎', date: '1/15 - 3/15', color: GOLD },
-  { id: 'c3', title: '冬日禮品換購', mall: '赤柱廣場', type: '禮品兌換', date: '1/1 - 2/28', color: '#7B1FA2' },
+  { id: 'c2', title: '新年幸運大抽獎', mall: '荷里活廣場', type: '抽獎', date: '1/15 - 3/15', color: GOLD },
+  { id: 'c3', title: '冬日禮品換購', mall: '大埔超級城', type: '禮品兌換', date: '1/1 - 2/28', color: '#7B1FA2' },
 ];
 
 const news = [
   { id: 'n1', title: '領展商場推出全新環保倡議', date: '2024-01-25' },
-  { id: 'n2', title: '全新餐飲品牌進駐 T Town', date: '2024-01-20' },
+  { id: 'n2', title: '全新餐飲品牌進駐屯門市廣場', date: '2024-01-20' },
 ];
 
 export default function Home() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
+  const currentMallId = useAuthStore((s) => s.currentMallId);
+  const currentMall = getMallById(currentMallId);
+  const mallMerchants = getMerchantsByMall(currentMallId);
 
   return (
     <PullToRefresh onRefresh={async () => { Toast.show('已刷新'); }}>
       <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
         {/* Header */}
-        <div style={{ background: PRIMARY, padding: '20px 16px 24px', color: '#fff' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>你好，{user?.name || '會員'}</div>
-              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 2 }}>
-                Gold 金卡會員
-              </div>
-            </div>
+        <div style={{ background: PRIMARY, padding: '12px 16px 24px', color: '#fff' }}>
+          {/* Mall Selector Row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <MallSelector style={{ color: '#fff' }} />
             <div
               style={{
                 width: 36, height: 36, borderRadius: 18,
@@ -55,6 +56,13 @@ export default function Home() {
               }}
             >
               🔔
+            </div>
+          </div>
+          {/* User Greeting */}
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>你好，{user?.name || '會員'}</div>
+            <div style={{ fontSize: 13, opacity: 0.85, marginTop: 2 }}>
+              Gold 金卡會員 · {currentMall?.nameTW} ({mallMerchants.length} 商戶)
             </div>
           </div>
         </div>

@@ -1,46 +1,29 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { NavBar, Card, List, Tag, Button, Divider } from 'antd-mobile';
+import { NavBar, Card, List, Tag, Button, Divider, Empty } from 'antd-mobile';
+import { merchants, getMallById } from '../../data/malls';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
-const merchantData: Record<string, any> = {
-  m1: {
-    name: '星巴克', nameEn: 'Starbucks', category: '餐飲', floor: 'G', unit: 'G12',
-    mall: '又一城 Festival Walk', phone: '2265 8328',
-    hours: '08:00 - 22:00', stampEnabled: true, stampMultiplier: 1,
-    desc: '星巴克咖啡是全球最大的咖啡連鎖品牌，提供優質咖啡、茶飲及輕食。',
-    tags: ['咖啡', 'Wi-Fi', '外賣'],
-  },
-  m2: {
-    name: 'Pacific Coffee', nameEn: 'Pacific Coffee', category: '餐飲', floor: 'G', unit: 'G08',
-    mall: '又一城 Festival Walk', phone: '2265 8800',
-    hours: '07:30 - 21:30', stampEnabled: true, stampMultiplier: 1,
-    desc: '太平洋咖啡是香港本地咖啡品牌，提供多款精品咖啡及特色飲品。',
-    tags: ['咖啡', 'Wi-Fi', '本地品牌'],
-  },
-  m4: {
-    name: 'UNIQLO', nameEn: 'UNIQLO', category: '時裝', floor: '1F', unit: '132-136',
-    mall: '又一城 Festival Walk', phone: '2265 8500',
-    hours: '10:00 - 22:00', stampEnabled: true, stampMultiplier: 1.5,
-    desc: 'UNIQLO是日本知名快時尚品牌，以高品質基本款服飾聞名。',
-    tags: ['時裝', '日本品牌', '家庭'],
-  },
-};
-
-const defaultMerchant = {
-  name: '商戶', nameEn: 'Merchant', category: '綜合', floor: 'G', unit: '-',
-  mall: '領展商場', phone: '-', hours: '10:00 - 22:00',
-  stampEnabled: true, stampMultiplier: 1,
-  desc: '歡迎光臨本商戶。',
-  tags: ['商戶'],
-};
-
 export default function MerchantDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const merchant = merchantData[id || ''] || defaultMerchant;
+
+  // Find merchant by id
+  const merchant = merchants.find((m) => m.id === id);
+  const mall = merchant ? getMallById(merchant.mallId) : null;
+
+  if (!merchant || !mall) {
+    return (
+      <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
+        <NavBar onBack={() => navigate(-1)} style={{ background: '#fff' }}>商戶詳情</NavBar>
+        <div style={{ padding: 40 }}>
+          <Empty description="找不到該商戶" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
@@ -59,8 +42,10 @@ export default function MerchantDetail() {
         }}
       >
         <div style={{ fontSize: 48, marginBottom: 8 }}>🏪</div>
-        <div style={{ fontSize: 22, fontWeight: 700 }}>{merchant.name}</div>
-        <div style={{ fontSize: 14, opacity: 0.7, marginTop: 2 }}>{merchant.nameEn}</div>
+        <div style={{ fontSize: 22, fontWeight: 700 }}>{merchant.nameTW || merchant.name}</div>
+        {merchant.nameTW && (
+          <div style={{ fontSize: 14, opacity: 0.7, marginTop: 2 }}>{merchant.name}</div>
+        )}
       </div>
 
       {/* Tags */}
@@ -68,12 +53,12 @@ export default function MerchantDetail() {
         <Tag color="primary" fill="outline" style={{ '--border-color': PRIMARY, '--text-color': PRIMARY } as React.CSSProperties}>
           {merchant.category}
         </Tag>
-        {merchant.stampEnabled && (
+        {merchant.stampMultiplier > 0 && (
           <Tag style={{ '--background-color': `${GOLD}22`, '--text-color': GOLD } as React.CSSProperties}>
             印花 x{merchant.stampMultiplier}
           </Tag>
         )}
-        {merchant.tags.map((tag: string) => (
+        {merchant.tags.slice(0, 4).map((tag: string) => (
           <Tag key={tag} style={{ '--background-color': '#f0f0f0', '--text-color': '#666' } as React.CSSProperties}>
             {tag}
           </Tag>
@@ -84,15 +69,18 @@ export default function MerchantDetail() {
       <div style={{ padding: 16 }}>
         <Card style={{ borderRadius: 12 }}>
           <div style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 12 }}>
-            {merchant.desc}
+            歡迎光臨 {merchant.nameTW || merchant.name}，位於 {mall.nameTW} {merchant.floor} 層 {merchant.unit}。
+            {merchant.stampMultiplier > 1 && (
+              <span style={{ color: GOLD }}> 消費可享 {merchant.stampMultiplier} 倍印花獎賞！</span>
+            )}
           </div>
           <Divider />
           <List style={{ '--border-top': 'none', '--border-bottom': 'none' } as React.CSSProperties}>
-            <List.Item extra={merchant.mall}>所屬商場</List.Item>
+            <List.Item extra={`${mall.nameTW} (${mall.nameEN})`}>所屬商場</List.Item>
             <List.Item extra={`${merchant.floor} - ${merchant.unit}`}>位置</List.Item>
-            <List.Item extra={merchant.hours}>營業時間</List.Item>
-            <List.Item extra={merchant.phone}>聯絡電話</List.Item>
-            <List.Item extra={merchant.stampEnabled ? `${merchant.stampMultiplier}x 印花` : '不適用'}>
+            <List.Item extra={merchant.hours || '10:00 - 22:00'}>營業時間</List.Item>
+            <List.Item extra={merchant.phone || '-'}>聯絡電話</List.Item>
+            <List.Item extra={merchant.stampMultiplier > 0 ? `${merchant.stampMultiplier}x 印花` : '不適用'}>
               印花獎賞
             </List.Item>
           </List>

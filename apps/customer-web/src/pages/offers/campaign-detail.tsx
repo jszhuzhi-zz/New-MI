@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NavBar, Card, List, Tag, Button, Divider, Toast, Image, Swiper, Modal, ProgressBar } from 'antd-mobile';
-import { HeartOutline, HeartFill, ShareOutline, ClockCircleOutline, LocationFill, GiftOutline } from 'antd-mobile-icons';
+import { HeartOutline, HeartFill, SendOutline, ClockCircleOutline, LocationFill, GiftOutline } from 'antd-mobile-icons';
 
 const PRIMARY = '#00694B';
 
@@ -241,7 +241,7 @@ export default function CampaignDetail() {
               {isFavorite ? <HeartFill fontSize={22} color="#ff4d4f" /> : <HeartOutline fontSize={22} color="#fff" />}
             </div>
             <div onClick={handleShare}>
-              <ShareOutline fontSize={22} color="#fff" />
+              <SendOutline fontSize={22} color="#fff" />
             </div>
           </div>
         }
