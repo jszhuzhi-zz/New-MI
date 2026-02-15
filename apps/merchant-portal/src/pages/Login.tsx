@@ -13,36 +13,12 @@ import type { MerchantUser } from '../store/auth';
 
 const { Text } = Typography;
 
-const labels: Record<string, Record<string, string>> = {
-  accountLogin: { 'zh-CN': '账号登录', 'zh-TW': '賬號登錄', en: 'Account Login' },
-  smsLogin: { 'zh-CN': '短信登录', 'zh-TW': '短信登錄', en: 'SMS Login' },
-  username: { 'zh-CN': '用户名', 'zh-TW': '用戶名', en: 'Username' },
-  password: { 'zh-CN': '密码', 'zh-TW': '密碼', en: 'Password' },
-  phone: { 'zh-CN': '手机号', 'zh-TW': '手機號', en: 'Phone Number' },
-  smsCode: { 'zh-CN': '验证码', 'zh-TW': '驗證碼', en: 'SMS Code' },
-  sendCode: { 'zh-CN': '获取验证码', 'zh-TW': '獲取驗證碼', en: 'Send Code' },
-  codeSent: { 'zh-CN': '{s}秒后重发', 'zh-TW': '{s}秒後重發', en: 'Resend in {s}s' },
-  login: { 'zh-CN': '登录', 'zh-TW': '登錄', en: 'Login' },
-  loginSuccess: { 'zh-CN': '登录成功', 'zh-TW': '登錄成功', en: 'Login successful' },
-  usernameRequired: { 'zh-CN': '请输入用户名', 'zh-TW': '請輸入用戶名', en: 'Please enter username' },
-  passwordRequired: { 'zh-CN': '请输入密码', 'zh-TW': '請輸入密碼', en: 'Please enter password' },
-  phoneRequired: { 'zh-CN': '请输入手机号', 'zh-TW': '請輸入手機號', en: 'Please enter phone' },
-  codeRequired: { 'zh-CN': '请输入验证码', 'zh-TW': '請輸入驗證碼', en: 'Please enter code' },
-  demoHint: {
-    'zh-CN': '演示账号: merchant / 123456',
-    'zh-TW': '演示賬號: merchant / 123456',
-    en: 'Demo: merchant / 123456',
-  },
-};
-
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
-
-  const getLabel = (key: string) => labels[key]?.[locale] || labels[key]?.en || key;
 
   const mockUser: MerchantUser = {
     id: 'merchant-001',
@@ -63,7 +39,7 @@ const Login: React.FC = () => {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       login(mockUser, 'mock-merchant-token-' + Date.now());
-      message.success(getLabel('loginSuccess'));
+      message.success(t('auth.loginSuccess'));
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -75,7 +51,7 @@ const Login: React.FC = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       login(mockUser, 'mock-merchant-token-' + Date.now());
-      message.success(getLabel('loginSuccess'));
+      message.success(t('auth.loginSuccess'));
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -93,7 +69,7 @@ const Login: React.FC = () => {
         return prev - 1;
       });
     }, 1000);
-    message.success(locale === 'en' ? 'Code sent' : '验证码已发送');
+    message.success(t('auth.sendCode'));
   };
 
   return (
@@ -110,7 +86,7 @@ const Login: React.FC = () => {
         items={[
           {
             key: 'account',
-            label: getLabel('accountLogin'),
+            label: t('auth.accountLogin'),
             children: (
               <Form
                 size="large"
@@ -120,25 +96,25 @@ const Login: React.FC = () => {
               >
                 <Form.Item
                   name="username"
-                  rules={[{ required: true, message: getLabel('usernameRequired') }]}
+                  rules={[{ required: true, message: t('auth.usernameRequired') }]}
                 >
                   <Input
                     prefix={<UserOutlined />}
-                    placeholder={getLabel('username')}
+                    placeholder={t('auth.username')}
                   />
                 </Form.Item>
                 <Form.Item
                   name="password"
-                  rules={[{ required: true, message: getLabel('passwordRequired') }]}
+                  rules={[{ required: true, message: t('auth.passwordRequired') }]}
                 >
                   <Input.Password
                     prefix={<LockOutlined />}
-                    placeholder={getLabel('password')}
+                    placeholder={t('auth.password')}
                   />
                 </Form.Item>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" loading={loading} block>
-                    {getLabel('login')}
+                    {t('auth.login')}
                   </Button>
                 </Form.Item>
               </Form>
@@ -146,27 +122,27 @@ const Login: React.FC = () => {
           },
           {
             key: 'sms',
-            label: getLabel('smsLogin'),
+            label: t('auth.smsLogin'),
             children: (
               <Form size="large" onFinish={handleSmsLogin} autoComplete="off">
                 <Form.Item
                   name="phone"
-                  rules={[{ required: true, message: getLabel('phoneRequired') }]}
+                  rules={[{ required: true, message: t('auth.phoneRequired') }]}
                 >
                   <Input
                     prefix={<PhoneOutlined />}
-                    placeholder={getLabel('phone')}
+                    placeholder={t('auth.phone')}
                     maxLength={11}
                   />
                 </Form.Item>
                 <Form.Item
                   name="code"
-                  rules={[{ required: true, message: getLabel('codeRequired') }]}
+                  rules={[{ required: true, message: t('auth.codeRequired') }]}
                 >
                   <Space.Compact style={{ width: '100%' }}>
                     <Input
                       prefix={<SafetyCertificateOutlined />}
-                      placeholder={getLabel('smsCode')}
+                      placeholder={t('auth.smsCode')}
                       maxLength={6}
                     />
                     <Button
@@ -175,14 +151,14 @@ const Login: React.FC = () => {
                       style={{ width: 130 }}
                     >
                       {countdown > 0
-                        ? getLabel('codeSent').replace('{s}', String(countdown))
-                        : getLabel('sendCode')}
+                        ? t('auth.codeSent', { s: String(countdown) })
+                        : t('auth.sendOtp')}
                     </Button>
                   </Space.Compact>
                 </Form.Item>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" loading={loading} block>
-                    {getLabel('login')}
+                    {t('auth.login')}
                   </Button>
                 </Form.Item>
               </Form>
@@ -192,7 +168,7 @@ const Login: React.FC = () => {
       />
       <div style={{ textAlign: 'center' }}>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          {getLabel('demoHint')}
+          {t('auth.demoHint')}
         </Text>
       </div>
     </Card>

@@ -134,7 +134,7 @@ export default function LoginScreen() {
               </View>
             </View>
             <Text style={styles.appName}>
-              {locale === 'en' ? 'Link Mall' : '領展商場'}
+              {t('auth.appName')}
             </Text>
             <Text style={styles.tagline}>{t('auth.welcomeSubtitle')}</Text>
           </View>
@@ -227,7 +227,7 @@ export default function LoginScreen() {
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>
-              {locale === 'en' ? 'or continue with' : '或使用以下方式登入'}
+              {t('auth.orContinueWith')}
             </Text>
             <View style={styles.dividerLine} />
           </View>
