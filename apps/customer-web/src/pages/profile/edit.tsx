@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { NavBar, Form, Input, Button, Toast, ImageUploader, DatePicker, Card, Dialog } from 'antd-mobile';
-import { CameraOutline } from 'antd-mobile-icons';
+import { NavBar, Form, Input, Button, Toast, ImageUploader, DatePicker, Card, Dialog, List } from 'antd-mobile';
+import { CameraOutline, CheckCircleFill } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
 import dayjs from 'dayjs';
 
@@ -25,18 +25,14 @@ export default function ProfileEditPage() {
   const [avatar, setAvatar] = useState<FileItem[]>(
     user?.avatar ? [{ url: user.avatar }] : []
   );
-  const [birthdayPhotos, setBirthdayPhotos] = useState<FileItem[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const handleAvatarUpload = async (file: File): Promise<{ url: string }> => {
-    // Simulate upload
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const url = URL.createObjectURL(file);
-    return { url };
-  };
+  // Track if user already got bonuses
+  const hadAvatar = !!user?.avatar;
+  const hadBirthday = !!user?.birthday;
 
-  const handleBirthdayPhotoUpload = async (file: File): Promise<{ url: string }> => {
+  const handleAvatarUpload = async (file: File): Promise<{ url: string }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     const url = URL.createObjectURL(file);
     return { url };
@@ -51,10 +47,20 @@ export default function ProfileEditPage() {
     setSaving(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Calculate birthday bonus
-    let birthdayBonus = 0;
-    if (birthdayPhotos.length > 0 && form.birthday) {
-      birthdayBonus = 100; // 100 stamps for birthday photo
+    // Calculate bonuses for first-time completion
+    let totalBonus = 0;
+    const bonusItems: string[] = [];
+
+    // First time uploading avatar
+    if (!hadAvatar && avatar.length > 0) {
+      totalBonus += 50;
+      bonusItems.push('上傳頭像 +50');
+    }
+
+    // First time registering birthday
+    if (!hadBirthday && form.birthday) {
+      totalBonus += 100;
+      bonusItems.push('登記生日 +100');
     }
 
     setUser({
@@ -65,15 +71,27 @@ export default function ProfileEditPage() {
       email: form.email,
       birthday: form.birthday ? dayjs(form.birthday).format('YYYY-MM-DD') : null,
       avatar: avatar[0]?.url || null,
-      stampBalance: (user?.stampBalance || 0) + birthdayBonus,
+      stampBalance: (user?.stampBalance || 0) + totalBonus,
     });
 
     setSaving(false);
 
-    if (birthdayBonus > 0) {
+    if (totalBonus > 0) {
       Dialog.alert({
-        title: '生日獎勵',
-        content: `恭喜！您已獲得 ${birthdayBonus} 印花生日獎勵！`,
+        title: '恭喜獲得印花獎勵！',
+        content: (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
+            <div style={{ marginBottom: 12 }}>
+              {bonusItems.map((item, i) => (
+                <div key={i} style={{ color: GOLD, fontWeight: 500, marginBottom: 4 }}>{item}</div>
+              ))}
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: PRIMARY }}>
+              共 +{totalBonus} 印花
+            </div>
+          </div>
+        ),
         confirmText: '太好了',
       });
     } else {
@@ -84,11 +102,17 @@ export default function ProfileEditPage() {
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
-      <NavBar onBack={() => navigate(-1)} style={{ background: '#fff' }}>
+      <NavBar
+        onBack={() => navigate(-1)}
+        style={{
+          '--height': '44px',
+          background: '#fff',
+        } as React.CSSProperties}
+      >
         編輯資料
       </NavBar>
 
-      {/* Avatar */}
+      {/* Avatar Section */}
       <div style={{ padding: '24px 16px', textAlign: 'center', background: '#fff' }}>
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <div style={{
@@ -117,7 +141,17 @@ export default function ProfileEditPage() {
             </div>
           </ImageUploader>
         </div>
-        <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>點擊更換頭像</div>
+        <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
+          點擊更換頭像
+          {!hadAvatar && !avatar[0] && (
+            <span style={{ color: GOLD, marginLeft: 4 }}>+50印花</span>
+          )}
+          {hadAvatar && (
+            <span style={{ color: PRIMARY, marginLeft: 4 }}>
+              <CheckCircleFill fontSize={12} /> 已完成
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Form */}
@@ -154,50 +188,56 @@ export default function ProfileEditPage() {
             />
           </Form.Item>
           <Form.Item
-            label="生日"
-            onClick={() => setShowDatePicker(true)}
-            extra={form.birthday ? dayjs(form.birthday).format('YYYY-MM-DD') : '選擇日期'}
+            label={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>生日</span>
+                {!hadBirthday && !form.birthday && (
+                  <span style={{
+                    background: `${GOLD}20`, color: GOLD,
+                    fontSize: 10, padding: '1px 6px', borderRadius: 8,
+                  }}>
+                    +100印花
+                  </span>
+                )}
+                {hadBirthday && (
+                  <CheckCircleFill fontSize={14} color={PRIMARY} />
+                )}
+              </div>
+            }
+            onClick={() => !hadBirthday && setShowDatePicker(true)}
+            extra={
+              form.birthday
+                ? dayjs(form.birthday).format('YYYY-MM-DD')
+                : hadBirthday
+                  ? user?.birthday
+                  : '選擇日期'
+            }
+            disabled={hadBirthday}
           />
         </Form>
       </div>
 
-      {/* Birthday Photo Upload */}
-      <Card
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span>🎂 生日照片</span>
-            <span style={{
-              background: `${GOLD}20`, color: GOLD,
-              fontSize: 11, padding: '2px 8px', borderRadius: 10,
-            }}>
-              +100 印花
-            </span>
-          </div>
-        }
-        style={{ margin: 16, borderRadius: 12 }}
-      >
-        <div style={{ padding: '8px 0' }}>
-          <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
-            上傳您的生日照片（如身份證或護照），首次驗證可獲得100印花獎勵
-          </div>
-          <ImageUploader
-            value={birthdayPhotos}
-            onChange={setBirthdayPhotos}
-            upload={handleBirthdayPhotoUpload}
-            maxCount={1}
+      {/* Bonus Tips */}
+      <Card style={{ margin: 16, borderRadius: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>🎁</span> 完善資料賺印花
+        </div>
+        <List style={{ '--border-top': 'none', '--border-bottom': 'none' } as React.CSSProperties}>
+          <List.Item
+            prefix={hadAvatar ? <CheckCircleFill color={PRIMARY} /> : <span style={{ opacity: 0.3 }}>○</span>}
+            extra={<span style={{ color: hadAvatar ? '#999' : GOLD }}>+50</span>}
           >
-            <div style={{
-              width: '100%', height: 100, border: '2px dashed #d9d9d9',
-              borderRadius: 8, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', color: '#999',
-            }}>
-              <CameraOutline fontSize={24} />
-              <span style={{ fontSize: 12, marginTop: 4 }}>點擊上傳照片</span>
-            </div>
-          </ImageUploader>
-          <div style={{ fontSize: 11, color: '#bbb', marginTop: 8 }}>
-            * 照片僅用於生日驗證，我們會妥善保護您的隱私
-          </div>
+            <span style={{ color: hadAvatar ? '#999' : '#333' }}>上傳頭像</span>
+          </List.Item>
+          <List.Item
+            prefix={hadBirthday ? <CheckCircleFill color={PRIMARY} /> : <span style={{ opacity: 0.3 }}>○</span>}
+            extra={<span style={{ color: hadBirthday ? '#999' : GOLD }}>+100</span>}
+          >
+            <span style={{ color: hadBirthday ? '#999' : '#333' }}>登記生日</span>
+          </List.Item>
+        </List>
+        <div style={{ fontSize: 11, color: '#999', marginTop: 8 }}>
+          * 每項任務僅首次完成可獲得印花獎勵
         </div>
       </Card>
 
