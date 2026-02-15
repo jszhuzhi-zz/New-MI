@@ -4,6 +4,7 @@ import { Card, List, Tag, NavBar, Tabs, Button, Toast, Dialog, ImageUploader } f
 import { QRCodeSVG } from 'qrcode.react';
 import { ScanCodeOutline, ReceivePaymentOutline, PictureOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
+import { useLocale } from '../../hooks/useLocale';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -19,6 +20,7 @@ type CollectMethod = 'qrcode' | 'scan' | 'photo';
 
 export default function ScanPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const user = useAuthStore((s) => s.user);
   const [activeMethod, setActiveMethod] = useState<CollectMethod>('qrcode');
   const [scanning, setScanning] = useState(false);
@@ -50,10 +52,10 @@ export default function ScanPage() {
       // Simulate scan detection after 3 seconds
       setTimeout(() => {
         stopScanner();
-        simulateStampEarn('掃描小票');
+        simulateStampEarn(t('customerApp.scanReceipt'));
       }, 3000);
     } catch (err) {
-      Toast.show({ icon: 'fail', content: '無法啟動相機' });
+      Toast.show({ icon: 'fail', content: t('customerApp.cameraFailed') });
     }
   };
 
@@ -74,29 +76,29 @@ export default function ScanPage() {
     if (!file) return;
 
     setProcessing(true);
-    Toast.show({ icon: 'loading', content: 'AI識別中...', duration: 0 });
+    Toast.show({ icon: 'loading', content: t('customerApp.aiProcessing'), duration: 0 });
 
     // Simulate AI processing
     await new Promise(resolve => setTimeout(resolve, 2500));
     Toast.clear();
     setProcessing(false);
 
-    simulateStampEarn('小票識別');
+    simulateStampEarn(t('customerApp.photoRecognition'));
   };
 
   const simulateStampEarn = (method: string) => {
     const stamps = Math.floor(Math.random() * 50) + 10;
     Dialog.alert({
-      title: '積分成功！',
+      title: t('customerApp.stampSuccess'),
       content: (
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-          <div style={{ color: '#666', marginBottom: 8 }}>通過{method}獲得</div>
+          <div style={{ color: '#666', marginBottom: 8 }}>{t('customerApp.earnedVia', { method })}</div>
           <div style={{ fontSize: 32, fontWeight: 700, color: PRIMARY }}>+{stamps}</div>
-          <div style={{ fontSize: 14, color: GOLD }}>印花</div>
+          <div style={{ fontSize: 14, color: GOLD }}>{t('customerApp.stamps')}</div>
         </div>
       ),
-      confirmText: '太好了',
+      confirmText: t('customerApp.great'),
     });
   };
 
@@ -104,20 +106,20 @@ export default function ScanPage() {
     {
       key: 'qrcode' as CollectMethod,
       icon: <ReceivePaymentOutline fontSize={24} />,
-      title: '出示會員碼',
-      desc: '給商戶掃描',
+      title: t('customerApp.showMemberCode'),
+      desc: t('customerApp.forMerchantScan'),
     },
     {
       key: 'scan' as CollectMethod,
       icon: <ScanCodeOutline fontSize={24} />,
-      title: '掃描小票',
-      desc: '掃描小票二維碼',
+      title: t('customerApp.scanReceipt'),
+      desc: t('customerApp.scanReceiptQR'),
     },
     {
       key: 'photo' as CollectMethod,
       icon: <PictureOutline fontSize={24} />,
-      title: '拍照識別',
-      desc: 'AI自動識別積分',
+      title: t('customerApp.photoRecognition'),
+      desc: t('customerApp.aiRecognition'),
     },
   ];
 
@@ -131,7 +133,7 @@ export default function ScanPage() {
           color: '#fff',
         } as React.CSSProperties}
       >
-        印花收集
+        {t('customerApp.stampCollection')}
       </NavBar>
 
       {/* Method Selection */}
@@ -220,10 +222,10 @@ export default function ScanPage() {
                     '--border-color': GOLD,
                   } as React.CSSProperties}
                 >
-                  {user?.tierName || 'Gold 金卡會員'}
+                  {user?.tierName || t('customerApp.goldTier')}
                 </Tag>
                 <Tag color="primary" fill="outline">
-                  {(user?.stampBalance || 2580).toLocaleString()} 印花
+                  {(user?.stampBalance || 2580).toLocaleString()} {t('customerApp.stamps')}
                 </Tag>
               </div>
 
@@ -235,8 +237,8 @@ export default function ScanPage() {
                 fontSize: 13,
                 color: '#666',
               }}>
-                <div style={{ fontWeight: 500, marginBottom: 4 }}>出示此碼給商戶掃描</div>
-                <div style={{ fontSize: 12, color: '#999' }}>商戶掃描後即可為您累積印花</div>
+                <div style={{ fontWeight: 500, marginBottom: 4 }}>{t('customerApp.showCodeForScan')}</div>
+                <div style={{ fontSize: 12, color: '#999' }}>{t('customerApp.merchantWillScan')}</div>
               </div>
             </div>
           )}
@@ -272,13 +274,13 @@ export default function ScanPage() {
                     }} />
                   </div>
                   <div style={{ marginTop: 16, color: '#666' }}>
-                    正在掃描小票上的二維碼...
+                    {t('customerApp.scanning')}
                   </div>
                   <Button
                     style={{ marginTop: 16 }}
                     onClick={stopScanner}
                   >
-                    取消
+                    {t('common.cancel')}
                   </Button>
                 </div>
               ) : (
@@ -296,10 +298,10 @@ export default function ScanPage() {
                     <ScanCodeOutline fontSize={56} color={PRIMARY} />
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>
-                    掃描小票二維碼
+                    {t('customerApp.scanReceiptQR')}
                   </div>
                   <div style={{ fontSize: 13, color: '#999', marginBottom: 20 }}>
-                    將相機對準小票上的二維碼即可獲取印花
+                    {t('customerApp.pointCameraToQR')}
                   </div>
                   <Button
                     color="primary"
@@ -311,7 +313,7 @@ export default function ScanPage() {
                       width: 200,
                     } as React.CSSProperties}
                   >
-                    開始掃描
+                    {t('customerApp.startScan')}
                   </Button>
                 </div>
               )}
@@ -334,10 +336,10 @@ export default function ScanPage() {
                 <PictureOutline fontSize={56} color={PRIMARY} />
               </div>
               <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>
-                拍照識別小票
+                {t('customerApp.photoRecognition')}
               </div>
               <div style={{ fontSize: 13, color: '#999', marginBottom: 20 }}>
-                拍攝完整小票，AI自動識別消費金額並積分
+                {t('customerApp.photoRecognitionDesc')}
               </div>
               <div style={{
                 background: '#fffbe6',
@@ -348,7 +350,7 @@ export default function ScanPage() {
                 fontSize: 12,
                 color: '#d48806',
               }}>
-                請確保小票清晰完整，包含商戶名稱、消費金額和日期
+                {t('customerApp.ensureReceiptClear')}
               </div>
               <Button
                 color="primary"
@@ -361,7 +363,7 @@ export default function ScanPage() {
                   width: 200,
                 } as React.CSSProperties}
               >
-                拍照 / 選擇圖片
+                {t('customerApp.takePhotoOrSelect')}
               </Button>
               <input
                 ref={fileInputRef}
@@ -384,21 +386,21 @@ export default function ScanPage() {
               <div style={{ fontSize: 24, fontWeight: 700, color: PRIMARY }}>
                 {(user?.stampBalance || 2580).toLocaleString()}
               </div>
-              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>可用印花</div>
+              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('customerApp.availableStamps')}</div>
             </div>
             <div style={{ width: 1, background: '#f0f0f0' }} />
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: GOLD }}>
                 1,250
               </div>
-              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>本月獲得</div>
+              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('customerApp.monthlyEarnedStamps')}</div>
             </div>
             <div style={{ width: 1, background: '#f0f0f0' }} />
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#666' }}>
                 12
               </div>
-              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>交易次數</div>
+              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('customerApp.transactions')}</div>
             </div>
           </div>
         </Card>
@@ -407,12 +409,12 @@ export default function ScanPage() {
       {/* Recent Records */}
       <div style={{ padding: '0 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>最近記錄</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{t('customerApp.recentRecords')}</span>
           <span
             style={{ fontSize: 12, color: PRIMARY, cursor: 'pointer' }}
             onClick={() => navigate('/stamp')}
           >
-            查看全部
+            {t('customerApp.viewAll')}
           </span>
         </div>
         <Card style={{ borderRadius: 12 }}>

@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Input, Form, Toast, Tabs, Card } from 'antd-mobile';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuthStore } from '../../store/auth';
+import { useLocale } from '../../hooks/useLocale';
 
 const PRIMARY = '#00694B';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const { setToken, setUser, isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState('qr');
   const [qrSessionId, setQrSessionId] = useState('');
@@ -54,7 +56,7 @@ export default function LoginPage() {
   }, [isAuthenticated, navigate]);
 
   const handlePhoneLogin = async (values: { phone: string; code: string }) => {
-    Toast.show({ icon: 'loading', content: '登入中...' });
+    Toast.show({ icon: 'loading', content: t('customerApp.loggingIn') });
 
     // Simulate login
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -74,7 +76,7 @@ export default function LoginPage() {
       birthday: null,
     });
 
-    Toast.show({ icon: 'success', content: '登入成功' });
+    Toast.show({ icon: 'success', content: t('auth.loginSuccess') });
     navigate('/');
   };
 
@@ -100,7 +102,7 @@ export default function LoginPage() {
       avatar: null,
       birthday: '1990-05-15',
     });
-    Toast.show({ icon: 'success', content: '登入成功' });
+    Toast.show({ icon: 'success', content: t('auth.loginSuccess') });
     navigate('/');
   };
 
@@ -127,7 +129,7 @@ export default function LoginPage() {
       <div style={{ margin: '-30px 16px 0', position: 'relative', zIndex: 1 }}>
         <Card style={{ borderRadius: 16, padding: '8px 0' }}>
           <Tabs activeKey={activeTab} onChange={setActiveTab}>
-            <Tabs.Tab title="掃碼登入" key="qr">
+            <Tabs.Tab title={t('customerApp.qrLogin')} key="qr">
               <div style={{ padding: '24px 16px', textAlign: 'center' }}>
                 <div style={{
                   display: 'inline-block',
@@ -144,14 +146,14 @@ export default function LoginPage() {
                       color: '#999',
                     }}>
                       <div style={{ fontSize: 48, marginBottom: 8 }}>⏱️</div>
-                      <div>二維碼已過期</div>
+                      <div>{t('customerApp.qrExpired')}</div>
                       <Button
                         size="small"
                         color="primary"
                         style={{ marginTop: 12, '--background-color': PRIMARY } as React.CSSProperties}
                         onClick={handleRefreshQR}
                       >
-                        刷新二維碼
+                        {t('customerApp.refreshQR')}
                       </Button>
                     </div>
                   ) : (
@@ -172,16 +174,16 @@ export default function LoginPage() {
                   {qrStatus === 'pending' && (
                     <>
                       <div style={{ fontSize: 14, color: '#333', fontWeight: 500 }}>
-                        請使用 Link Mall APP 掃描登入
+                        {t('customerApp.scanToLogin')}
                       </div>
                       <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-                        二維碼將在 {formatTime(countdown)} 後過期
+                        {t('customerApp.qrExpireIn', { time: formatTime(countdown) })}
                       </div>
                     </>
                   )}
                   {qrStatus === 'scanned' && (
                     <div style={{ color: PRIMARY, fontWeight: 500 }}>
-                      ✓ 已掃描，請在手機上確認登入
+                      ✓ {t('customerApp.qrScanned')}
                     </div>
                   )}
                 </div>
@@ -192,13 +194,13 @@ export default function LoginPage() {
                     onClick={handleDemoLogin}
                     style={{ '--border-color': PRIMARY, '--text-color': PRIMARY } as React.CSSProperties}
                   >
-                    演示登入 (Demo)
+                    {t('customerApp.demoLogin')}
                   </Button>
                 </div>
               </div>
             </Tabs.Tab>
 
-            <Tabs.Tab title="手機號登入" key="phone">
+            <Tabs.Tab title={t('customerApp.phoneLogin')} key="phone">
               <div style={{ padding: '24px 16px' }}>
                 <Form
                   onFinish={handlePhoneLogin}
@@ -209,27 +211,27 @@ export default function LoginPage() {
                       color="primary"
                       style={{ '--background-color': PRIMARY, marginTop: 16 } as React.CSSProperties}
                     >
-                      獲取驗證碼並登入
+                      {t('customerApp.getCodeAndLogin')}
                     </Button>
                   }
                 >
                   <Form.Item
                     name="phone"
-                    label="手機號碼"
-                    rules={[{ required: true, message: '請輸入手機號碼' }]}
+                    label={t('customerApp.phoneNumber')}
+                    rules={[{ required: true, message: t('customerApp.enterPhone') }]}
                   >
-                    <Input placeholder="請輸入手機號碼" type="tel" />
+                    <Input placeholder={t('customerApp.enterPhone')} type="tel" />
                   </Form.Item>
                   <Form.Item
                     name="code"
-                    label="驗證碼"
+                    label={t('customerApp.verifyCode')}
                     extra={
                       <Button size="small" fill="none" style={{ color: PRIMARY }}>
-                        發送驗證碼
+                        {t('customerApp.sendVerifyCode')}
                       </Button>
                     }
                   >
-                    <Input placeholder="請輸入驗證碼" type="number" maxLength={6} />
+                    <Input placeholder={t('customerApp.enterCode')} type="number" maxLength={6} />
                   </Form.Item>
                 </Form>
 
@@ -239,7 +241,7 @@ export default function LoginPage() {
                     onClick={handleDemoLogin}
                     style={{ color: '#999', fontSize: 13 }}
                   >
-                    演示登入 (Demo)
+                    {t('customerApp.demoLogin')}
                   </Button>
                 </div>
               </div>
@@ -251,10 +253,10 @@ export default function LoginPage() {
       {/* Footer */}
       <div style={{ padding: '32px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 12, color: '#999' }}>
-          登入即表示您同意我們的
-          <span style={{ color: PRIMARY }}> 服務條款 </span>
-          和
-          <span style={{ color: PRIMARY }}> 私隱政策</span>
+          {t('customerApp.agreeTerms')}
+          <span style={{ color: PRIMARY }}> {t('customerApp.termsOfService')} </span>
+          {t('customerApp.and')}
+          <span style={{ color: PRIMARY }}> {t('customerApp.privacyPolicy')}</span>
         </div>
       </div>
     </div>

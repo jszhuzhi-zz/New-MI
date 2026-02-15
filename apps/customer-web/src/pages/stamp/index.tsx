@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, List, Tag, ProgressBar } from 'antd-mobile';
+import { useLocale } from '../../hooks/useLocale';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -21,6 +22,7 @@ const transactions = [
 
 export default function StampPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const [tab, setTab] = useState('all');
 
   const filtered = transactions.filter((t) => {
@@ -40,9 +42,9 @@ export default function StampPage() {
           padding: '28px 20px 32px', color: '#fff', textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: 13, opacity: 0.7 }}>我的印花餘額</div>
+        <div style={{ fontSize: 13, opacity: 0.7 }}>{t('customerApp.myStampBalance')}</div>
         <div style={{ fontSize: 48, fontWeight: 800, color: GOLD, marginTop: 4 }}>2,580</div>
-        <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>印花 Stamps</div>
+        <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>{t('customerApp.stampsUnit')}</div>
 
         {/* Tier Progress */}
         <div
@@ -52,8 +54,8 @@ export default function StampPage() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
-            <span>🥇 Gold 金卡</span>
-            <span>💎 Platinum 白金</span>
+            <span>🥇 {t('customerApp.goldTier')}</span>
+            <span>💎 {t('customerApp.platinumTier')}</span>
           </div>
           <ProgressBar
             percent={64.5}
@@ -64,7 +66,7 @@ export default function StampPage() {
             } as any}
           />
           <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textAlign: 'center' }}>
-            距離升級還需 <span style={{ color: GOLD, fontWeight: 700 }}>1,420</span> 印花
+            {t('customerApp.needMoreToUpgrade', { stamps: '1,420' })}
           </div>
         </div>
       </div>
@@ -78,9 +80,9 @@ export default function StampPage() {
         }}
       >
         {[
-          { label: '本月獲取', value: '+320', color: PRIMARY },
-          { label: '本月使用', value: '-150', color: '#E65100' },
-          { label: '即將到期', value: '200', color: '#C62828' },
+          { label: t('customerApp.monthlyEarned'), value: '+320', color: PRIMARY },
+          { label: t('customerApp.monthlyUsed'), value: '-150', color: '#E65100' },
+          { label: t('customerApp.expiringSoon'), value: '200', color: '#C62828' },
         ].map((s, i) => (
           <div key={i} style={{ flex: 1, textAlign: 'center', borderRight: i < 2 ? '1px solid #f0f0f0' : 'none' }}>
             <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</div>
@@ -92,10 +94,10 @@ export default function StampPage() {
       {/* Transaction Tabs */}
       <div style={{ padding: '16px 16px 0' }}>
         <Tabs activeKey={tab} onChange={setTab} style={{ '--active-line-color': PRIMARY, '--active-title-color': PRIMARY } as any}>
-          <Tabs.Tab title="全部" key="all" />
-          <Tabs.Tab title="獲取" key="earn" />
-          <Tabs.Tab title="使用" key="redeem" />
-          <Tabs.Tab title="到期" key="expire" />
+          <Tabs.Tab title={t('customerApp.filterAll')} key="all" />
+          <Tabs.Tab title={t('customerApp.filterEarn')} key="earn" />
+          <Tabs.Tab title={t('customerApp.filterUse')} key="redeem" />
+          <Tabs.Tab title={t('customerApp.filterExpire')} key="expire" />
         </Tabs>
       </div>
 

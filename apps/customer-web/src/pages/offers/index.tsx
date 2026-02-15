@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, Card, Grid, Tag, Badge, Button } from 'antd-mobile';
 import { RightOutline } from 'antd-mobile-icons';
+import { useLocale } from '../../hooks/useLocale';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -55,21 +56,22 @@ const gifts = [
   { id: 'g6', title: '限量版Link Mall公仔', stamps: 2000, stock: true, color: GOLD },
 ];
 
-const statusMap = {
-  unused: { text: '未使用', color: 'success' as const },
-  used: { text: '已使用', color: 'default' as const },
-  expired: { text: '已過期', color: 'default' as const },
-};
-
 export default function OffersPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState('campaigns');
+
+  const statusMap = {
+    unused: { text: t('customerApp.unused'), color: 'success' as const },
+    used: { text: t('customerApp.used'), color: 'default' as const },
+    expired: { text: t('customerApp.expired'), color: 'default' as const },
+  };
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 60 }}>
       <div style={{ background: PRIMARY, padding: '20px 16px 12px', color: '#fff' }}>
-        <div style={{ fontSize: 20, fontWeight: 700 }}>優惠專區</div>
-        <div style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>探索專屬優惠與活動</div>
+        <div style={{ fontSize: 20, fontWeight: 700 }}>{t('customerApp.offersZone')}</div>
+        <div style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>{t('customerApp.exploreOffers')}</div>
       </div>
 
       <Tabs
@@ -84,10 +86,10 @@ export default function OffersPage() {
           zIndex: 10,
         } as React.CSSProperties}
       >
-        <Tabs.Tab title="活動" key="campaigns" />
-        <Tabs.Tab title="優惠券" key="coupons" />
-        <Tabs.Tab title="抽獎" key="draws" />
-        <Tabs.Tab title="禮品兌換" key="gifts" />
+        <Tabs.Tab title={t('customerApp.campaigns')} key="campaigns" />
+        <Tabs.Tab title={t('customerApp.coupons')} key="coupons" />
+        <Tabs.Tab title={t('customerApp.draws')} key="draws" />
+        <Tabs.Tab title={t('customerApp.giftRedemption')} key="gifts" />
       </Tabs>
 
       <div style={{ padding: 16 }}>
@@ -136,7 +138,7 @@ export default function OffersPage() {
                       <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{cp.merchant}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                         <Tag color={st.color} fill="outline" style={{ fontSize: 10, '--border-radius': '4px' } as React.CSSProperties}>{st.text}</Tag>
-                        <span style={{ fontSize: 11, color: '#bbb' }}>有效期至 {cp.expire}</span>
+                        <span style={{ fontSize: 11, color: '#bbb' }}>{t('customerApp.validUntil')} {cp.expire}</span>
                       </div>
                     </div>
                     <RightOutline style={{ color: '#ccc' }} />
@@ -162,14 +164,14 @@ export default function OffersPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: 13, color: '#666' }}>
-                      已抽 <span style={{ fontWeight: 700, color: PRIMARY }}>{ld.entries}</span> / {ld.maxEntries} 次
+                      {t('customerApp.drawnTimes', { times: ld.entries, max: ld.maxEntries })}
                     </div>
-                    <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>截止日期: {ld.endDate}</div>
+                    <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('customerApp.deadline')}: {ld.endDate}</div>
                   </div>
                   <Button color="primary" size="small"
                     style={{ '--background-color': PRIMARY, '--border-color': PRIMARY, borderRadius: 20 } as React.CSSProperties}
                     disabled={ld.entries >= ld.maxEntries}
-                  >{ld.entries >= ld.maxEntries ? '已用完' : '立即抽獎'}</Button>
+                  >{ld.entries >= ld.maxEntries ? t('customerApp.noMoreDraws') : t('customerApp.drawNow')}</Button>
                 </div>
               </Card>
             ))}
@@ -188,12 +190,12 @@ export default function OffersPage() {
                   }}>🎁</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#333', lineHeight: 1.3 }}>{g.title}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: GOLD }}>{g.stamps} 印花</span>
-                    {!g.stock && <Tag color="default" style={{ fontSize: 10 }}>已售罄</Tag>}
+                    <span style={{ fontSize: 16, fontWeight: 700, color: GOLD }}>{g.stamps} {t('customerApp.stamps')}</span>
+                    {!g.stock && <Tag color="default" style={{ fontSize: 10 }}>{t('customerApp.soldOut')}</Tag>}
                   </div>
                   <Button block size="small" color="primary" disabled={!g.stock}
                     style={{ marginTop: 8, '--background-color': g.stock ? PRIMARY : '#ccc', '--border-color': g.stock ? PRIMARY : '#ccc', borderRadius: 8, fontSize: 13 } as React.CSSProperties}
-                  >{g.stock ? '立即兌換' : '已售罄'}</Button>
+                  >{g.stock ? t('customerApp.redeemGiftNow') : t('customerApp.soldOut')}</Button>
                 </Card>
               </Grid.Item>
             ))}

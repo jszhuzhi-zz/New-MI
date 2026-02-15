@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { NavBar, Card, Button, Tag, Toast, Dialog, Tabs, SearchBar, Grid } from 'antd-mobile';
 import { GiftOutline, RightOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
+import { useLocale } from '../../hooks/useLocale';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -32,16 +33,25 @@ const gifts: Gift[] = [
   { id: 'g10', name: 'Parking Coupon x5', nameTW: '泊車券五張', stamps: 400, category: '服務', image: '🅿️', description: '商場免費泊車三小時', stock: 300, popular: true },
 ];
 
-const categories = ['全部', '禮券', '生活', '娛樂', '體驗', '餐飲', '服務'];
-
 export default function GiftsPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const { user, setUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState('all');
   const [searchText, setSearchText] = useState('');
   const [redeeming, setRedeeming] = useState<string | null>(null);
 
   const stampBalance = user?.stampBalance || 0;
+
+  const categories = [
+    { key: 'all', label: t('customerApp.categoryAll') },
+    { key: '禮券', label: t('customerApp.categoryVoucher') },
+    { key: '生活', label: t('customerApp.categoryLife') },
+    { key: '娛樂', label: t('customerApp.categoryEntertainment') },
+    { key: '體驗', label: t('customerApp.categoryExperience') },
+    { key: '餐飲', label: t('customerApp.categoryDining') },
+    { key: '服務', label: t('customerApp.categoryService') },
+  ];
 
   const filteredGifts = gifts.filter(g => {
     const matchCategory = activeTab === 'all' || g.category === activeTab;
@@ -53,24 +63,24 @@ export default function GiftsPage() {
 
   const handleRedeem = async (gift: Gift) => {
     if (stampBalance < gift.stamps) {
-      Toast.show({ icon: 'fail', content: '印花不足' });
+      Toast.show({ icon: 'fail', content: t('customerApp.insufficientStamps') });
       return;
     }
 
     const confirmed = await Dialog.confirm({
-      title: '確認兌換',
+      title: t('customerApp.confirmRedeem'),
       content: (
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>{gift.image}</div>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{gift.nameTW}</div>
           <div style={{ color: '#999', marginBottom: 12 }}>{gift.description}</div>
           <div style={{ color: GOLD, fontWeight: 600 }}>
-            消耗 {gift.stamps} 印花
+            {t('customerApp.consume')} {gift.stamps} {t('customerApp.stamps')}
           </div>
         </div>
       ),
-      confirmText: '確認兌換',
-      cancelText: '取消',
+      confirmText: t('customerApp.confirmRedeem'),
+      cancelText: t('common.cancel'),
     });
 
     if (confirmed) {
@@ -85,18 +95,18 @@ export default function GiftsPage() {
       setRedeeming(null);
 
       Dialog.alert({
-        title: '兌換成功',
+        title: t('customerApp.redeemSuccess'),
         content: (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-            <div style={{ marginBottom: 8 }}>您已成功兌換</div>
+            <div style={{ marginBottom: 8 }}>{t('customerApp.youHaveRedeemed')}</div>
             <div style={{ fontSize: 16, fontWeight: 600, color: PRIMARY }}>{gift.nameTW}</div>
             <div style={{ marginTop: 12, fontSize: 13, color: '#999' }}>
-              請前往「我的優惠券」查看使用方法
+              {t('customerApp.viewInCoupons')}
             </div>
           </div>
         ),
-        confirmText: '查看優惠券',
+        confirmText: t('customerApp.viewCoupons'),
         onConfirm: () => navigate('/offers'),
       });
     }
@@ -123,17 +133,17 @@ export default function GiftsPage() {
             }}
           >
             <span style={{ color: GOLD, fontWeight: 600 }}>{stampBalance.toLocaleString()}</span>
-            <span style={{ marginLeft: 2 }}>印花</span>
+            <span style={{ marginLeft: 2 }}>{t('customerApp.stamps')}</span>
           </div>
         }
       >
-        印花商城
+        {t('customerApp.stampMall')}
       </NavBar>
 
       {/* Search */}
       <div style={{ padding: '16px 16px 12px' }}>
         <SearchBar
-          placeholder="搜尋禮品"
+          placeholder={t('customerApp.searchGifts')}
           value={searchText}
           onChange={setSearchText}
           style={{
@@ -153,20 +163,20 @@ export default function GiftsPage() {
       }}>
         {categories.map(cat => (
           <div
-            key={cat}
-            onClick={() => setActiveTab(cat === '全部' ? 'all' : cat)}
+            key={cat.key}
+            onClick={() => setActiveTab(cat.key)}
             style={{
               padding: '6px 14px',
               borderRadius: 16,
               fontSize: 13,
               whiteSpace: 'nowrap',
               cursor: 'pointer',
-              background: (cat === '全部' ? activeTab === 'all' : activeTab === cat) ? PRIMARY : '#fff',
-              color: (cat === '全部' ? activeTab === 'all' : activeTab === cat) ? '#fff' : '#666',
-              fontWeight: (cat === '全部' ? activeTab === 'all' : activeTab === cat) ? 600 : 400,
+              background: activeTab === cat.key ? PRIMARY : '#fff',
+              color: activeTab === cat.key ? '#fff' : '#666',
+              fontWeight: activeTab === cat.key ? 600 : 400,
             }}
           >
-            {cat}
+            {cat.label}
           </div>
         ))}
       </div>
@@ -175,7 +185,7 @@ export default function GiftsPage() {
       {activeTab === 'all' && !searchText && (
         <div style={{ padding: '0 16px 12px' }}>
           <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>🔥</span> 熱門兌換
+            <span>🔥</span> {t('customerApp.hotRedemption')}
           </div>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
             {gifts.filter(g => g.popular).map(gift => (
@@ -195,7 +205,7 @@ export default function GiftsPage() {
                 <div style={{ fontSize: 36, marginBottom: 6 }}>{gift.image}</div>
                 <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{gift.nameTW}</div>
                 <Tag color="warning" fill="outline" style={{ fontSize: 11 }}>
-                  {gift.stamps} 印花
+                  {gift.stamps} {t('customerApp.stamps')}
                 </Tag>
               </div>
             ))}
@@ -238,7 +248,7 @@ export default function GiftsPage() {
                     borderTop: '1px solid #f0f0f0',
                   }}>
                     <div style={{ color: GOLD, fontWeight: 600, fontSize: 14 }}>
-                      {gift.stamps} <span style={{ fontSize: 11, fontWeight: 400 }}>印花</span>
+                      {gift.stamps} <span style={{ fontSize: 11, fontWeight: 400 }}>{t('customerApp.stamps')}</span>
                     </div>
                     <Button
                       size="mini"
@@ -253,7 +263,7 @@ export default function GiftsPage() {
                         padding: '4px 10px',
                       } as React.CSSProperties}
                     >
-                      {stampBalance < gift.stamps ? '不足' : '兌換'}
+                      {stampBalance < gift.stamps ? t('customerApp.insufficient') : t('customerApp.redeemNow')}
                     </Button>
                   </div>
                   {gift.stock <= 30 && (
@@ -262,7 +272,7 @@ export default function GiftsPage() {
                       fontSize: 10,
                       color: '#ff4d4f'
                     }}>
-                      僅剩 {gift.stock} 份
+                      {t('customerApp.onlyLeft', { count: gift.stock })}
                     </div>
                   )}
                 </div>
@@ -274,7 +284,7 @@ export default function GiftsPage() {
         {filteredGifts.length === 0 && (
           <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
             <GiftOutline fontSize={48} />
-            <div style={{ marginTop: 12 }}>未找到符合條件的禮品</div>
+            <div style={{ marginTop: 12 }}>{t('customerApp.noMatchingGifts')}</div>
           </div>
         )}
       </div>

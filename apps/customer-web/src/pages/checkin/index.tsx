@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, Card, Button, Toast, Tag, Grid, ProgressBar, Modal } from 'antd-mobile';
 import { GiftOutline, FireFill, CheckCircleFill } from 'antd-mobile-icons';
+import { useLocale } from '../../hooks/useLocale';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -17,6 +18,7 @@ interface CheckInDay {
 
 export default function CheckInPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const today = new Date();
   const [checkedInDays, setCheckedInDays] = useState<number[]>([1, 2, 3, 4, 5]); // Demo: already checked in 5 days
   const [consecutiveDays, setConsecutiveDays] = useState(5);
@@ -60,16 +62,16 @@ export default function CheckInPage() {
 
   // Consecutive bonus rewards
   const consecutiveRewards = [
-    { days: 7, reward: 50, name: '連續7天獎勵' },
-    { days: 14, reward: 100, name: '連續14天獎勵' },
-    { days: 21, reward: 200, name: '連續21天獎勵' },
-    { days: 30, reward: 500, name: '全勤獎勵' },
+    { days: 7, reward: 50, name: t('customerApp.day7Reward') },
+    { days: 14, reward: 100, name: t('customerApp.day14Reward') },
+    { days: 21, reward: 200, name: t('customerApp.day21Reward') },
+    { days: 30, reward: 500, name: t('customerApp.fullAttendance') },
   ];
 
   const handleCheckIn = () => {
     const todayDay = today.getDate();
     if (checkedInDays.includes(todayDay)) {
-      Toast.show({ content: '今天已經簽到過了', icon: 'fail' });
+      Toast.show({ content: t('customerApp.alreadyCheckedIn'), icon: 'fail' });
       return;
     }
 
@@ -88,9 +90,9 @@ export default function CheckInPage() {
     if (bonus) {
       setTimeout(() => {
         Modal.alert({
-          title: '🎉 額外獎勵！',
-          content: `恭喜您連續簽到${bonus.days}天，獲得額外${bonus.reward}印花！`,
-          confirmText: '太棒了',
+          title: `🎉 ${t('customerApp.bonusReward')}`,
+          content: t('customerApp.congratsConsecutive', { days: bonus.days, stamps: bonus.reward }),
+          confirmText: t('customerApp.awesome'),
         });
         setTotalStamps((prev) => prev + bonus.reward);
       }, 1500);
@@ -104,7 +106,7 @@ export default function CheckInPage() {
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 100 }}>
       <NavBar onBack={() => navigate(-1)} style={{ background: PRIMARY, color: '#fff' }}>
-        每日簽到
+        {t('customerApp.dailyCheckIn')}
       </NavBar>
 
       {/* Header Stats */}
@@ -115,17 +117,17 @@ export default function CheckInPage() {
         <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
           <div>
             <div style={{ fontSize: 32, fontWeight: 700 }}>{consecutiveDays}</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>連續簽到(天)</div>
+            <div style={{ fontSize: 12, opacity: 0.8 }}>{t('customerApp.consecutiveDays')}</div>
           </div>
           <div style={{ width: 1, background: 'rgba(255,255,255,0.3)' }} />
           <div>
             <div style={{ fontSize: 32, fontWeight: 700 }}>{totalStamps}</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>本月已獲印花</div>
+            <div style={{ fontSize: 12, opacity: 0.8 }}>{t('customerApp.monthlyStamps')}</div>
           </div>
           <div style={{ width: 1, background: 'rgba(255,255,255,0.3)' }} />
           <div>
             <div style={{ fontSize: 32, fontWeight: 700 }}>{checkedInDays.length}</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>本月簽到(天)</div>
+            <div style={{ fontSize: 12, opacity: 0.8 }}>{t('customerApp.monthlyCheckIns')}</div>
           </div>
         </div>
       </div>
@@ -146,11 +148,11 @@ export default function CheckInPage() {
             )}
           </div>
           <div style={{ fontSize: 18, fontWeight: 600, color: '#333', marginBottom: 8 }}>
-            {isTodayCheckedIn ? '今日已簽到' : '今日可獲得'}
+            {isTodayCheckedIn ? t('customerApp.checkedInToday') : t('customerApp.canEarnToday')}
           </div>
           {!isTodayCheckedIn && (
             <div style={{ fontSize: 28, fontWeight: 700, color: PRIMARY, marginBottom: 16 }}>
-              +{calendarDays.find((d) => d && d.day === today.getDate())?.reward || 10} 印花
+              +{calendarDays.find((d) => d && d.day === today.getDate())?.reward || 10} {t('customerApp.stamps')}
             </div>
           )}
           <Button
@@ -167,7 +169,7 @@ export default function CheckInPage() {
               fontSize: 16,
             } as React.CSSProperties}
           >
-            {isTodayCheckedIn ? '✓ 已簽到' : '立即簽到'}
+            {isTodayCheckedIn ? `✓ ${t('customerApp.checkedIn')}` : t('customerApp.checkInNow')}
           </Button>
         </Card>
       </div>
@@ -177,7 +179,7 @@ export default function CheckInPage() {
         <Card style={{ borderRadius: 12 }}>
           <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
             <FireFill fontSize={18} color="#ff6b00" />
-            連續簽到獎勵
+            {t('customerApp.checkInRewards')}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
             {consecutiveRewards.map((r, i) => (
@@ -192,7 +194,7 @@ export default function CheckInPage() {
                   {consecutiveDays >= r.days ? '✓' : r.days}
                 </div>
                 <div style={{ fontSize: 11, color: consecutiveDays >= r.days ? PRIMARY : '#999' }}>
-                  +{r.reward}印花
+                  +{r.reward} {t('customerApp.stamps')}
                 </div>
               </div>
             ))}
@@ -202,7 +204,7 @@ export default function CheckInPage() {
             style={{ '--fill-color': PRIMARY, '--track-width': '8px' } as React.CSSProperties}
           />
           <div style={{ fontSize: 12, color: '#999', textAlign: 'center', marginTop: 8 }}>
-            再連續簽到 {Math.max(7 - (consecutiveDays % 7), 0)} 天可獲得下一階段獎勵
+            {t('customerApp.nextRewardIn', { days: Math.max(7 - (consecutiveDays % 7), 0) })}
           </div>
         </Card>
       </div>
@@ -211,7 +213,7 @@ export default function CheckInPage() {
       <div style={{ padding: '0 16px 16px' }}>
         <Card style={{ borderRadius: 12 }}>
           <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 16 }}>
-            {today.getFullYear()}年{today.getMonth() + 1}月簽到日曆
+            {today.getFullYear()}/{today.getMonth() + 1} {t('customerApp.checkInCalendar')}
           </div>
 
           {/* Week header */}
@@ -272,11 +274,11 @@ export default function CheckInPage() {
           <div style={{ display: 'flex', gap: 16, marginTop: 12, justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#999' }}>
               <div style={{ width: 12, height: 12, borderRadius: 6, background: `${PRIMARY}15`, border: `1px solid ${PRIMARY}` }} />
-              已簽到
+              {t('customerApp.checkedIn')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#999' }}>
-              <Tag style={{ '--background-color': GOLD, '--text-color': '#fff', fontSize: 8, padding: '0 2px' } as React.CSSProperties}>2倍</Tag>
-              雙倍印花日
+              <Tag style={{ '--background-color': GOLD, '--text-color': '#fff', fontSize: 8, padding: '0 2px' } as React.CSSProperties}>2x</Tag>
+              {t('customerApp.doubleStampDay')}
             </div>
           </div>
         </Card>
@@ -285,13 +287,13 @@ export default function CheckInPage() {
       {/* Rules */}
       <div style={{ padding: '0 16px 16px' }}>
         <Card style={{ borderRadius: 12 }}>
-          <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 12 }}>簽到規則</div>
+          <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 12 }}>{t('customerApp.checkInRules')}</div>
           <div style={{ fontSize: 13, color: '#666', lineHeight: 1.8 }}>
-            <p style={{ margin: '0 0 8px' }}>1. 每日00:00至23:59可簽到一次</p>
-            <p style={{ margin: '0 0 8px' }}>2. 每日簽到可獲得10印花，週末可獲得15印花</p>
-            <p style={{ margin: '0 0 8px' }}>3. 每月7日、14日、21日、28日為雙倍印花日</p>
-            <p style={{ margin: '0 0 8px' }}>4. 連續簽到7/14/21/30天可獲得額外獎勵</p>
-            <p style={{ margin: 0 }}>5. 簽到中斷將重新計算連續天數</p>
+            <p style={{ margin: '0 0 8px' }}>1. {t('customerApp.rule1')}</p>
+            <p style={{ margin: '0 0 8px' }}>2. {t('customerApp.rule2')}</p>
+            <p style={{ margin: '0 0 8px' }}>3. {t('customerApp.rule3')}</p>
+            <p style={{ margin: '0 0 8px' }}>4. {t('customerApp.rule4')}</p>
+            <p style={{ margin: 0 }}>5. {t('customerApp.rule5')}</p>
           </div>
         </Card>
       </div>
@@ -303,10 +305,10 @@ export default function CheckInPage() {
         content={
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: '#333', marginBottom: 8 }}>簽到成功！</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: PRIMARY }}>+{earnedReward} 印花</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: '#333', marginBottom: 8 }}>{t('customerApp.checkInSuccess')}</div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: PRIMARY }}>+{earnedReward} {t('customerApp.stamps')}</div>
             <div style={{ fontSize: 14, color: '#999', marginTop: 12 }}>
-              連續簽到 {consecutiveDays} 天
+              {t('customerApp.consecutiveCheckIn')} {consecutiveDays} {t('customerApp.consecutiveDays')}
             </div>
           </div>
         }
@@ -315,7 +317,7 @@ export default function CheckInPage() {
         actions={[
           {
             key: 'confirm',
-            text: '太棒了！',
+            text: t('customerApp.awesome'),
             primary: true,
           },
         ]}

@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/auth';
 import { useSettingsStore } from '../../store/settings';
 import { getMallById } from '../../data/malls';
 import MallSelector from '../../components/MallSelector';
+import { useLocale } from '../../hooks/useLocale';
 
 const GOLD = '#C4A962';
 
@@ -63,6 +64,7 @@ const news = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const user = useAuthStore((s) => s.user);
   const currentMallId = useAuthStore((s) => s.currentMallId);
   const currentMall = getMallById(currentMallId);
@@ -70,14 +72,14 @@ export default function Home() {
   const colors = getThemeColors();
 
   const quickActions = [
-    { icon: <ScanIcon color={colors.primary} />, label: '掃碼', path: '/scan' },
-    { icon: <CouponIcon color={colors.primary} />, label: '優惠券', path: '/offers' },
-    { icon: <MallIcon color={colors.primary} />, label: '商場', path: '/mall' },
-    { icon: <GiftIcon color={colors.primary} />, label: '禮品', path: '/gifts' },
+    { icon: <ScanIcon color={colors.primary} />, label: t('customerApp.scan'), path: '/scan' },
+    { icon: <CouponIcon color={colors.primary} />, label: t('customerApp.coupons'), path: '/offers' },
+    { icon: <MallIcon color={colors.primary} />, label: t('customerApp.mall'), path: '/mall' },
+    { icon: <GiftIcon color={colors.primary} />, label: t('customerApp.gifts'), path: '/gifts' },
   ];
 
   return (
-    <PullToRefresh onRefresh={async () => { Toast.show('已刷新'); }}>
+    <PullToRefresh onRefresh={async () => { Toast.show(t('customerApp.refreshed')); }}>
       <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
         {/* Unified Header */}
         <div style={{
@@ -129,7 +131,7 @@ export default function Home() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ fontSize: 13, color: '#666' }}>你好，{user?.name || '會員'}</div>
+                <div style={{ fontSize: 13, color: '#666' }}>{t('customerApp.hello')}，{user?.name || t('member.member')}</div>
                 <div style={{
                   display: 'inline-block',
                   background: GOLD,
@@ -143,7 +145,7 @@ export default function Home() {
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 11, color: '#999' }}>可用印花</div>
+                <div style={{ fontSize: 11, color: '#999' }}>{t('customerApp.availableStamps')}</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end' }}>
                   <span style={{ fontSize: 28, fontWeight: 700, color: colors.primary }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
                 </div>
@@ -202,9 +204,9 @@ export default function Home() {
         {/* Campaigns */}
         <div style={{ padding: '16px 16px 0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 16, fontWeight: 600 }}>熱門活動</span>
+            <span style={{ fontSize: 16, fontWeight: 600 }}>{t('customerApp.hotCampaigns')}</span>
             <span style={{ fontSize: 12, color: colors.primary, cursor: 'pointer' }} onClick={() => navigate('/offers')}>
-              查看全部 <RightOutline fontSize={10} />
+              {t('customerApp.viewAll')} <RightOutline fontSize={10} />
             </span>
           </div>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
@@ -240,7 +242,7 @@ export default function Home() {
 
         {/* News */}
         <div style={{ padding: '16px' }}>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 10 }}>最新消息</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 10 }}>{t('customerApp.latestNews')}</div>
           {news.map((n) => (
             <Card key={n.id} style={{ marginBottom: 8, borderRadius: 10 }}>
               <div style={{ fontSize: 14, fontWeight: 500 }}>{n.title}</div>
