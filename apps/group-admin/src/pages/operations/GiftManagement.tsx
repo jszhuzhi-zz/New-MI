@@ -27,6 +27,7 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '../../store/app';
+import { useLocale } from '../../hooks/useLocale';
 import type { ColumnsType } from 'antd/es/table';
 
 const { Title, Text } = Typography;
@@ -153,6 +154,7 @@ const mockGifts: Gift[] = [
 ];
 
 const GiftManagement: React.FC = () => {
+  const { t } = useLocale();
   const setBreadcrumbs = useAppStore((s) => s.setBreadcrumbs);
   const [gifts, setGifts] = useState<Gift[]>(mockGifts);
   const [loading, setLoading] = useState(false);
@@ -164,10 +166,10 @@ const GiftManagement: React.FC = () => {
 
   useEffect(() => {
     setBreadcrumbs([
-      { title: '營運管理', path: '/operations' },
-      { title: '禮品管理' },
+      { title: t('customerApp.giftManagement'), path: '/operations' },
+      { title: t('customerApp.giftManagement') },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, t]);
 
   const filteredGifts = gifts.filter((g) => {
     const matchSearch =
@@ -192,12 +194,12 @@ const GiftManagement: React.FC = () => {
 
   const handleDelete = (id: string) => {
     setGifts(gifts.filter((g) => g.id !== id));
-    message.success('禮品已刪除');
+    message.success(t('common.success'));
   };
 
   const handleToggleFeatured = (id: string, featured: boolean) => {
     setGifts(gifts.map((g) => (g.id === id ? { ...g, featured } : g)));
-    message.success(featured ? '已設為熱門' : '已取消熱門');
+    message.success(t('common.success'));
   };
 
   const handleSubmit = async () => {
@@ -220,10 +222,10 @@ const GiftManagement: React.FC = () => {
 
       if (editingGift) {
         setGifts(gifts.map((g) => (g.id === editingGift.id ? giftData : g)));
-        message.success('禮品資料已更新');
+        message.success(t('common.success'));
       } else {
         setGifts([...gifts, giftData]);
-        message.success('禮品已新增');
+        message.success(t('common.success'));
       }
 
       setModalVisible(false);
@@ -235,16 +237,16 @@ const GiftManagement: React.FC = () => {
 
   const getStatusTag = (status: Gift['status']) => {
     const config = {
-      active: { color: 'green', text: '上架中' },
-      inactive: { color: 'default', text: '已下架' },
-      out_of_stock: { color: 'red', text: '已售罄' },
+      active: { color: 'green', text: t('customerApp.online') },
+      inactive: { color: 'default', text: t('customerApp.offline') },
+      out_of_stock: { color: 'red', text: t('customerApp.soldOut') },
     };
     return <Tag color={config[status].color}>{config[status].text}</Tag>;
   };
 
   const columns: ColumnsType<Gift> = [
     {
-      title: '禮品',
+      title: t('campaign.gift'),
       key: 'gift',
       render: (_, record) => (
         <Space>
@@ -265,7 +267,7 @@ const GiftManagement: React.FC = () => {
           <Space direction="vertical" size={0}>
             <Space>
               <Text strong>{record.nameTW}</Text>
-              {record.featured && <Tag color="gold">熱門</Tag>}
+              {record.featured && <Tag color="gold">{t('customerApp.hotRedemption')}</Tag>}
             </Space>
             <Text type="secondary" style={{ fontSize: 12 }}>
               {record.nameEN}
@@ -275,13 +277,13 @@ const GiftManagement: React.FC = () => {
       ),
     },
     {
-      title: '類別',
+      title: t('customerApp.category'),
       dataIndex: 'category',
       key: 'category',
       render: (cat) => <Tag>{cat}</Tag>,
     },
     {
-      title: '所需印花',
+      title: t('customerApp.requiredStamps'),
       dataIndex: 'stamps',
       key: 'stamps',
       sorter: (a, b) => a.stamps - b.stamps,
@@ -292,13 +294,13 @@ const GiftManagement: React.FC = () => {
       ),
     },
     {
-      title: '原價值',
+      title: t('customerApp.giftDescription'),
       dataIndex: 'originalValue',
       key: 'originalValue',
       render: (v) => <Text>HK${v}</Text>,
     },
     {
-      title: '庫存',
+      title: t('customerApp.stockQuantity'),
       key: 'stock',
       render: (_, record) => (
         <Space direction="vertical" size={0} style={{ width: 100 }}>
@@ -315,19 +317,19 @@ const GiftManagement: React.FC = () => {
       ),
     },
     {
-      title: '兌換次數',
+      title: t('stamp.redemptions') || 'Redemptions',
       dataIndex: 'redemptions',
       key: 'redemptions',
       sorter: (a, b) => a.redemptions - b.redemptions,
     },
     {
-      title: '狀態',
+      title: t('common.status'),
       dataIndex: 'status',
       key: 'status',
       render: getStatusTag,
     },
     {
-      title: '熱門',
+      title: t('customerApp.hotRedemption'),
       key: 'featured',
       render: (_, record) => (
         <Switch
@@ -338,21 +340,21 @@ const GiftManagement: React.FC = () => {
       ),
     },
     {
-      title: '操作',
+      title: t('common.actions'),
       key: 'actions',
       render: (_, record) => (
         <Space>
           <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            編輯
+            {t('common.edit')}
           </Button>
           <Popconfirm
-            title="確定要刪除此禮品嗎？"
+            title={t('common.confirm')}
             onConfirm={() => handleDelete(record.id)}
-            okText="確定"
-            cancelText="取消"
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
           >
             <Button type="link" danger icon={<DeleteOutlined />}>
-              刪除
+              {t('common.delete')}
             </Button>
           </Popconfirm>
         </Space>
@@ -370,7 +372,7 @@ const GiftManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="禮品總數"
+              title={t('customerApp.totalGifts')}
               value={gifts.length}
               prefix={<GiftOutlined />}
               valueStyle={{ color: '#1677ff' }}
@@ -380,7 +382,7 @@ const GiftManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="上架中"
+              title={t('customerApp.activeGifts')}
               value={activeGifts}
               valueStyle={{ color: '#52c41a' }}
             />
@@ -389,7 +391,7 @@ const GiftManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="總兌換次數"
+              title={t('customerApp.totalRedemptions')}
               value={totalRedemptions}
               valueStyle={{ color: '#C4A962' }}
             />
@@ -398,7 +400,7 @@ const GiftManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="低庫存警告"
+              title={t('customerApp.lowStockWarning')}
               value={lowStockGifts}
               valueStyle={{ color: lowStockGifts > 0 ? '#ff4d4f' : '#52c41a' }}
             />
@@ -407,17 +409,17 @@ const GiftManagement: React.FC = () => {
       </Row>
 
       <Card
-        title={<Title level={4} style={{ margin: 0 }}>禮品列表</Title>}
+        title={<Title level={4} style={{ margin: 0 }}>{t('customerApp.giftList')}</Title>}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            新增禮品
+            {t('customerApp.addGift')}
           </Button>
         }
       >
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={8}>
             <Input
-              placeholder="搜尋禮品名稱"
+              placeholder={t('customerApp.searchGiftName')}
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -426,7 +428,7 @@ const GiftManagement: React.FC = () => {
           </Col>
           <Col span={6}>
             <Select
-              placeholder="選擇類別"
+              placeholder={t('customerApp.selectCategory')}
               style={{ width: '100%' }}
               allowClear
               value={selectedCategory || undefined}
@@ -450,7 +452,7 @@ const GiftManagement: React.FC = () => {
       </Card>
 
       <Modal
-        title={editingGift ? '編輯禮品' : '新增禮品'}
+        title={editingGift ? t('customerApp.editGift') : t('customerApp.addGift')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -462,8 +464,8 @@ const GiftManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="nameTW"
-                label="禮品名稱 (中文)"
-                rules={[{ required: true, message: '請輸入禮品中文名稱' }]}
+                label={t('customerApp.giftNameCN')}
+                rules={[{ required: true, message: t('customerApp.enterGiftNameCN') }]}
               >
                 <Input placeholder="例如：HK$50商場禮券" />
               </Form.Item>
@@ -471,8 +473,8 @@ const GiftManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="nameEN"
-                label="禮品名稱 (英文)"
-                rules={[{ required: true, message: '請輸入禮品英文名稱' }]}
+                label={t('customerApp.giftNameEN')}
+                rules={[{ required: true, message: t('customerApp.enterGiftNameEN') }]}
               >
                 <Input placeholder="e.g., HK$50 Mall Voucher" />
               </Form.Item>
@@ -483,10 +485,10 @@ const GiftManagement: React.FC = () => {
             <Col span={8}>
               <Form.Item
                 name="category"
-                label="類別"
-                rules={[{ required: true, message: '請選擇類別' }]}
+                label={t('customerApp.category')}
+                rules={[{ required: true, message: t('customerApp.selectCategory') }]}
               >
-                <Select placeholder="選擇類別">
+                <Select placeholder={t('customerApp.selectCategory')}>
                   {categories.map((c) => (
                     <Select.Option key={c} value={c}>
                       {c}
@@ -498,34 +500,34 @@ const GiftManagement: React.FC = () => {
             <Col span={8}>
               <Form.Item
                 name="stamps"
-                label="所需印花"
-                rules={[{ required: true, message: '請輸入所需印花' }]}
+                label={t('customerApp.requiredStamps')}
+                rules={[{ required: true, message: t('customerApp.requiredStamps') }]}
               >
                 <InputNumber min={1} placeholder="500" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="originalValue" label="原價值 (HKD)">
+              <Form.Item name="originalValue" label={t('customerApp.originalValue')}>
                 <InputNumber min={0} placeholder="50" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="description" label="描述">
-            <TextArea rows={2} placeholder="禮品描述" />
+          <Form.Item name="description" label={t('customerApp.description')}>
+            <TextArea rows={2} placeholder={t('customerApp.giftDescription')} />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="image" label="圖示">
+              <Form.Item name="image" label={t('customerApp.icon')}>
                 <Input placeholder="例如：🎟️" />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
                 name="totalStock"
-                label="總庫存"
-                rules={[{ required: true, message: '請輸入總庫存' }]}
+                label={t('customerApp.totalStock')}
+                rules={[{ required: true, message: t('customerApp.enterTotalStock') }]}
               >
                 <InputNumber min={1} placeholder="100" style={{ width: '100%' }} />
               </Form.Item>
@@ -533,13 +535,13 @@ const GiftManagement: React.FC = () => {
             <Col span={8}>
               <Form.Item
                 name="status"
-                label="狀態"
-                rules={[{ required: true, message: '請選擇狀態' }]}
+                label={t('common.status')}
+                rules={[{ required: true, message: t('customerApp.selectStatus') }]}
               >
-                <Select placeholder="選擇狀態">
-                  <Select.Option value="active">上架中</Select.Option>
-                  <Select.Option value="inactive">已下架</Select.Option>
-                  <Select.Option value="out_of_stock">已售罄</Select.Option>
+                <Select placeholder={t('customerApp.selectStatus')}>
+                  <Select.Option value="active">{t('customerApp.online')}</Select.Option>
+                  <Select.Option value="inactive">{t('customerApp.offline')}</Select.Option>
+                  <Select.Option value="out_of_stock">{t('customerApp.soldOut')}</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -547,18 +549,18 @@ const GiftManagement: React.FC = () => {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="startDate" label="開始日期">
+              <Form.Item name="startDate" label={t('customerApp.startDate')}>
                 <Input type="date" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="endDate" label="結束日期">
+              <Form.Item name="endDate" label={t('customerApp.endDate')}>
                 <Input type="date" />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="featured" label="設為熱門" valuePropName="checked">
+          <Form.Item name="featured" label={t('customerApp.setFeatured')} valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>

@@ -30,6 +30,7 @@ import {
   QrcodeOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '../../store/app';
+import { useLocale } from '../../hooks/useLocale';
 import type { ColumnsType } from 'antd/es/table';
 
 const { Title, Text } = Typography;
@@ -155,6 +156,7 @@ const mockMerchants: Merchant[] = [
 ];
 
 const MerchantManagement: React.FC = () => {
+  const { t } = useLocale();
   const setBreadcrumbs = useAppStore((s) => s.setBreadcrumbs);
   const [merchants, setMerchants] = useState<Merchant[]>(mockMerchants);
   const [loading, setLoading] = useState(false);
@@ -167,10 +169,10 @@ const MerchantManagement: React.FC = () => {
 
   useEffect(() => {
     setBreadcrumbs([
-      { title: '營運管理', path: '/operations' },
-      { title: '商戶管理' },
+      { title: t('customerApp.operationsManagement'), path: '/operations' },
+      { title: t('customerApp.merchantManagement') },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, t]);
 
   const filteredMerchants = merchants.filter((m) => {
     const matchSearch =
@@ -196,14 +198,14 @@ const MerchantManagement: React.FC = () => {
 
   const handleDelete = (id: string) => {
     setMerchants(merchants.filter((m) => m.id !== id));
-    message.success('商戶已刪除');
+    message.success(t('customerApp.merchantDeleted'));
   };
 
   const handleToggleStamp = (id: string, enabled: boolean) => {
     setMerchants(
       merchants.map((m) => (m.id === id ? { ...m, stampEnabled: enabled } : m))
     );
-    message.success(enabled ? '印花功能已啟用' : '印花功能已停用');
+    message.success(enabled ? t('customerApp.stampEnabledMsg') : t('customerApp.stampDisabledMsg'));
   };
 
   const handleSubmit = async () => {
@@ -225,10 +227,10 @@ const MerchantManagement: React.FC = () => {
 
       if (editingMerchant) {
         setMerchants(merchants.map((m) => (m.id === editingMerchant.id ? merchantData : m)));
-        message.success('商戶資料已更新');
+        message.success(t('customerApp.merchantUpdated'));
       } else {
         setMerchants([...merchants, merchantData]);
-        message.success('商戶已新增');
+        message.success(t('customerApp.merchantAdded'));
       }
 
       setModalVisible(false);
@@ -240,7 +242,7 @@ const MerchantManagement: React.FC = () => {
 
   const handleGenerateQR = (merchant: Merchant) => {
     Modal.info({
-      title: '商戶收款二維碼',
+      title: t('customerApp.merchantQRCode'),
       content: (
         <div style={{ textAlign: 'center', padding: 20 }}>
           <div
@@ -262,21 +264,21 @@ const MerchantManagement: React.FC = () => {
           <div style={{ marginTop: 16 }}>
             <Text strong>{merchant.nameTW}</Text>
             <br />
-            <Text type="secondary">{merchant.mallName} · {merchant.floor}樓</Text>
+            <Text type="secondary">{merchant.mallName} · {merchant.floor}F</Text>
           </div>
           <div style={{ marginTop: 12 }}>
-            <Button type="primary">下載二維碼</Button>
+            <Button type="primary">{t('customerApp.downloadQRCode')}</Button>
           </div>
         </div>
       ),
-      okText: '關閉',
+      okText: t('common.confirm'),
       width: 360,
     });
   };
 
   const columns: ColumnsType<Merchant> = [
     {
-      title: '商戶',
+      title: t('merchant.merchant'),
       key: 'merchant',
       render: (_, record) => (
         <Space>
@@ -293,27 +295,27 @@ const MerchantManagement: React.FC = () => {
       ),
     },
     {
-      title: '所屬商場',
+      title: t('customerApp.belongsToMall'),
       dataIndex: 'mallName',
       key: 'mallName',
     },
     {
-      title: '位置',
+      title: t('customerApp.location'),
       key: 'location',
       render: (_, record) => (
         <Text>
-          {record.floor}樓 {record.unit}
+          {record.floor}F {record.unit}
         </Text>
       ),
     },
     {
-      title: '類別',
+      title: t('customerApp.category'),
       dataIndex: 'category',
       key: 'category',
       render: (cat) => <Tag>{cat}</Tag>,
     },
     {
-      title: '印花',
+      title: t('stamp.stamp'),
       key: 'stamp',
       render: (_, record) => (
         <Space direction="vertical" size={0}>
@@ -324,24 +326,24 @@ const MerchantManagement: React.FC = () => {
           />
           {record.stampEnabled && (
             <Text type="secondary" style={{ fontSize: 11 }}>
-              ${1}/{record.stampRate}印花
+              ${1}/{record.stampRate} {t('stamp.stamp')}
             </Text>
           )}
         </Space>
       ),
     },
     {
-      title: '狀態',
+      title: t('common.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
         <Tag color={status === 'active' ? 'green' : 'default'}>
-          {status === 'active' ? '營業中' : '已停業'}
+          {status === 'active' ? t('customerApp.inBusiness') : t('customerApp.outOfBusiness')}
         </Tag>
       ),
     },
     {
-      title: '操作',
+      title: t('common.actions'),
       key: 'actions',
       render: (_, record) => (
         <Space>
@@ -350,19 +352,19 @@ const MerchantManagement: React.FC = () => {
             icon={<QrcodeOutlined />}
             onClick={() => handleGenerateQR(record)}
           >
-            二維碼
+            {t('customerApp.qrCode')}
           </Button>
           <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            編輯
+            {t('common.edit')}
           </Button>
           <Popconfirm
-            title="確定要刪除此商戶嗎？"
+            title={t('customerApp.confirmDeleteMerchant')}
             onConfirm={() => handleDelete(record.id)}
-            okText="確定"
-            cancelText="取消"
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
           >
             <Button type="link" danger icon={<DeleteOutlined />}>
-              刪除
+              {t('common.delete')}
             </Button>
           </Popconfirm>
         </Space>
@@ -373,10 +375,10 @@ const MerchantManagement: React.FC = () => {
   return (
     <div>
       <Card
-        title={<Title level={4} style={{ margin: 0 }}>商戶管理</Title>}
+        title={<Title level={4} style={{ margin: 0 }}>{t('customerApp.merchantList')}</Title>}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            新增商戶
+            {t('customerApp.addMerchant')}
           </Button>
         }
       >
@@ -384,7 +386,7 @@ const MerchantManagement: React.FC = () => {
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={8}>
             <Input
-              placeholder="搜尋商戶名稱"
+              placeholder={t('customerApp.searchMerchantName')}
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -393,7 +395,7 @@ const MerchantManagement: React.FC = () => {
           </Col>
           <Col span={6}>
             <Select
-              placeholder="選擇商場"
+              placeholder={t('customerApp.selectMall')}
               style={{ width: '100%' }}
               allowClear
               value={selectedMall || undefined}
@@ -408,7 +410,7 @@ const MerchantManagement: React.FC = () => {
           </Col>
           <Col span={6}>
             <Select
-              placeholder="選擇類別"
+              placeholder={t('customerApp.selectCategory')}
               style={{ width: '100%' }}
               allowClear
               value={selectedCategory || undefined}
@@ -432,7 +434,7 @@ const MerchantManagement: React.FC = () => {
       </Card>
 
       <Modal
-        title={editingMerchant ? '編輯商戶' : '新增商戶'}
+        title={editingMerchant ? t('customerApp.editMerchant') : t('customerApp.addMerchant')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -444,8 +446,8 @@ const MerchantManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="nameTW"
-                label="商戶名稱 (中文)"
-                rules={[{ required: true, message: '請輸入商戶中文名稱' }]}
+                label={t('customerApp.merchantNameCN')}
+                rules={[{ required: true, message: t('customerApp.enterMerchantNameCN') }]}
               >
                 <Input placeholder="例如：太平洋咖啡" />
               </Form.Item>
@@ -453,8 +455,8 @@ const MerchantManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="nameEN"
-                label="商戶名稱 (英文)"
-                rules={[{ required: true, message: '請輸入商戶英文名稱' }]}
+                label={t('customerApp.merchantNameEN')}
+                rules={[{ required: true, message: t('customerApp.enterMerchantNameEN') }]}
               >
                 <Input placeholder="e.g., Pacific Coffee" />
               </Form.Item>
@@ -465,10 +467,10 @@ const MerchantManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="mallId"
-                label="所屬商場"
-                rules={[{ required: true, message: '請選擇商場' }]}
+                label={t('customerApp.belongsToMall')}
+                rules={[{ required: true, message: t('customerApp.selectMall') }]}
               >
-                <Select placeholder="選擇商場">
+                <Select placeholder={t('customerApp.selectMall')}>
                   {malls.map((m) => (
                     <Select.Option key={m.id} value={m.id}>
                       {m.name}
@@ -480,10 +482,10 @@ const MerchantManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="category"
-                label="類別"
-                rules={[{ required: true, message: '請選擇類別' }]}
+                label={t('customerApp.category')}
+                rules={[{ required: true, message: t('customerApp.selectCategory') }]}
               >
-                <Select placeholder="選擇類別">
+                <Select placeholder={t('customerApp.selectCategory')}>
                   {categories.map((c) => (
                     <Select.Option key={c} value={c}>
                       {c}
@@ -498,19 +500,19 @@ const MerchantManagement: React.FC = () => {
             <Col span={8}>
               <Form.Item
                 name="floor"
-                label="樓層"
-                rules={[{ required: true, message: '請輸入樓層' }]}
+                label={t('customerApp.floor')}
+                rules={[{ required: true, message: t('customerApp.floor') }]}
               >
                 <Input placeholder="例如：G" />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="unit" label="店舖號碼">
+              <Form.Item name="unit" label={t('customerApp.unit')}>
                 <Input placeholder="例如：G01-G10" />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="logo" label="圖示">
+              <Form.Item name="logo" label={t('customerApp.icon')}>
                 <Input placeholder="例如：☕" />
               </Form.Item>
             </Col>
@@ -518,12 +520,12 @@ const MerchantManagement: React.FC = () => {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="phone" label="聯繫電話">
+              <Form.Item name="phone" label={t('customerApp.contactPhone')}>
                 <Input placeholder="+852 XXXX XXXX" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="openingHours" label="營業時間">
+              <Form.Item name="openingHours" label={t('customerApp.openingHours')}>
                 <Input placeholder="例如：10:00 - 22:00" />
               </Form.Item>
             </Col>
@@ -533,7 +535,7 @@ const MerchantManagement: React.FC = () => {
             <Col span={8}>
               <Form.Item
                 name="stampEnabled"
-                label="啟用印花"
+                label={t('customerApp.enableStamp')}
                 valuePropName="checked"
                 initialValue={true}
               >
@@ -541,19 +543,19 @@ const MerchantManagement: React.FC = () => {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="stampRate" label="印花比率 (每$1)">
+              <Form.Item name="stampRate" label={t('customerApp.stampRate')}>
                 <InputNumber min={1} max={10} placeholder="1" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
                 name="status"
-                label="狀態"
-                rules={[{ required: true, message: '請選擇狀態' }]}
+                label={t('common.status')}
+                rules={[{ required: true, message: t('customerApp.selectStatus') }]}
               >
-                <Select placeholder="選擇狀態">
-                  <Select.Option value="active">營業中</Select.Option>
-                  <Select.Option value="inactive">已停業</Select.Option>
+                <Select placeholder={t('customerApp.selectStatus')}>
+                  <Select.Option value="active">{t('customerApp.inBusiness')}</Select.Option>
+                  <Select.Option value="inactive">{t('customerApp.outOfBusiness')}</Select.Option>
                 </Select>
               </Form.Item>
             </Col>

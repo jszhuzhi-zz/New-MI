@@ -28,6 +28,7 @@ import {
   EyeOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '../../store/app';
+import { useLocale } from '../../hooks/useLocale';
 import type { ColumnsType } from 'antd/es/table';
 
 const { Title, Text } = Typography;
@@ -134,6 +135,7 @@ const mockQRCodes: QRCode[] = [
 ];
 
 const QRCodeManagement: React.FC = () => {
+  const { t } = useLocale();
   const setBreadcrumbs = useAppStore((s) => s.setBreadcrumbs);
   const [qrCodes, setQRCodes] = useState<QRCode[]>(mockQRCodes);
   const [loading, setLoading] = useState(false);
@@ -146,10 +148,10 @@ const QRCodeManagement: React.FC = () => {
 
   useEffect(() => {
     setBreadcrumbs([
-      { title: '營運管理', path: '/operations' },
-      { title: '二維碼管理' },
+      { title: t('customerApp.operationsManagement'), path: '/operations' },
+      { title: t('customerApp.qrCodeManagement') },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, t]);
 
   const filteredQRCodes = qrCodes.filter((qr) => {
     const matchSearch =
@@ -173,7 +175,7 @@ const QRCodeManagement: React.FC = () => {
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
-    message.success('已複製到剪貼板');
+    message.success(t('customerApp.copiedToClipboard'));
   };
 
   const handleSubmit = async () => {
@@ -197,7 +199,7 @@ const QRCodeManagement: React.FC = () => {
       };
 
       setQRCodes([...qrCodes, qrData]);
-      message.success('二維碼已創建');
+      message.success(t('customerApp.qrCodeCreated'));
 
       setModalVisible(false);
       setLoading(false);
@@ -208,26 +210,26 @@ const QRCodeManagement: React.FC = () => {
 
   const getTypeTag = (type: QRCode['type']) => {
     const config = {
-      merchant_payment: { color: 'blue', text: '商戶收款' },
-      campaign: { color: 'gold', text: '活動' },
-      checkin: { color: 'green', text: '簽到' },
-      coupon: { color: 'purple', text: '優惠券' },
+      merchant_payment: { color: 'blue', text: t('customerApp.merchantPayment') },
+      campaign: { color: 'gold', text: t('customerApp.campaignCode') },
+      checkin: { color: 'green', text: t('customerApp.checkinCode') },
+      coupon: { color: 'purple', text: t('customerApp.couponCode') },
     };
     return <Tag color={config[type].color}>{config[type].text}</Tag>;
   };
 
   const getStatusTag = (status: QRCode['status']) => {
     const config = {
-      active: { color: 'green', text: '有效' },
-      expired: { color: 'default', text: '已過期' },
-      disabled: { color: 'red', text: '已停用' },
+      active: { color: 'green', text: t('customerApp.valid') },
+      expired: { color: 'default', text: t('customerApp.expiredStatus') },
+      disabled: { color: 'red', text: t('customerApp.disabled') },
     };
     return <Tag color={config[status].color}>{config[status].text}</Tag>;
   };
 
   const columns: ColumnsType<QRCode> = [
     {
-      title: '二維碼',
+      title: t('customerApp.qrCode'),
       key: 'qr',
       render: (_, record) => (
         <Space>
@@ -254,18 +256,18 @@ const QRCodeManagement: React.FC = () => {
       ),
     },
     {
-      title: '類型',
+      title: t('customerApp.qrCodeType'),
       dataIndex: 'type',
       key: 'type',
       render: getTypeTag,
     },
     {
-      title: '商場',
+      title: t('customerApp.mall'),
       dataIndex: 'mallName',
       key: 'mallName',
     },
     {
-      title: '印花',
+      title: t('stamp.stamp'),
       dataIndex: 'stamps',
       key: 'stamps',
       render: (v) =>
@@ -276,7 +278,7 @@ const QRCodeManagement: React.FC = () => {
         ),
     },
     {
-      title: '使用次數',
+      title: t('customerApp.usageCount'),
       key: 'usage',
       render: (_, record) => (
         <Text>
@@ -286,7 +288,7 @@ const QRCodeManagement: React.FC = () => {
       ),
     },
     {
-      title: '有效期',
+      title: t('customerApp.validityPeriod'),
       key: 'validity',
       render: (_, record) => (
         <Text type="secondary" style={{ fontSize: 12 }}>
@@ -295,28 +297,28 @@ const QRCodeManagement: React.FC = () => {
       ),
     },
     {
-      title: '狀態',
+      title: t('common.status'),
       dataIndex: 'status',
       key: 'status',
       render: getStatusTag,
     },
     {
-      title: '操作',
+      title: t('common.actions'),
       key: 'actions',
       render: (_, record) => (
         <Space>
           <Button type="link" icon={<EyeOutlined />} onClick={() => handlePreview(record)}>
-            預覽
+            {t('customerApp.preview')}
           </Button>
           <Button
             type="link"
             icon={<CopyOutlined />}
             onClick={() => handleCopyCode(record.code)}
           >
-            複製
+            {t('customerApp.copy')}
           </Button>
           <Button type="link" icon={<DownloadOutlined />}>
-            下載
+            {t('common.download')}
           </Button>
         </Space>
       ),
@@ -327,13 +329,20 @@ const QRCodeManagement: React.FC = () => {
   const totalScans = qrCodes.reduce((sum, q) => sum + q.usedCount, 0);
   const campaignCount = qrCodes.filter((q) => q.type === 'campaign').length;
 
+  const qrTypeLabels = [
+    { value: 'merchant_payment', label: t('customerApp.merchantPayment') },
+    { value: 'campaign', label: t('customerApp.campaignCode') },
+    { value: 'checkin', label: t('customerApp.checkinCode') },
+    { value: 'coupon', label: t('customerApp.couponCode') },
+  ];
+
   return (
     <div>
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card>
             <Statistic
-              title="二維碼總數"
+              title={t('customerApp.totalQRCodes')}
               value={qrCodes.length}
               prefix={<QrcodeOutlined />}
               valueStyle={{ color: '#1677ff' }}
@@ -343,7 +352,7 @@ const QRCodeManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="有效二維碼"
+              title={t('customerApp.activeQRCodes')}
               value={activeCount}
               valueStyle={{ color: '#52c41a' }}
             />
@@ -352,7 +361,7 @@ const QRCodeManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="總掃描次數"
+              title={t('customerApp.totalScans')}
               value={totalScans}
               valueStyle={{ color: '#C4A962' }}
             />
@@ -360,18 +369,18 @@ const QRCodeManagement: React.FC = () => {
         </Col>
         <Col span={6}>
           <Card>
-            <Statistic title="活動碼數量" value={campaignCount} />
+            <Statistic title={t('customerApp.campaignQRCodes')} value={campaignCount} />
           </Card>
         </Col>
       </Row>
 
       <Card
-        title={<Title level={4} style={{ margin: 0 }}>二維碼列表</Title>}
+        title={<Title level={4} style={{ margin: 0 }}>{t('customerApp.qrCodeList')}</Title>}
         extra={
           <Space>
-            <Button icon={<PrinterOutlined />}>批量打印</Button>
+            <Button icon={<PrinterOutlined />}>{t('customerApp.batchPrint')}</Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              創建二維碼
+              {t('customerApp.createQRCode')}
             </Button>
           </Space>
         }
@@ -380,15 +389,15 @@ const QRCodeManagement: React.FC = () => {
           activeKey={activeTab}
           onChange={setActiveTab}
           items={[
-            { key: 'all', label: '全部' },
-            ...qrTypes.map((t) => ({ key: t.value, label: t.label })),
+            { key: 'all', label: t('common.all') },
+            ...qrTypeLabels.map((qrType) => ({ key: qrType.value, label: qrType.label })),
           ]}
         />
 
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={8}>
             <Input
-              placeholder="搜尋二維碼名稱或編號"
+              placeholder={t('customerApp.searchQRCode')}
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -407,7 +416,7 @@ const QRCodeManagement: React.FC = () => {
 
       {/* Create Modal */}
       <Modal
-        title="創建二維碼"
+        title={t('customerApp.createQRCode')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -419,13 +428,13 @@ const QRCodeManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="type"
-                label="類型"
-                rules={[{ required: true, message: '請選擇類型' }]}
+                label={t('customerApp.qrCodeType')}
+                rules={[{ required: true, message: t('customerApp.selectType') }]}
               >
-                <Select placeholder="選擇類型">
-                  {qrTypes.map((t) => (
-                    <Select.Option key={t.value} value={t.value}>
-                      {t.label}
+                <Select placeholder={t('customerApp.selectType')}>
+                  {qrTypes.map((qrType) => (
+                    <Select.Option key={qrType.value} value={qrType.value}>
+                      {qrType.label}
                     </Select.Option>
                   ))}
                 </Select>
@@ -434,10 +443,10 @@ const QRCodeManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="mallId"
-                label="所屬商場"
-                rules={[{ required: true, message: '請選擇商場' }]}
+                label={t('customerApp.belongsToMall')}
+                rules={[{ required: true, message: t('customerApp.selectMall') }]}
               >
-                <Select placeholder="選擇商場">
+                <Select placeholder={t('customerApp.selectMall')}>
                   {malls.map((m) => (
                     <Select.Option key={m.id} value={m.id}>
                       {m.name}
@@ -450,24 +459,24 @@ const QRCodeManagement: React.FC = () => {
 
           <Form.Item
             name="name"
-            label="名稱"
-            rules={[{ required: true, message: '請輸入名稱' }]}
+            label={t('customerApp.qrCodeNameLabel')}
+            rules={[{ required: true, message: t('customerApp.enterQRCodeName') }]}
           >
-            <Input placeholder="二維碼名稱" />
+            <Input placeholder={t('customerApp.enterQRCodeName')} />
           </Form.Item>
 
-          <Form.Item name="description" label="描述">
-            <Input.TextArea rows={2} placeholder="二維碼描述" />
+          <Form.Item name="description" label={t('customerApp.qrCodeDescriptionLabel')}>
+            <Input.TextArea rows={2} placeholder={t('customerApp.description')} />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="stamps" label="贈送印花">
+              <Form.Item name="stamps" label={t('customerApp.grantStamps')}>
                 <InputNumber min={0} placeholder="0" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="maxUses" label="最大使用次數 (0為無限)">
+              <Form.Item name="maxUses" label={t('customerApp.maxUses')}>
                 <InputNumber min={0} placeholder="0" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
@@ -477,8 +486,8 @@ const QRCodeManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="startDate"
-                label="開始日期"
-                rules={[{ required: true, message: '請選擇開始日期' }]}
+                label={t('customerApp.startDate')}
+                rules={[{ required: true, message: t('customerApp.startDate') }]}
               >
                 <Input type="date" />
               </Form.Item>
@@ -486,8 +495,8 @@ const QRCodeManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="endDate"
-                label="結束日期"
-                rules={[{ required: true, message: '請選擇結束日期' }]}
+                label={t('customerApp.endDate')}
+                rules={[{ required: true, message: t('customerApp.endDate') }]}
               >
                 <Input type="date" />
               </Form.Item>
@@ -498,15 +507,15 @@ const QRCodeManagement: React.FC = () => {
 
       {/* Preview Modal */}
       <Modal
-        title="二維碼預覽"
+        title={t('customerApp.qrCodePreview')}
         open={previewVisible}
         onCancel={() => setPreviewVisible(false)}
         footer={[
           <Button key="copy" onClick={() => selectedQR && handleCopyCode(selectedQR.code)}>
-            複製編號
+            {t('customerApp.copyCode')}
           </Button>,
           <Button key="download" type="primary" icon={<DownloadOutlined />}>
-            下載二維碼
+            {t('customerApp.downloadQRCode')}
           </Button>,
         ]}
         width={400}
@@ -537,7 +546,7 @@ const QRCodeManagement: React.FC = () => {
             </div>
             <div style={{ marginTop: 12 }}>
               <Text type="secondary">
-                {selectedQR.mallName} · 使用次數: {selectedQR.usedCount.toLocaleString()}
+                {selectedQR.mallName} · {t('customerApp.usageCount')}: {selectedQR.usedCount.toLocaleString()}
               </Text>
             </div>
           </div>

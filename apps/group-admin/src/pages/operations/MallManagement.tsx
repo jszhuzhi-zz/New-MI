@@ -27,6 +27,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '../../store/app';
+import { useLocale } from '../../hooks/useLocale';
 import type { ColumnsType } from 'antd/es/table';
 
 const { Title, Text } = Typography;
@@ -119,6 +120,7 @@ const mockMalls: Mall[] = [
 ];
 
 const MallManagement: React.FC = () => {
+  const { t } = useLocale();
   const setBreadcrumbs = useAppStore((s) => s.setBreadcrumbs);
   const [malls, setMalls] = useState<Mall[]>(mockMalls);
   const [loading, setLoading] = useState(false);
@@ -128,10 +130,10 @@ const MallManagement: React.FC = () => {
 
   useEffect(() => {
     setBreadcrumbs([
-      { title: '營運管理', path: '/operations' },
-      { title: '商場管理' },
+      { title: t('customerApp.operationsManagement'), path: '/operations' },
+      { title: t('customerApp.mallManagement') },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, t]);
 
   const handleAdd = () => {
     setEditingMall(null);
@@ -150,7 +152,7 @@ const MallManagement: React.FC = () => {
 
   const handleDelete = (id: string) => {
     setMalls(malls.filter((m) => m.id !== id));
-    message.success('商場已刪除');
+    message.success(t('customerApp.mallDeleted'));
   };
 
   const handleSubmit = async () => {
@@ -172,10 +174,10 @@ const MallManagement: React.FC = () => {
 
       if (editingMall) {
         setMalls(malls.map((m) => (m.id === editingMall.id ? mallData : m)));
-        message.success('商場資料已更新');
+        message.success(t('customerApp.mallUpdated'));
       } else {
         setMalls([...malls, mallData]);
-        message.success('商場已新增');
+        message.success(t('customerApp.mallAdded'));
       }
 
       setModalVisible(false);
@@ -187,16 +189,16 @@ const MallManagement: React.FC = () => {
 
   const getStatusTag = (status: Mall['status']) => {
     const config = {
-      active: { color: 'green', text: '營運中' },
-      inactive: { color: 'default', text: '已停用' },
-      maintenance: { color: 'orange', text: '維護中' },
+      active: { color: 'green', text: t('customerApp.operating') },
+      inactive: { color: 'default', text: t('customerApp.closed') },
+      maintenance: { color: 'orange', text: t('customerApp.maintenance') },
     };
     return <Tag color={config[status].color}>{config[status].text}</Tag>;
   };
 
   const columns: ColumnsType<Mall> = [
     {
-      title: '商場名稱',
+      title: t('customerApp.mallName'),
       key: 'name',
       render: (_, record) => (
         <Space direction="vertical" size={0}>
@@ -208,64 +210,64 @@ const MallManagement: React.FC = () => {
       ),
     },
     {
-      title: '地區',
+      title: t('customerApp.region'),
       dataIndex: 'region',
       key: 'region',
       filters: regions.map((r) => ({ text: r, value: r })),
       onFilter: (value, record) => record.region === value,
     },
     {
-      title: '地址',
+      title: t('customerApp.address'),
       dataIndex: 'address',
       key: 'address',
       ellipsis: true,
     },
     {
-      title: '樓層',
+      title: t('customerApp.floors'),
       key: 'floors',
-      render: (_, record) => <Text>{record.floors.length} 層</Text>,
+      render: (_, record) => <Text>{t('customerApp.floorCount', { count: record.floors.length })}</Text>,
     },
     {
-      title: '商戶數',
+      title: t('customerApp.merchantCount'),
       dataIndex: 'merchantCount',
       key: 'merchantCount',
       sorter: (a, b) => a.merchantCount - b.merchantCount,
     },
     {
-      title: '會員數',
+      title: t('customerApp.memberCount'),
       dataIndex: 'memberCount',
       key: 'memberCount',
       sorter: (a, b) => a.memberCount - b.memberCount,
       render: (v) => v.toLocaleString(),
     },
     {
-      title: '狀態',
+      title: t('common.status'),
       dataIndex: 'status',
       key: 'status',
       render: getStatusTag,
       filters: [
-        { text: '營運中', value: 'active' },
-        { text: '已停用', value: 'inactive' },
-        { text: '維護中', value: 'maintenance' },
+        { text: t('customerApp.operating'), value: 'active' },
+        { text: t('customerApp.closed'), value: 'inactive' },
+        { text: t('customerApp.maintenance'), value: 'maintenance' },
       ],
       onFilter: (value, record) => record.status === value,
     },
     {
-      title: '操作',
+      title: t('common.actions'),
       key: 'actions',
       render: (_, record) => (
         <Space>
           <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            編輯
+            {t('common.edit')}
           </Button>
           <Popconfirm
-            title="確定要刪除此商場嗎？"
+            title={t('customerApp.confirmDeleteMall')}
             onConfirm={() => handleDelete(record.id)}
-            okText="確定"
-            cancelText="取消"
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
           >
             <Button type="link" danger icon={<DeleteOutlined />}>
-              刪除
+              {t('common.delete')}
             </Button>
           </Popconfirm>
         </Space>
@@ -283,7 +285,7 @@ const MallManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="商場總數"
+              title={t('customerApp.totalMalls')}
               value={malls.length}
               prefix={<ShopOutlined />}
               valueStyle={{ color: '#1677ff' }}
@@ -293,7 +295,7 @@ const MallManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="營運中商場"
+              title={t('customerApp.activeMalls')}
               value={activeMalls}
               prefix={<ShopOutlined />}
               valueStyle={{ color: '#52c41a' }}
@@ -303,7 +305,7 @@ const MallManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="總商戶數"
+              title={t('customerApp.totalMerchants')}
               value={totalMerchants}
               prefix={<EnvironmentOutlined />}
             />
@@ -312,7 +314,7 @@ const MallManagement: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="總會員數"
+              title={t('customerApp.totalMembers')}
               value={totalMembers}
               prefix={<TeamOutlined />}
             />
@@ -321,10 +323,10 @@ const MallManagement: React.FC = () => {
       </Row>
 
       <Card
-        title={<Title level={4} style={{ margin: 0 }}>商場列表</Title>}
+        title={<Title level={4} style={{ margin: 0 }}>{t('customerApp.mallList')}</Title>}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            新增商場
+            {t('customerApp.addMall')}
           </Button>
         }
       >
@@ -337,7 +339,7 @@ const MallManagement: React.FC = () => {
       </Card>
 
       <Modal
-        title={editingMall ? '編輯商場' : '新增商場'}
+        title={editingMall ? t('customerApp.editMall') : t('customerApp.addMall')}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -349,8 +351,8 @@ const MallManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="nameTW"
-                label="商場名稱 (中文)"
-                rules={[{ required: true, message: '請輸入商場中文名稱' }]}
+                label={t('customerApp.mallNameCN')}
+                rules={[{ required: true, message: t('customerApp.enterMallNameCN') }]}
               >
                 <Input placeholder="例如：又一城" />
               </Form.Item>
@@ -358,8 +360,8 @@ const MallManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="nameEN"
-                label="商場名稱 (英文)"
-                rules={[{ required: true, message: '請輸入商場英文名稱' }]}
+                label={t('customerApp.mallNameEN')}
+                rules={[{ required: true, message: t('customerApp.enterMallNameEN') }]}
               >
                 <Input placeholder="e.g., Festival Walk" />
               </Form.Item>
@@ -370,10 +372,10 @@ const MallManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="region"
-                label="地區"
-                rules={[{ required: true, message: '請選擇地區' }]}
+                label={t('customerApp.region')}
+                rules={[{ required: true, message: t('customerApp.selectRegion') }]}
               >
-                <Select placeholder="選擇地區">
+                <Select placeholder={t('customerApp.selectRegion')}>
                   {regions.map((r) => (
                     <Select.Option key={r} value={r}>
                       {r}
@@ -385,13 +387,13 @@ const MallManagement: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="status"
-                label="狀態"
-                rules={[{ required: true, message: '請選擇狀態' }]}
+                label={t('common.status')}
+                rules={[{ required: true, message: t('customerApp.selectStatus') }]}
               >
-                <Select placeholder="選擇狀態">
-                  <Select.Option value="active">營運中</Select.Option>
-                  <Select.Option value="inactive">已停用</Select.Option>
-                  <Select.Option value="maintenance">維護中</Select.Option>
+                <Select placeholder={t('customerApp.selectStatus')}>
+                  <Select.Option value="active">{t('customerApp.operating')}</Select.Option>
+                  <Select.Option value="inactive">{t('customerApp.closed')}</Select.Option>
+                  <Select.Option value="maintenance">{t('customerApp.maintenance')}</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -399,34 +401,34 @@ const MallManagement: React.FC = () => {
 
           <Form.Item
             name="address"
-            label="地址"
-            rules={[{ required: true, message: '請輸入地址' }]}
+            label={t('customerApp.address')}
+            rules={[{ required: true, message: t('customerApp.enterAddress') }]}
           >
-            <Input placeholder="完整地址" />
+            <Input placeholder={t('customerApp.enterAddress')} />
           </Form.Item>
 
           <Form.Item
             name="floors"
-            label="樓層 (以逗號分隔)"
-            rules={[{ required: true, message: '請輸入樓層' }]}
+            label={t('customerApp.floorsCommaSeparated')}
+            rules={[{ required: true, message: t('customerApp.enterFloors') }]}
           >
             <Input placeholder="例如：B, G, 1, 2, 3" />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="openingHours" label="營業時間">
+              <Form.Item name="openingHours" label={t('customerApp.openingHours')}>
                 <Input placeholder="例如：10:00 - 22:00" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="contactPhone" label="聯繫電話">
+              <Form.Item name="contactPhone" label={t('customerApp.contactPhone')}>
                 <Input placeholder="+852 XXXX XXXX" />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="contactEmail" label="聯繫電郵">
+          <Form.Item name="contactEmail" label={t('customerApp.contactEmail')}>
             <Input placeholder="example@mall.com.hk" />
           </Form.Item>
         </Form>
