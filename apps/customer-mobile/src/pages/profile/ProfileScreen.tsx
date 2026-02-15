@@ -128,6 +128,22 @@ export default function ProfileScreen() {
         />
       </View>
 
+      {/* Support Section */}
+      <View style={styles.menuSection}>
+        <Text style={styles.menuSectionTitle}>
+          {locale === 'en' ? 'Support' : locale === 'zh-CN' ? '支持' : '支援'}
+        </Text>
+        <MenuItem
+          label={locale === 'en' ? 'AI Customer Service' : 'AI客服'}
+          sublabel={locale === 'en' ? '24/7 Assistance' : '24小時服務'}
+          onPress={() => navigation.navigate('AICustomerService', {})}
+        />
+        <MenuItem
+          label={t('profile.helpFaq')}
+          onPress={() => {}}
+        />
+      </View>
+
       {/* Settings Section */}
       <View style={styles.menuSection}>
         <Text style={styles.menuSectionTitle}>
@@ -136,10 +152,6 @@ export default function ProfileScreen() {
         <MenuItem
           label={t('profile.settings')}
           onPress={() => navigation.navigate('Settings')}
-        />
-        <MenuItem
-          label={t('profile.helpFaq')}
-          onPress={() => {}}
         />
         <MenuItem
           label={t('profile.about')}

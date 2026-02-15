@@ -19,6 +19,7 @@ import MerchantDetail from './pages/mall/merchant-detail';
 import CheckInPage from './pages/checkin';
 import LoginPage from './pages/auth/login';
 import GiftsPage from './pages/gifts';
+import AICustomerServicePage from './pages/support/ai-customer-service';
 import { useAuthStore } from './store/auth';
 
 const globalStyles = `
@@ -137,6 +138,7 @@ export default function App() {
           <Route path="/checkin" element={<CheckInPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/gifts" element={<GiftsPage />} />
+          <Route path="/support" element={<AICustomerServicePage />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

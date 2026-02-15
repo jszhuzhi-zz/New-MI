@@ -49,6 +49,7 @@ import EditProfileScreen from '../pages/profile/EditProfileScreen';
 import TierInfoScreen from '../pages/profile/TierInfoScreen';
 import MessageCenterScreen from '../pages/profile/MessageCenterScreen';
 import FavoriteStoresScreen from '../pages/profile/FavoriteStoresScreen';
+import AICustomerServiceScreen from '../pages/profile/AICustomerServiceScreen';
 import SettingsScreen from '../pages/profile/SettingsScreen';
 
 // Mall Screens
@@ -88,6 +89,7 @@ const headerTitles: Record<string, Record<string, string>> = {
   TierInfo: { 'zh-TW': '會員等級', 'zh-CN': '会员等级', en: 'Tier Info' },
   MessageCenter: { 'zh-TW': '消息中心', 'zh-CN': '消息中心', en: 'Messages' },
   FavoriteStores: { 'zh-TW': '收藏商戶', 'zh-CN': '收藏商户', en: 'Favorite Stores' },
+  AICustomerService: { 'zh-TW': 'AI客服', 'zh-CN': 'AI客服', en: 'AI Customer Service' },
   Settings: { 'zh-TW': '設定', 'zh-CN': '设置', en: 'Settings' },
   MallDirectory: { 'zh-TW': '商場指南', 'zh-CN': '商场指南', en: 'Mall Directory' },
   MerchantDetail: { 'zh-TW': '商戶詳情', 'zh-CN': '商户详情', en: 'Store Detail' },
@@ -319,6 +321,11 @@ function ProfileNavigator() {
         name="FavoriteStores"
         component={FavoriteStoresScreen}
         options={{ title: headerTitles.FavoriteStores[locale] }}
+      />
+      <ProfileStack.Screen
+        name="AICustomerService"
+        component={AICustomerServiceScreen}
+        options={{ title: headerTitles.AICustomerService[locale] }}
       />
       <ProfileStack.Screen
         name="Settings"

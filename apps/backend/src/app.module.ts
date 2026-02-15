@@ -13,6 +13,8 @@ import { CampaignModule } from './modules/campaign/campaign.module';
 import { ContentModule } from './modules/content/content.module';
 import { ReportModule } from './modules/report/report.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { FavoriteModule } from './modules/favorite/favorite.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { NotificationModule } from './modules/notification/notification.module';
     ContentModule,
     ReportModule,
     NotificationModule,
+    FavoriteModule,
+    FeedbackModule,
   ],
 })
 export class AppModule {}

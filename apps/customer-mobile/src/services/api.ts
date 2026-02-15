@@ -384,6 +384,48 @@ export const favoritesApi = {
     apiClient.delete<ApiResponse<void>>(`/favorites/${merchantId}`),
 };
 
+// ─── Feedback / AI Customer Service APIs ────────────────────────────────────
+
+export const feedbackApi = {
+  createFeedback: (data: {
+    projectId: string;
+    category?: string;
+    title?: string;
+    isAnonymous?: boolean;
+    contactInfo?: { name?: string; phone?: string; email?: string };
+  }) =>
+    apiClient.post<ApiResponse<any>>('/feedback', data),
+
+  createAnonymousFeedback: (data: {
+    projectId: string;
+    category?: string;
+    contactInfo?: { name?: string; phone?: string; email?: string };
+  }) =>
+    apiClient.post<ApiResponse<any>>('/feedback/anonymous', data),
+
+  getMyFeedbacks: (params?: {
+    status?: string;
+    page?: number;
+    pageSize?: number;
+  }) =>
+    apiClient.get<ApiResponse<any>>('/feedback/my', { params }),
+
+  getFeedback: (feedbackId: string) =>
+    apiClient.get<ApiResponse<any>>(`/feedback/${feedbackId}`),
+
+  sendMessage: (feedbackId: string, content: string) =>
+    apiClient.post<ApiResponse<{
+      userMessage: any;
+      assistantMessage: any;
+    }>>(`/feedback/${feedbackId}/messages`, { content }),
+
+  rateFeedback: (feedbackId: string, rating: number) =>
+    apiClient.put<ApiResponse<any>>(`/feedback/${feedbackId}/rate`, { rating }),
+
+  resolveFeedback: (feedbackId: string) =>
+    apiClient.put<ApiResponse<any>>(`/feedback/${feedbackId}/resolve`),
+};
+
 // ─── Export ──────────────────────────────────────────────────────────────────
 
 export default apiClient;
@@ -400,4 +442,5 @@ export const api = {
   parking: parkingApi,
   notification: notificationApi,
   favorites: favoritesApi,
+  feedback: feedbackApi,
 };

@@ -87,6 +87,7 @@ export type ProfileStackParamList = {
   TierInfo: undefined;
   MessageCenter: undefined;
   FavoriteStores: undefined;
+  AICustomerService: { projectId?: string; feedbackId?: string };
   Settings: undefined;
   TransactionHistory: undefined;
   HelpFAQ: undefined;
