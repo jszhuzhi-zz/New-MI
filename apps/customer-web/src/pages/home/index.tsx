@@ -1,29 +1,57 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swiper, Grid, Card, Tag, PullToRefresh, Toast } from 'antd-mobile';
-import { RightOutline, ScanCodeOutline } from 'antd-mobile-icons';
+import { Swiper, Card, Tag, PullToRefresh, Toast } from 'antd-mobile';
+import { RightOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
-import { getMallById, getMerchantsByMall } from '../../data/malls';
+import { useSettingsStore } from '../../store/settings';
+import { getMallById } from '../../data/malls';
 import MallSelector from '../../components/MallSelector';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
+// Custom SVG Icons
+const ScanIcon = ({ color }: { color: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="7" y="7" width="10" height="10" rx="1" stroke={color} strokeWidth="2"/>
+  </svg>
+);
+
+const CouponIcon = ({ color }: { color: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6M20 12a2 2 0 10-4 0 2 2 0 004 0zM8 12a2 2 0 10-4 0 2 2 0 004 0z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 8h6M9 16h6" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+const MallIcon = ({ color }: { color: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M3 21h18M5 21V7l7-4 7 4v14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 21v-6h6v6M9 10h.01M15 10h.01M9 14h.01M15 14h.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const GiftIcon = ({ color }: { color: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M20 12v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8M22 8v4H2V8a2 2 0 012-2h16a2 2 0 012 2zM12 22V6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 6a3 3 0 00-3-3c-1.5 0-3 1.5-3 3h6zM12 6a3 3 0 013-3c1.5 0 3 1.5 3 3h-6z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const BellIcon = ({ color }: { color: string }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const banners = [
-  { id: 1, title: '新春印花三倍賞', sub: '農曆新年期間消費可獲三倍印花', bg: PRIMARY },
+  { id: 1, title: '新春印花三倍賞', sub: '農曆新年期間消費可獲三倍印花', bg: '#00694B' },
   { id: 2, title: '全新會員專屬優惠', sub: '註冊即送200印花', bg: '#1976D2' },
   { id: 3, title: '聖誕購物節', sub: '消費滿HK$500送精美禮品', bg: '#C62828' },
 ];
 
-const quickActions = [
-  { icon: <ScanCodeOutline fontSize={24} />, label: '掃碼', path: '/scan' },
-  { icon: '🎟️', label: '優惠券', path: '/offers' },
-  { icon: '🏬', label: '商場', path: '/mall' },
-  { icon: '🎁', label: '禮品', path: '/gifts' },
-];
-
 const campaigns = [
-  { id: 'c1', title: '新春印花三倍賞', mall: '又一城', type: '印花加倍', date: '2/1 - 2/28', color: PRIMARY },
+  { id: 'c1', title: '新春印花三倍賞', mall: '又一城', type: '印花加倍', date: '2/1 - 2/28', color: '#00694B' },
   { id: 'c2', title: '新年幸運大抽獎', mall: '荷里活廣場', type: '抽獎', date: '1/15 - 3/15', color: GOLD },
   { id: 'c3', title: '冬日禮品換購', mall: '大埔超級城', type: '禮品兌換', date: '1/1 - 2/28', color: '#7B1FA2' },
 ];
@@ -38,13 +66,22 @@ export default function Home() {
   const user = useAuthStore((s) => s.user);
   const currentMallId = useAuthStore((s) => s.currentMallId);
   const currentMall = getMallById(currentMallId);
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
+
+  const quickActions = [
+    { icon: <ScanIcon color={colors.primary} />, label: '掃碼', path: '/scan' },
+    { icon: <CouponIcon color={colors.primary} />, label: '優惠券', path: '/offers' },
+    { icon: <MallIcon color={colors.primary} />, label: '商場', path: '/mall' },
+    { icon: <GiftIcon color={colors.primary} />, label: '禮品', path: '/gifts' },
+  ];
 
   return (
     <PullToRefresh onRefresh={async () => { Toast.show('已刷新'); }}>
       <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
         {/* Unified Header */}
         <div style={{
-          background: `linear-gradient(180deg, ${PRIMARY} 0%, ${PRIMARY} 60%, #004D36 100%)`,
+          background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.primary} 60%, ${colors.primaryDark} 100%)`,
           padding: '12px 16px 80px',
         }}>
           {/* Top Bar */}
@@ -64,17 +101,16 @@ export default function Home() {
                   cursor: 'pointer',
                 }}
               >
-                <ScanCodeOutline fontSize={18} color="#fff" />
+                <ScanIcon color="#fff" />
               </div>
               <div
                 style={{
                   width: 32, height: 32, borderRadius: 16,
                   background: 'rgba(255,255,255,0.2)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14,
                 }}
               >
-                🔔
+                <BellIcon color="#fff" />
               </div>
             </div>
           </div>
@@ -109,7 +145,7 @@ export default function Home() {
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 11, color: '#999' }}>可用印花</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end' }}>
-                  <span style={{ fontSize: 28, fontWeight: 700, color: PRIMARY }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: colors.primary }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -129,11 +165,9 @@ export default function Home() {
                 >
                   <div style={{
                     width: 44, height: 44, borderRadius: 22,
-                    background: '#f5f5f5',
+                    background: `${colors.primary}10`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 6px',
-                    fontSize: 20,
-                    color: PRIMARY,
                   }}>
                     {a.icon}
                   </div>
@@ -147,11 +181,12 @@ export default function Home() {
         {/* Banners */}
         <div style={{ padding: '16px 16px 0' }}>
           <Swiper autoplay autoplayInterval={3500} loop style={{ '--border-radius': '12px' } as any}>
-            {banners.map((b) => (
+            {banners.map((b, idx) => (
               <Swiper.Item key={b.id}>
                 <div
                   style={{
-                    height: 120, borderRadius: 12, background: b.bg,
+                    height: 120, borderRadius: 12,
+                    background: idx === 0 ? colors.primary : b.bg,
                     display: 'flex', flexDirection: 'column', justifyContent: 'center',
                     padding: '0 20px', color: '#fff',
                   }}
@@ -168,12 +203,12 @@ export default function Home() {
         <div style={{ padding: '16px 16px 0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 16, fontWeight: 600 }}>熱門活動</span>
-            <span style={{ fontSize: 12, color: PRIMARY, cursor: 'pointer' }} onClick={() => navigate('/offers')}>
+            <span style={{ fontSize: 12, color: colors.primary, cursor: 'pointer' }} onClick={() => navigate('/offers')}>
               查看全部 <RightOutline fontSize={10} />
             </span>
           </div>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
-            {campaigns.map((c) => (
+            {campaigns.map((c, idx) => (
               <div
                 key={c.id}
                 onClick={() => navigate(`/campaign/${c.id}`)}
@@ -183,7 +218,13 @@ export default function Home() {
                   boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 }}
               >
-                <div style={{ height: 80, background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 600, padding: '0 10px', textAlign: 'center' }}>
+                <div style={{
+                  height: 80,
+                  background: idx === 0 ? colors.primary : c.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontSize: 14, fontWeight: 600,
+                  padding: '0 10px', textAlign: 'center'
+                }}>
                   {c.title}
                 </div>
                 <div style={{ padding: 10 }}>

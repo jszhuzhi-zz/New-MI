@@ -463,14 +463,20 @@ const translations: Record<Locale, TranslationKeys> = {
 };
 
 export const useTranslation = () => {
+  // Import inline to avoid circular dependency
   const { useSettingsStore } = require('../store/settings');
-  const locale = useSettingsStore((s: any) => s.locale);
+  const locale = useSettingsStore((s: { locale: Locale }) => s.locale) as Locale;
 
   const t = (key: keyof TranslationKeys): string => {
     return translations[locale]?.[key] || translations['zh-TW'][key] || key;
   };
 
   return { t, locale };
+};
+
+// For components that need translations without hooks
+export const getTranslation = (locale: Locale, key: keyof TranslationKeys): string => {
+  return translations[locale]?.[key] || translations['zh-TW'][key] || key;
 };
 
 export default translations;
