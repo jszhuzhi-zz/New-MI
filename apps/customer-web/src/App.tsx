@@ -12,7 +12,7 @@ import CampaignDetail from './pages/offers/campaign-detail';
 import CouponDetail from './pages/offers/coupon-detail';
 import ProfilePage from './pages/profile';
 import TierPage from './pages/profile/tier';
-import SettingsPage from './pages/profile/settings';
+import SettingsPage from './pages/settings';
 import ProfileEditPage from './pages/profile/edit';
 import MallDirectory from './pages/mall/directory';
 import MerchantDetail from './pages/mall/merchant-detail';
