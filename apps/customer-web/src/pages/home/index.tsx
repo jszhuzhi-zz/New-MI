@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, Grid, Card, Tag, PullToRefresh, Toast } from 'antd-mobile';
-import { RightOutline } from 'antd-mobile-icons';
+import { RightOutline, ScanCodeOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
 import { getMallById, getMerchantsByMall } from '../../data/malls';
 import MallSelector from '../../components/MallSelector';
@@ -16,10 +16,10 @@ const banners = [
 ];
 
 const quickActions = [
-  { icon: '📷', label: '掃碼換印花', path: '/scan' },
-  { icon: '🎟️', label: '我的優惠券', path: '/offers' },
-  { icon: '🏬', label: '商場導覽', path: '/mall' },
-  { icon: '🎁', label: '印花商城', path: '/gifts' },
+  { icon: <ScanCodeOutline fontSize={24} />, label: '掃碼', path: '/scan' },
+  { icon: '🎟️', label: '優惠券', path: '/offers' },
+  { icon: '🏬', label: '商場', path: '/mall' },
+  { icon: '🎁', label: '禮品', path: '/gifts' },
 ];
 
 const campaigns = [
@@ -38,64 +38,108 @@ export default function Home() {
   const user = useAuthStore((s) => s.user);
   const currentMallId = useAuthStore((s) => s.currentMallId);
   const currentMall = getMallById(currentMallId);
-  const mallMerchants = getMerchantsByMall(currentMallId);
 
   return (
     <PullToRefresh onRefresh={async () => { Toast.show('已刷新'); }}>
       <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
-        {/* Header */}
-        <div style={{ background: PRIMARY, padding: '12px 16px 24px', color: '#fff' }}>
-          {/* Mall Selector Row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        {/* Unified Header */}
+        <div style={{
+          background: `linear-gradient(180deg, ${PRIMARY} 0%, ${PRIMARY} 60%, #004D36 100%)`,
+          padding: '12px 16px 80px',
+        }}>
+          {/* Top Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
             <MallSelector style={{ color: '#fff' }} />
-            <div
-              style={{
-                width: 36, height: 36, borderRadius: 18,
-                background: 'rgba(255,255,255,0.15)', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: 18,
-              }}
-            >
-              🔔
-            </div>
-          </div>
-          {/* User Greeting */}
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>你好，{user?.name || '會員'}</div>
-            <div style={{ fontSize: 13, opacity: 0.85, marginTop: 2 }}>
-              Gold 金卡會員 · {currentMall?.nameTW} ({mallMerchants.length} 商戶)
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div
+                onClick={() => navigate('/scan')}
+                style={{
+                  width: 32, height: 32, borderRadius: 16,
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <ScanCodeOutline fontSize={18} color="#fff" />
+              </div>
+              <div
+                style={{
+                  width: 32, height: 32, borderRadius: 16,
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 14,
+                }}
+              >
+                🔔
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Member Card */}
-        <div style={{ margin: '-12px 16px 0', position: 'relative', zIndex: 1 }}>
+        {/* Member Card - Floating */}
+        <div style={{ margin: '-64px 16px 0', position: 'relative', zIndex: 1 }}>
           <div
+            onClick={() => navigate('/stamp')}
             style={{
-              background: `linear-gradient(135deg, ${PRIMARY} 0%, #004D36 100%)`,
-              borderRadius: 16, padding: 20, color: '#fff',
-              boxShadow: '0 4px 12px rgba(0,105,75,0.3)',
+              background: '#fff',
+              borderRadius: 16, padding: 16,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              cursor: 'pointer',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ fontSize: 12, opacity: 0.7 }}>Link Mall 會員卡</div>
-                <div style={{ fontSize: 16, fontWeight: 600, marginTop: 4, letterSpacing: 1 }}>
-                  {user?.cardNo || 'LM-2024-0088'}
+                <div style={{ fontSize: 13, color: '#666' }}>你好，{user?.name || '會員'}</div>
+                <div style={{
+                  display: 'inline-block',
+                  background: GOLD,
+                  color: '#fff',
+                  padding: '2px 8px',
+                  borderRadius: 4,
+                  fontSize: 11,
+                  marginTop: 4,
+                }}>
+                  Gold 金卡
                 </div>
               </div>
-              <div
-                style={{
-                  width: 56, height: 56, borderRadius: 8, background: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: PRIMARY, fontSize: 10, fontWeight: 700,
-                }}
-              >
-                QR Code
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: '#999' }}>可用印花</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end' }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: PRIMARY }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
+                </div>
               </div>
             </div>
-            <div style={{ marginTop: 16, display: 'flex', alignItems: 'baseline' }}>
-              <span style={{ fontSize: 36, fontWeight: 800, color: GOLD }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
-              <span style={{ fontSize: 14, marginLeft: 6, opacity: 0.8 }}>印花</span>
+            {/* Quick Actions in Card */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-around',
+              marginTop: 16,
+              paddingTop: 12,
+              borderTop: '1px solid #f0f0f0',
+            }}>
+              {quickActions.map((a) => (
+                <div
+                  key={a.label}
+                  onClick={(e) => { e.stopPropagation(); navigate(a.path); }}
+                  style={{ textAlign: 'center', cursor: 'pointer' }}
+                >
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 22,
+                    background: '#f5f5f5',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 6px',
+                    fontSize: 20,
+                    color: PRIMARY,
+                  }}>
+                    {a.icon}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#666' }}>{a.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -107,67 +151,46 @@ export default function Home() {
               <Swiper.Item key={b.id}>
                 <div
                   style={{
-                    height: 140, borderRadius: 12, background: b.bg,
+                    height: 120, borderRadius: 12, background: b.bg,
                     display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                    padding: '0 24px', color: '#fff',
+                    padding: '0 20px', color: '#fff',
                   }}
                 >
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>{b.title}</div>
-                  <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>{b.sub}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700 }}>{b.title}</div>
+                  <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{b.sub}</div>
                 </div>
               </Swiper.Item>
             ))}
           </Swiper>
         </div>
 
-        {/* Quick Actions */}
-        <div style={{ padding: '16px', }}>
-          <div
-            style={{
-              background: '#fff', borderRadius: 12, padding: '16px 8px',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-            }}
-          >
-            <Grid columns={4} gap={8}>
-              {quickActions.map((a) => (
-                <Grid.Item key={a.label} onClick={() => navigate(a.path)}>
-                  <div style={{ textAlign: 'center', cursor: 'pointer' }}>
-                    <div style={{ fontSize: 28, marginBottom: 6 }}>{a.icon}</div>
-                    <div style={{ fontSize: 12, color: '#333' }}>{a.label}</div>
-                  </div>
-                </Grid.Item>
-              ))}
-            </Grid>
-          </div>
-        </div>
-
         {/* Campaigns */}
-        <div style={{ padding: '0 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 18, fontWeight: 700 }}>熱門活動</span>
-            <span style={{ fontSize: 13, color: PRIMARY, cursor: 'pointer' }} onClick={() => navigate('/offers')}>
-              查看全部 <RightOutline />
+        <div style={{ padding: '16px 16px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 16, fontWeight: 600 }}>熱門活動</span>
+            <span style={{ fontSize: 12, color: PRIMARY, cursor: 'pointer' }} onClick={() => navigate('/offers')}>
+              查看全部 <RightOutline fontSize={10} />
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
             {campaigns.map((c) => (
               <div
                 key={c.id}
                 onClick={() => navigate(`/campaign/${c.id}`)}
                 style={{
-                  minWidth: 200, background: '#fff', borderRadius: 12,
+                  minWidth: 160, background: '#fff', borderRadius: 10,
                   overflow: 'hidden', flexShrink: 0, cursor: 'pointer',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 }}
               >
-                <div style={{ height: 100, background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 16, fontWeight: 600, padding: '0 12px', textAlign: 'center' }}>
+                <div style={{ height: 80, background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 600, padding: '0 10px', textAlign: 'center' }}>
                   {c.title}
                 </div>
-                <div style={{ padding: 12 }}>
-                  <Tag color="primary" fill="outline" style={{ '--border-radius': '4px', fontSize: 11 } as any}>
+                <div style={{ padding: 10 }}>
+                  <Tag color="primary" fill="outline" style={{ '--border-radius': '4px', fontSize: 10 } as any}>
                     {c.type}
                   </Tag>
-                  <div style={{ fontSize: 12, color: '#999', marginTop: 6 }}>{c.mall} · {c.date}</div>
+                  <div style={{ fontSize: 11, color: '#999', marginTop: 4 }}>{c.mall} · {c.date}</div>
                 </div>
               </div>
             ))}
@@ -176,11 +199,11 @@ export default function Home() {
 
         {/* News */}
         <div style={{ padding: '16px' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>最新消息</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 10 }}>最新消息</div>
           {news.map((n) => (
-            <Card key={n.id} style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 15, fontWeight: 500 }}>{n.title}</div>
-              <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{n.date}</div>
+            <Card key={n.id} style={{ marginBottom: 8, borderRadius: 10 }}>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{n.title}</div>
+              <div style={{ fontSize: 11, color: '#999', marginTop: 4 }}>{n.date}</div>
             </Card>
           ))}
         </div>

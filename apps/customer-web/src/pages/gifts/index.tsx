@@ -106,49 +106,32 @@ export default function GiftsPage() {
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
       <NavBar
         onBack={() => navigate(-1)}
-        style={{ background: PRIMARY, color: '#fff' }}
+        style={{
+          '--height': '44px',
+          background: PRIMARY,
+          color: '#fff',
+        } as React.CSSProperties}
         right={
-          <div style={{ fontSize: 12 }}>
-            <span style={{ color: GOLD, fontWeight: 600 }}>{stampBalance}</span> 印花
+          <div
+            onClick={() => navigate('/stamp')}
+            style={{
+              fontSize: 12,
+              background: 'rgba(255,255,255,0.2)',
+              padding: '4px 10px',
+              borderRadius: 12,
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ color: GOLD, fontWeight: 600 }}>{stampBalance.toLocaleString()}</span>
+            <span style={{ marginLeft: 2 }}>印花</span>
           </div>
         }
       >
         印花商城
       </NavBar>
 
-      {/* Balance Card */}
-      <div style={{ padding: 16 }}>
-        <Card style={{
-          background: `linear-gradient(135deg, ${PRIMARY} 0%, #004D36 100%)`,
-          borderRadius: 16,
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>可用印花</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', marginTop: 4 }}>
-                <span style={{ fontSize: 36, fontWeight: 800, color: GOLD }}>{stampBalance.toLocaleString()}</span>
-                <span style={{ fontSize: 14, color: '#fff', marginLeft: 6 }}>印花</span>
-              </div>
-            </div>
-            <div
-              onClick={() => navigate('/stamp')}
-              style={{
-                background: 'rgba(255,255,255,0.2)',
-                padding: '8px 16px',
-                borderRadius: 20,
-                color: '#fff',
-                fontSize: 13,
-                cursor: 'pointer',
-              }}
-            >
-              印花記錄 <RightOutline fontSize={10} />
-            </div>
-          </div>
-        </Card>
-      </div>
-
       {/* Search */}
-      <div style={{ padding: '0 16px 12px' }}>
+      <div style={{ padding: '16px 16px 12px' }}>
         <SearchBar
           placeholder="搜尋禮品"
           value={searchText}
