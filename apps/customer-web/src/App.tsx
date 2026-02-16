@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { ConfigProvider } from 'antd-mobile';
 import zhTW from 'antd-mobile/es/locales/zh-TW';
 import TabLayout from './components/TabLayout';
@@ -21,6 +21,22 @@ import LoginPage from './pages/auth/login';
 import GiftsPage from './pages/gifts';
 import AICustomerServicePage from './pages/support/ai-customer-service';
 import { useAuthStore } from './store/auth';
+
+// Handle SPA redirect from 404.html
+function RedirectHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('redirect_path');
+    if (redirectPath && location.pathname === '/') {
+      sessionStorage.removeItem('redirect_path');
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate, location]);
+
+  return null;
+}
 
 const globalStyles = `
   .adm-tab-bar {
@@ -119,6 +135,7 @@ export default function App() {
     <ConfigProvider locale={zhTW}>
       <style>{globalStyles}</style>
       <BrowserRouter>
+        <RedirectHandler />
         <Routes>
           <Route element={<TabLayout />}>
             <Route path="/" element={<Home />} />
