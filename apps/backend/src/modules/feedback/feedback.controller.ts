@@ -185,4 +185,94 @@ export class FeedbackController {
       data: { status: feedback.status },
     };
   }
+
+  // ============================================================================
+  // Admin APIs
+  // ============================================================================
+
+  /**
+   * Get all feedbacks for a project (admin)
+   */
+  @Get('admin/project/:projectId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all feedbacks for a project (admin)' })
+  async getProjectFeedbacks(
+    @Param('projectId') projectId: string,
+    @Query('status') status?: FeedbackStatus,
+    @Query('category') category?: FeedbackCategory,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+    @Query('search') search?: string,
+  ) {
+    const result = await this.feedbackService.getProjectFeedbacks(projectId, {
+      status,
+      category,
+      page: page ? Number(page) : undefined,
+      pageSize: pageSize ? Number(pageSize) : undefined,
+      search,
+    });
+    return { code: 0, message: 'success', data: result };
+  }
+
+  /**
+   * Generate AI summary for feedback
+   */
+  @Post(':id/summary')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Generate AI summary for feedback conversation' })
+  async generateSummary(@Param('id') feedbackId: string) {
+    const result = await this.feedbackService.generateSummary(feedbackId);
+    return { code: 0, message: 'Summary generated', data: result };
+  }
+
+  /**
+   * Assign feedback to staff
+   */
+  @Put(':id/assign')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Assign feedback to staff member' })
+  async assignFeedback(
+    @Param('id') feedbackId: string,
+    @Body() body: { assignedTo: string },
+  ) {
+    const feedback = await this.feedbackService.assignFeedback(feedbackId, body.assignedTo);
+    return { code: 0, message: 'Feedback assigned', data: feedback };
+  }
+
+  /**
+   * Add admin note to feedback
+   */
+  @Post(':id/notes')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Add admin note to feedback' })
+  async addAdminNote(
+    @CurrentUser() user: { userId: string },
+    @Param('id') feedbackId: string,
+    @Body() body: { content: string },
+  ) {
+    const note = await this.feedbackService.addAdminNote(feedbackId, body.content, user.userId);
+    return { code: 0, message: 'Note added', data: note };
+  }
+
+  /**
+   * Get feedback statistics
+   */
+  @Get('admin/stats/:projectId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get feedback statistics for dashboard' })
+  async getFeedbackStats(
+    @Param('projectId') projectId: string,
+    @Query('days') days?: number,
+  ) {
+    const stats = await this.feedbackService.getFeedbackStats(projectId, days ? Number(days) : 30);
+    return { code: 0, message: 'success', data: stats };
+  }
 }

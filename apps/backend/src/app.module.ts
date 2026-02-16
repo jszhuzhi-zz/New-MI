@@ -15,6 +15,8 @@ import { ReportModule } from './modules/report/report.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { FavoriteModule } from './modules/favorite/favorite.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
+import { ParkingModule } from './modules/parking/parking.module';
+import { LuckyDrawModule } from './modules/lucky-draw/lucky-draw.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
     NotificationModule,
     FavoriteModule,
     FeedbackModule,
+    ParkingModule,
+    LuckyDrawModule,
   ],
 })
 export class AppModule {}

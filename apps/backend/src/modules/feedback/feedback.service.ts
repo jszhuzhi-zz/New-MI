@@ -415,4 +415,170 @@ ${mallInfo}
     });
     return feedback;
   }
+
+  // ============================================================================
+  // Admin APIs
+  // ============================================================================
+
+  /**
+   * Get all feedbacks for admin (project level)
+   */
+  async getProjectFeedbacks(projectId: string, params?: {
+    status?: FeedbackStatus;
+    category?: FeedbackCategory;
+    page?: number;
+    pageSize?: number;
+    search?: string;
+  }) {
+    const page = params?.page || 1;
+    const pageSize = params?.pageSize || 20;
+    const skip = (page - 1) * pageSize;
+
+    const where: any = { projectId };
+    if (params?.status) where.status = params.status;
+    if (params?.category) where.category = params.category;
+
+    const [feedbacks, total] = await Promise.all([
+      this.prisma.feedback.findMany({
+        where,
+        include: {
+          member: {
+            select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+          },
+          messages: { take: 1, orderBy: { createdAt: 'desc' } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.feedback.count({ where }),
+    ]);
+
+    return {
+      items: feedbacks,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  /**
+   * Generate AI summary for a feedback conversation
+   */
+  async generateSummary(feedbackId: string) {
+    const feedback = await this.prisma.feedback.findUnique({
+      where: { id: feedbackId },
+      include: {
+        messages: { orderBy: { createdAt: 'asc' } },
+        member: { select: { firstName: true, lastName: true } },
+      },
+    });
+
+    if (!feedback) throw new NotFoundException('Feedback not found');
+
+    const conversation = feedback.messages.map(m =>
+      `${m.role === 'USER' ? '顧客' : 'AI助手'}: ${m.content}`
+    ).join('\n');
+
+    const summaryPrompt = `請對以下顧客反饋對話生成簡明的摘要，包括：
+1. 主要問題/訴求
+2. 顧客情緒
+3. 是否需要人工跟進
+4. 建議的處理措施
+
+對話內容：
+${conversation}
+
+請用JSON格式回覆：
+{"summary":"摘要","mainIssues":["問題"],"sentiment":"positive/neutral/negative","needsFollowUp":true,"suggestedActions":["建議"],"tags":["標籤"]}`;
+
+    try {
+      const response = await this.callGLM([
+        { role: 'system', content: '你是客服分析助手，負責分析客戶反饋並生成結構化摘要。' },
+        { role: 'user', content: summaryPrompt },
+      ]);
+
+      const aiContent = response.choices[0]?.message?.content || '';
+
+      let summaryData: any = {};
+      try {
+        const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) summaryData = JSON.parse(jsonMatch[0]);
+      } catch (e) {
+        summaryData = { summary: aiContent };
+      }
+
+      const updated = await this.prisma.feedback.update({
+        where: { id: feedbackId },
+        data: {
+          aiSummary: summaryData.summary || aiContent,
+          tags: summaryData.tags || [],
+          priority: summaryData.needsFollowUp ? 1 : 2,
+        },
+      });
+
+      return { feedback: updated, analysis: summaryData };
+    } catch (error) {
+      this.logger.error('Failed to generate summary:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Assign feedback to staff member
+   */
+  async assignFeedback(feedbackId: string, assignedTo: string) {
+    return this.prisma.feedback.update({
+      where: { id: feedbackId },
+      data: { assignedTo, status: FeedbackStatus.IN_PROGRESS },
+    });
+  }
+
+  /**
+   * Add admin note to feedback
+   */
+  async addAdminNote(feedbackId: string, content: string, adminId: string) {
+    return this.prisma.feedbackMessage.create({
+      data: {
+        feedbackId,
+        role: FeedbackMessageRole.SYSTEM,
+        content: `[管理員備註] ${content}`,
+        metadata: { adminId, isAdminNote: true },
+      },
+    });
+  }
+
+  /**
+   * Get feedback statistics
+   */
+  async getFeedbackStats(projectId: string, days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const [total, byStatus, byCategory, avgRating] = await Promise.all([
+      this.prisma.feedback.count({ where: { projectId, createdAt: { gte: startDate } } }),
+      this.prisma.feedback.groupBy({
+        by: ['status'],
+        where: { projectId, createdAt: { gte: startDate } },
+        _count: true,
+      }),
+      this.prisma.feedback.groupBy({
+        by: ['category'],
+        where: { projectId, createdAt: { gte: startDate } },
+        _count: true,
+      }),
+      this.prisma.feedback.aggregate({
+        where: { projectId, rating: { not: null } },
+        _avg: { rating: true },
+      }),
+    ]);
+
+    return {
+      total,
+      byStatus: byStatus.map(s => ({ status: s.status, count: s._count })),
+      byCategory: byCategory.map(c => ({ category: c.category, count: c._count })),
+      avgRating: avgRating._avg.rating,
+    };
+  }
 }

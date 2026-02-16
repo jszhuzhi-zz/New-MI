@@ -421,6 +421,8 @@ model Project {
   luckyDraws            LuckyDraw[]
   pushNotifications     PushNotification[]
   feedbacks             Feedback[]
+  parkingRecords        ParkingRecord[]
+  parkingRates          ParkingRate[]
 
   @@unique([groupId, code])
   @@index([groupId])
@@ -716,6 +718,7 @@ model Member {
   memberLabels       MemberMemberLabel[]
   favorites          MemberFavorite[]
   feedbacks          Feedback[]
+  parkingRecords     ParkingRecord[]
 
   @@index([projectId])
   @@index([email])
@@ -2286,4 +2289,118 @@ model SmsSendRecord {
   @@index([provider])
   @@index([createdAt])
   @@map("sms_send_records")
+}
+
+// ============================================================================
+// PARKING - Parking Payment System
+// ============================================================================
+
+enum ParkingPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum ParkingPaymentMethod {
+  ALIPAY
+  WECHAT_PAY
+  CREDIT_CARD
+  STAMPS
+  MEMBER_DISCOUNT
+  FREE
+}
+
+/// ParkingRecord - Parking session records for members.
+model ParkingRecord {
+  id              String               @id @default(uuid()) @db.Uuid
+  projectId       String               @db.Uuid
+  memberId        String?              @db.Uuid
+  /// License plate number
+  licensePlate    String               @db.VarChar(20)
+  /// Entry time
+  entryTime       DateTime
+  /// Exit time (null if still parked)
+  exitTime        DateTime?
+  /// Duration in minutes
+  duration        Int?
+  /// Original fee before any discounts
+  originalFee     Decimal              @db.Decimal(10, 2)
+  /// Discount amount (member discount, stamps, etc.)
+  discountAmount  Decimal              @default(0) @db.Decimal(10, 2)
+  /// Final fee after discounts
+  finalFee        Decimal              @db.Decimal(10, 2)
+  /// Stamps used for payment
+  stampsUsed      Int                  @default(0)
+  /// Free parking hours used (from membership tier)
+  freeHoursUsed   Decimal              @default(0) @db.Decimal(4, 2)
+  /// Payment status
+  paymentStatus   ParkingPaymentStatus @default(PENDING)
+  /// Payment method
+  paymentMethod   ParkingPaymentMethod?
+  /// Payment transaction ID
+  paymentTxnId    String?              @db.VarChar(255)
+  /// Paid at
+  paidAt          DateTime?
+  /// Parking lot/zone identifier
+  parkingZone     String?              @db.VarChar(50)
+  /// Floor/level
+  floor           String?              @db.VarChar(20)
+  /// Spot number
+  spotNumber      String?              @db.VarChar(20)
+  /// Notes
+  notes           String?              @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+  member  Member? @relation(fields: [memberId], references: [id])
+
+  @@index([projectId])
+  @@index([memberId])
+  @@index([licensePlate])
+  @@index([paymentStatus])
+  @@index([entryTime])
+  @@map("parking_records")
+}
+
+/// ParkingRate - Parking rate configuration per project.
+model ParkingRate {
+  id            String   @id @default(uuid()) @db.Uuid
+  projectId     String   @db.Uuid
+  /// Rate name (e.g., "Weekday", "Weekend", "Holiday")
+  name          Json     @db.JsonB
+  /// Rate per hour in HKD
+  hourlyRate    Decimal  @db.Decimal(10, 2)
+  /// First N hours free/discounted
+  freeHours     Decimal  @default(0) @db.Decimal(4, 2)
+  /// Maximum daily charge
+  maxDailyRate  Decimal? @db.Decimal(10, 2)
+  /// Days applicable (0=Sunday, 1=Monday, etc.)
+  applicableDays Int[]
+  /// Time range start (e.g., "08:00")
+  startTime     String?  @db.VarChar(10)
+  /// Time range end (e.g., "22:00")
+  endTime       String?  @db.VarChar(10)
+  /// Member tier discounts (JSON: { "GOLD": 0.2, "PLATINUM": 0.3 })
+  tierDiscounts Json?    @db.JsonB
+  /// Stamps per HKD spent on parking
+  stampsPerDollar Decimal @default(0) @db.Decimal(5, 2)
+  /// Stamps to HKD conversion for payment (e.g., 10 stamps = 1 HKD)
+  stampsToHkdRate Decimal @default(10) @db.Decimal(5, 2)
+  isActive      Boolean  @default(true)
+  priority      Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([isActive])
+  @@map("parking_rates")
 }
