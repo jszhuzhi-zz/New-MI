@@ -116,6 +116,29 @@ const messagesData: MessageData[] = [
 const STORAGE_KEY = 'messages_read_status';
 const DELETED_KEY = 'messages_deleted';
 
+// CSS for transitions
+const messageItemStyle = `
+  .message-item {
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+  }
+  .message-item.unread {
+    background: var(--unread-bg);
+    border-left: 3px solid var(--primary-color);
+  }
+  .message-item.read {
+    background: #fff;
+    border-left: 3px solid transparent;
+  }
+  .message-item .unread-dot {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+`;
+
 export default function MessagesPage() {
   const navigate = useNavigate();
   const { t, locale } = useTranslation();
@@ -177,7 +200,9 @@ export default function MessagesPage() {
   const unreadCount = messages.filter((m) => !m.read).length;
 
   const markAsRead = (id: string) => {
-    setReadStatus((prev) => ({ ...prev, [id]: true }));
+    if (!readStatus[id]) {
+      setReadStatus((prev) => ({ ...prev, [id]: true }));
+    }
   };
 
   const deleteMessage = (id: string) => {
@@ -277,6 +302,7 @@ export default function MessagesPage() {
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
+      <style>{messageItemStyle}</style>
       <NavBar
         onBack={() => navigate(-1)}
         right={
@@ -318,22 +344,30 @@ export default function MessagesPage() {
             >
               <List.Item
                 onClick={() => openMessage(msg)}
-                style={{ background: msg.read ? '#fff' : `${colors.primary}08` }}
+                className={`message-item ${msg.read ? 'read' : 'unread'}`}
+                style={{
+                  background: msg.read ? '#fff' : `${colors.primary}10`,
+                  borderLeft: msg.read ? '3px solid transparent' : `3px solid ${colors.primary}`,
+                  transition: 'all 0.3s ease',
+                  '--unread-bg': `${colors.primary}10`,
+                  '--primary-color': colors.primary,
+                } as React.CSSProperties}
                 prefix={
                   <div style={{
                     width: 44, height: 44,
                     borderRadius: '50%',
-                    background: `${getTypeColor(msg.type)}15`,
+                    background: msg.read ? `${getTypeColor(msg.type)}15` : `${getTypeColor(msg.type)}25`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 22,
+                    transition: 'background 0.3s ease',
                   }}>
                     {getTypeIcon(msg.type)}
                   </div>
                 }
                 description={
-                  <div style={{ color: '#666', marginTop: 4, fontSize: 13 }}>
+                  <div style={{ color: msg.read ? '#999' : '#666', marginTop: 4, fontSize: 13, transition: 'color 0.3s ease' }}>
                     {msg.content}
                   </div>
                 }
@@ -341,13 +375,40 @@ export default function MessagesPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
                     <span style={{ fontSize: 11, color: '#999' }}>{formatTime(msg.time)}</span>
                     {!msg.read && (
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: colors.primary }} />
+                      <span
+                        className="unread-dot"
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          background: colors.primary,
+                          boxShadow: `0 0 4px ${colors.primary}`,
+                        }}
+                      />
                     )}
                   </div>
                 }
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontWeight: msg.read ? 400 : 600, fontSize: 15 }}>{msg.title}</span>
+                  <span style={{
+                    fontWeight: msg.read ? 400 : 600,
+                    fontSize: 15,
+                    color: msg.read ? '#666' : '#333',
+                    transition: 'all 0.3s ease',
+                  }}>
+                    {msg.title}
+                  </span>
+                  {!msg.read && (
+                    <span style={{
+                      fontSize: 10,
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: colors.primary,
+                      color: '#fff',
+                    }}>
+                      {locale === 'en' ? 'NEW' : '新'}
+                    </span>
+                  )}
                 </div>
               </List.Item>
             </SwipeAction>
