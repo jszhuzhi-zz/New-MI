@@ -68,8 +68,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ currentMallId: mallId });
   },
   logout: () => {
+    // Clear all user-related data for privacy protection
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('favorites');
+    localStorage.removeItem('joinedCampaigns');
+    localStorage.removeItem('parkingPlates');
+    localStorage.removeItem('parkingHistory');
+    localStorage.removeItem('messages');
+    localStorage.removeItem('readMessages');
+    localStorage.removeItem('aiChatHistory');
+    localStorage.removeItem('feedbackHistory');
     set({ token: null, user: null, isAuthenticated: false });
   },
 }));
