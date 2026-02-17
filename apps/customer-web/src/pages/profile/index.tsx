@@ -141,7 +141,10 @@ export default function ProfilePage() {
       onConfirm: () => {
         logout();
         Toast.show({ content: t('profile.logoutSuccess'), icon: 'success' });
-        navigate('/');
+        // Force page refresh and navigate to home to clear all cached data
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 500);
       },
     });
   };
