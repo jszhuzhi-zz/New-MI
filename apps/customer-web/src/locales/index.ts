@@ -140,6 +140,27 @@ type TranslationKeys = {
   'profile.featureInDev': string;
   'profile.defaultName': string;
   'profile.goldMember': string;
+
+  // Campaign
+  'campaign.details': string;
+  'campaign.howToJoin': string;
+  'campaign.step': string;
+  'campaign.rewards': string;
+  'campaign.stampRedeem': string;
+  'campaign.freeRedeem': string;
+  'campaign.remaining': string;
+  'campaign.redeem': string;
+  'campaign.participatingMerchants': string;
+  'campaign.terms': string;
+  'campaign.joined': string;
+  'campaign.joinNow': string;
+  'campaign.linkCopied': string;
+  'campaign.alreadyJoined': string;
+  'campaign.confirmJoin': string;
+  'campaign.confirmJoinContent': string;
+  'campaign.joinSuccess': string;
+  'campaign.participantsCount': string;
+  'campaign.quota': string;
 };
 
 const translations: Record<Locale, TranslationKeys> = {
@@ -262,6 +283,25 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.featureInDev': '功能開發中',
     'profile.defaultName': '會員',
     'profile.goldMember': 'Gold 金卡會員',
+    'campaign.details': '活動詳情',
+    'campaign.howToJoin': '如何參加',
+    'campaign.step': '步驟',
+    'campaign.rewards': '活動獎賞',
+    'campaign.stampRedeem': '{stamps} 印花兌換',
+    'campaign.freeRedeem': '免費領取',
+    'campaign.remaining': '剩餘',
+    'campaign.redeem': '兌換',
+    'campaign.participatingMerchants': '適用商戶',
+    'campaign.terms': '條款及細則',
+    'campaign.joined': '已參加',
+    'campaign.joinNow': '立即參加',
+    'campaign.linkCopied': '已複製活動連結',
+    'campaign.alreadyJoined': '您已參加此活動',
+    'campaign.confirmJoin': '確認參加',
+    'campaign.confirmJoinContent': '確定要參加「{title}」嗎？',
+    'campaign.joinSuccess': '成功參加活動！',
+    'campaign.participantsCount': '已有 {count} 人參加',
+    'campaign.quota': '名額',
   },
 
   'zh-CN': {
@@ -383,6 +423,25 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.featureInDev': '功能开发中',
     'profile.defaultName': '会员',
     'profile.goldMember': 'Gold 金卡会员',
+    'campaign.details': '活动详情',
+    'campaign.howToJoin': '如何参加',
+    'campaign.step': '步骤',
+    'campaign.rewards': '活动奖赏',
+    'campaign.stampRedeem': '{stamps} 印花兑换',
+    'campaign.freeRedeem': '免费领取',
+    'campaign.remaining': '剩余',
+    'campaign.redeem': '兑换',
+    'campaign.participatingMerchants': '适用商户',
+    'campaign.terms': '条款及细则',
+    'campaign.joined': '已参加',
+    'campaign.joinNow': '立即参加',
+    'campaign.linkCopied': '已复制活动链接',
+    'campaign.alreadyJoined': '您已参加此活动',
+    'campaign.confirmJoin': '确认参加',
+    'campaign.confirmJoinContent': '确定要参加「{title}」吗？',
+    'campaign.joinSuccess': '成功参加活动！',
+    'campaign.participantsCount': '已有 {count} 人参加',
+    'campaign.quota': '名额',
   },
 
   en: {
@@ -504,6 +563,25 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.featureInDev': 'Feature in development',
     'profile.defaultName': 'Member',
     'profile.goldMember': 'Gold Member',
+    'campaign.details': 'Campaign Details',
+    'campaign.howToJoin': 'How to Join',
+    'campaign.step': 'Step',
+    'campaign.rewards': 'Rewards',
+    'campaign.stampRedeem': '{stamps} stamps to redeem',
+    'campaign.freeRedeem': 'Free to redeem',
+    'campaign.remaining': 'Remaining',
+    'campaign.redeem': 'Redeem',
+    'campaign.participatingMerchants': 'Participating Merchants',
+    'campaign.terms': 'Terms & Conditions',
+    'campaign.joined': 'Joined',
+    'campaign.joinNow': 'Join Now',
+    'campaign.linkCopied': 'Link copied',
+    'campaign.alreadyJoined': 'You have already joined this campaign',
+    'campaign.confirmJoin': 'Confirm Join',
+    'campaign.confirmJoinContent': 'Are you sure you want to join "{title}"?',
+    'campaign.joinSuccess': 'Successfully joined the campaign!',
+    'campaign.participantsCount': '{count} participants',
+    'campaign.quota': 'Quota',
   },
 };
 
@@ -512,8 +590,14 @@ export type TranslationKey = keyof TranslationKeys;
 export const useTranslation = () => {
   const locale = useSettingsStore((s) => s.locale);
 
-  const t = (key: TranslationKey): string => {
-    return translations[locale]?.[key] || translations['zh-TW'][key] || key;
+  const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
+    let text = translations[locale]?.[key] || translations['zh-TW'][key] || key;
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+    }
+    return text;
   };
 
   return { t, locale };

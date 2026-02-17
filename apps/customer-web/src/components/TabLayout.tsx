@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from '../locales';
 
 const PRIMARY = '#00694B';
 
@@ -111,17 +112,18 @@ const ProfileIcon = ({ active }: { active: boolean }) => (
   </svg>
 );
 
-const tabs: TabItem[] = [
-  { key: '/', title: '首頁', icon: (active) => <HomeIcon active={active} /> },
-  { key: '/stamp', title: '印花', icon: (active) => <StampIcon active={active} /> },
-  { key: '/scan', title: '掃碼', icon: () => <ScanIcon active={true} />, isCenter: true },
-  { key: '/offers', title: '優惠', icon: (active) => <OffersIcon active={active} /> },
-  { key: '/profile', title: '我的', icon: (active) => <ProfileIcon active={active} /> },
-];
-
 const TabLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+
+  const tabs: TabItem[] = [
+    { key: '/', title: t('common.home'), icon: (active) => <HomeIcon active={active} /> },
+    { key: '/stamp', title: t('common.stamp'), icon: (active) => <StampIcon active={active} /> },
+    { key: '/scan', title: t('common.scan'), icon: () => <ScanIcon active={true} />, isCenter: true },
+    { key: '/offers', title: t('common.offers'), icon: (active) => <OffersIcon active={active} /> },
+    { key: '/profile', title: t('common.profile'), icon: (active) => <ProfileIcon active={active} /> },
+  ];
 
   const isActive = (key: string) => {
     if (key === '/') return location.pathname === '/';
