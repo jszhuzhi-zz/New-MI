@@ -367,17 +367,22 @@ export default function Home() {
         <div style={{ padding: '16px' }}>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 10 }}>{t('home.latestNews')}</div>
           {news.map((n) => (
-            <Card key={n.id} style={{ marginBottom: 10, borderRadius: 10, padding: 0, overflow: 'hidden' }}>
-              <div style={{ display: 'flex', gap: 12 }}>
+            <Card
+              key={n.id}
+              onClick={() => navigate(`/news/${n.id}`)}
+              style={{ marginBottom: 10, borderRadius: 10, padding: 0, overflow: 'hidden', cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', gap: 12, position: 'relative' }}>
                 <Image
                   src={n.image}
                   fit="cover"
                   style={{ width: 100, height: 80, borderRadius: '10px 0 0 10px' }}
                 />
-                <div style={{ flex: 1, padding: '10px 10px 10px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{ flex: 1, padding: '10px 30px 10px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.4 }}>{n.title}</div>
                   <div style={{ fontSize: 11, color: '#999', marginTop: 6 }}>{n.date}</div>
                 </div>
+                <RightOutline style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#ccc' }} />
               </div>
             </Card>
           ))}

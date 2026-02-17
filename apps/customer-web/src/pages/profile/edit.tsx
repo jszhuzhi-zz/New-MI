@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { NavBar, Form, Input, Button, Toast, ImageUploader, DatePicker, Card, Dialog, List } from 'antd-mobile';
 import { CameraOutline, CheckCircleFill } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
+import { useSettingsStore } from '../../store/settings';
+import { useTranslation } from '../../locales';
 import dayjs from 'dayjs';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 interface FileItem {
@@ -14,6 +15,9 @@ interface FileItem {
 
 export default function ProfileEditPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const { user, setUser } = useAuthStore();
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -40,7 +44,7 @@ export default function ProfileEditPage() {
 
   const handleSave = async () => {
     if (!form.name) {
-      Toast.show({ icon: 'fail', content: '請輸入姓名' });
+      Toast.show({ icon: 'fail', content: t('profileEdit.nameRequired') });
       return;
     }
 
@@ -54,13 +58,13 @@ export default function ProfileEditPage() {
     // First time uploading avatar
     if (!hadAvatar && avatar.length > 0) {
       totalBonus += 50;
-      bonusItems.push('上傳頭像 +50');
+      bonusItems.push(`${t('profileEdit.uploadAvatar')} +50`);
     }
 
     // First time registering birthday
     if (!hadBirthday && form.birthday) {
       totalBonus += 100;
-      bonusItems.push('登記生日 +100');
+      bonusItems.push(`${t('profileEdit.registerBirthday')} +100`);
     }
 
     setUser({
@@ -78,7 +82,7 @@ export default function ProfileEditPage() {
 
     if (totalBonus > 0) {
       Dialog.alert({
-        title: '恭喜獲得印花獎勵！',
+        title: t('profileEdit.congratulations'),
         content: (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
@@ -87,15 +91,15 @@ export default function ProfileEditPage() {
                 <div key={i} style={{ color: GOLD, fontWeight: 500, marginBottom: 4 }}>{item}</div>
               ))}
             </div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: PRIMARY }}>
-              共 +{totalBonus} 印花
+            <div style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>
+              {t('profileEdit.totalBonus')} +{totalBonus} {t('profileEdit.stampBonus')}
             </div>
           </div>
         ),
-        confirmText: '太好了',
+        confirmText: t('scan.great'),
       });
     } else {
-      Toast.show({ icon: 'success', content: '資料已更新' });
+      Toast.show({ icon: 'success', content: t('profileEdit.updated') });
     }
     navigate(-1);
   };
@@ -109,7 +113,7 @@ export default function ProfileEditPage() {
           background: '#fff',
         } as React.CSSProperties}
       >
-        編輯資料
+        {t('profileEdit.title')}
       </NavBar>
 
       {/* Avatar Section */}
@@ -133,7 +137,7 @@ export default function ProfileEditPage() {
             <div style={{
               position: 'absolute', bottom: 0, right: 0,
               width: 28, height: 28, borderRadius: 14,
-              background: PRIMARY, color: '#fff',
+              background: colors.primary, color: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               border: '2px solid #fff',
             }}>
@@ -142,13 +146,13 @@ export default function ProfileEditPage() {
           </ImageUploader>
         </div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
-          點擊更換頭像
+          {t('profileEdit.changeAvatar')}
           {!hadAvatar && !avatar[0] && (
-            <span style={{ color: GOLD, marginLeft: 4 }}>+50印花</span>
+            <span style={{ color: GOLD, marginLeft: 4 }}>+50 {t('profileEdit.stampBonus')}</span>
           )}
           {hadAvatar && (
-            <span style={{ color: PRIMARY, marginLeft: 4 }}>
-              <CheckCircleFill fontSize={12} /> 已完成
+            <span style={{ color: colors.primary, marginLeft: 4 }}>
+              <CheckCircleFill fontSize={12} /> {t('profile.completed')}
             </span>
           )}
         </div>
@@ -157,31 +161,31 @@ export default function ProfileEditPage() {
       {/* Form */}
       <div style={{ padding: '16px', background: '#fff', marginTop: 8 }}>
         <Form layout="horizontal">
-          <Form.Item label="姓名" required>
+          <Form.Item label={t('profile.name')} required>
             <Input
-              placeholder="請輸入姓名"
+              placeholder={t('profileEdit.enterName')}
               value={form.name}
               onChange={v => setForm({ ...form, name: v })}
             />
           </Form.Item>
-          <Form.Item label="英文名">
+          <Form.Item label={t('profileEdit.englishName')}>
             <Input
-              placeholder="請輸入英文名"
+              placeholder={t('profileEdit.enterEnglishName')}
               value={form.nameEn}
               onChange={v => setForm({ ...form, nameEn: v })}
             />
           </Form.Item>
-          <Form.Item label="手機號碼">
+          <Form.Item label={t('profile.phone')}>
             <Input
-              placeholder="請輸入手機號碼"
+              placeholder={t('profileEdit.enterPhone')}
               type="tel"
               value={form.phone}
               onChange={v => setForm({ ...form, phone: v })}
             />
           </Form.Item>
-          <Form.Item label="電郵地址">
+          <Form.Item label={t('profile.email')}>
             <Input
-              placeholder="請輸入電郵地址"
+              placeholder={t('profileEdit.enterEmail')}
               type="email"
               value={form.email}
               onChange={v => setForm({ ...form, email: v })}
@@ -190,17 +194,17 @@ export default function ProfileEditPage() {
           <Form.Item
             label={
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>生日</span>
+                <span>{t('profile.birthday')}</span>
                 {!hadBirthday && !form.birthday && (
                   <span style={{
                     background: `${GOLD}20`, color: GOLD,
                     fontSize: 10, padding: '1px 6px', borderRadius: 8,
                   }}>
-                    +100印花
+                    +100 {t('profileEdit.stampBonus')}
                   </span>
                 )}
                 {hadBirthday && (
-                  <CheckCircleFill fontSize={14} color={PRIMARY} />
+                  <CheckCircleFill fontSize={14} color={colors.primary} />
                 )}
               </div>
             }
@@ -210,7 +214,7 @@ export default function ProfileEditPage() {
                 ? dayjs(form.birthday).format('YYYY-MM-DD')
                 : hadBirthday
                   ? user?.birthday
-                  : '選擇日期'
+                  : t('profileEdit.selectDate')
             }
             disabled={hadBirthday}
           />
@@ -220,24 +224,24 @@ export default function ProfileEditPage() {
       {/* Bonus Tips */}
       <Card style={{ margin: 16, borderRadius: 12 }}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span>🎁</span> 完善資料賺印花
+          <span>🎁</span> {t('profileEdit.bonusTitle')}
         </div>
         <List style={{ '--border-top': 'none', '--border-bottom': 'none' } as React.CSSProperties}>
           <List.Item
-            prefix={hadAvatar ? <CheckCircleFill color={PRIMARY} /> : <span style={{ opacity: 0.3 }}>○</span>}
+            prefix={hadAvatar ? <CheckCircleFill color={colors.primary} /> : <span style={{ opacity: 0.3 }}>○</span>}
             extra={<span style={{ color: hadAvatar ? '#999' : GOLD }}>+50</span>}
           >
-            <span style={{ color: hadAvatar ? '#999' : '#333' }}>上傳頭像</span>
+            <span style={{ color: hadAvatar ? '#999' : '#333' }}>{t('profileEdit.uploadAvatar')}</span>
           </List.Item>
           <List.Item
-            prefix={hadBirthday ? <CheckCircleFill color={PRIMARY} /> : <span style={{ opacity: 0.3 }}>○</span>}
+            prefix={hadBirthday ? <CheckCircleFill color={colors.primary} /> : <span style={{ opacity: 0.3 }}>○</span>}
             extra={<span style={{ color: hadBirthday ? '#999' : GOLD }}>+100</span>}
           >
-            <span style={{ color: hadBirthday ? '#999' : '#333' }}>登記生日</span>
+            <span style={{ color: hadBirthday ? '#999' : '#333' }}>{t('profileEdit.registerBirthday')}</span>
           </List.Item>
         </List>
         <div style={{ fontSize: 11, color: '#999', marginTop: 8 }}>
-          * 每項任務僅首次完成可獲得印花獎勵
+          * {t('profileEdit.bonusNote')}
         </div>
       </Card>
 
@@ -248,9 +252,9 @@ export default function ProfileEditPage() {
           color="primary"
           loading={saving}
           onClick={handleSave}
-          style={{ '--background-color': PRIMARY, borderRadius: 8, height: 44 } as React.CSSProperties}
+          style={{ '--background-color': colors.primary, borderRadius: 8, height: 44 } as React.CSSProperties}
         >
-          保存修改
+          {t('profileEdit.saveChanges')}
         </Button>
       </div>
 
@@ -264,7 +268,7 @@ export default function ProfileEditPage() {
         }}
         min={new Date(1920, 0, 1)}
         max={new Date()}
-        title="選擇生日"
+        title={t('profile.birthday')}
       />
     </div>
   );

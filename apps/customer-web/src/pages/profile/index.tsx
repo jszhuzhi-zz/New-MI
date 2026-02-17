@@ -23,15 +23,6 @@ const TrophyIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-const ShopIcon = ({ color }: { color: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M3 9l1.5-5h15L21 9" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M3 9a3 3 0 003 3 3 3 0 003-3M9 9a3 3 0 003 3 3 3 0 003-3M15 9a3 3 0 003 3 3 3 0 003-3" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 22v-6h6v6" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 const BellIcon = ({ color }: { color: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
     <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -74,6 +65,15 @@ const InfoIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
+const CarIcon = ({ color }: { color: string }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path d="M19 17h1c.6 0 1-.4 1-1v-3c0-.6-.4-1-1-1h-1l-3-5c-.3-.6-1-1-1.6-1H8.6c-.6 0-1.3.4-1.6 1l-3 5H3c-.6 0-1 .4-1 1v3c0 .6.4 1 1 1h1" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="7" cy="17" r="2" stroke={color} strokeWidth="1.5"/>
+    <circle cx="17" cy="17" r="2" stroke={color} strokeWidth="1.5"/>
+    <path d="M5 12l2-4h10l2 4" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -85,7 +85,7 @@ export default function ProfilePage() {
   const menuItems = [
     { label: t('profile.editProfile'), icon: <EditIcon color={colors.primary} />, path: '/profile/edit', badge: 0 },
     { label: t('profile.stampHistory'), icon: <TrophyIcon color={colors.primary} />, path: '/tier', badge: 0 },
-    { label: t('home.mall'), icon: <ShopIcon color={colors.primary} />, path: '/mall', badge: 0 },
+    { label: t('parking.title'), icon: <CarIcon color={colors.primary} />, path: '/parking', badge: 0 },
     { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3 },
     { label: t('favorites.title'), icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0 },
     { label: t('settings.languageSettings'), icon: <LanguageIcon color={colors.primary} />, path: '/settings', badge: 0 },
@@ -178,7 +178,6 @@ export default function ProfilePage() {
           {[
             { label: t('common.stamp'), value: (user?.stampBalance || 2580).toLocaleString(), path: '/stamp' },
             { label: t('offers.myCoupons'), value: '5', path: '/offers' },
-            { label: t('home.mall'), value: '🏬', path: '/mall' },
           ].map((stat, i) => (
             <div
               key={i}
@@ -186,7 +185,7 @@ export default function ProfilePage() {
               style={{
                 flex: 1,
                 textAlign: 'center',
-                borderRight: i < 2 ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                borderRight: i < 1 ? '1px solid rgba(255,255,255,0.2)' : 'none',
                 cursor: stat.path ? 'pointer' : 'default',
               }}
             >

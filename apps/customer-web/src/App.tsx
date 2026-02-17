@@ -22,6 +22,8 @@ import GiftsPage from './pages/gifts';
 import AICustomerServicePage from './pages/support/ai-customer-service';
 import MessagesPage from './pages/messages';
 import FavoritesPage from './pages/favorites';
+import ParkingPage from './pages/parking';
+import NewsDetail from './pages/news/detail';
 import { useAuthStore } from './store/auth';
 
 // Handle SPA redirect from 404.html
@@ -160,6 +162,8 @@ export default function App() {
           <Route path="/support" element={<AICustomerServicePage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/parking" element={<ParkingPage />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

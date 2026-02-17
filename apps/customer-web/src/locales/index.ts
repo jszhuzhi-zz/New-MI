@@ -175,6 +175,64 @@ type TranslationKeys = {
   'campaign.credentialCode': string;
   'campaign.validUntil': string;
   'campaign.credentialTip': string;
+
+  // Profile Edit
+  'profileEdit.title': string;
+  'profileEdit.changeAvatar': string;
+  'profileEdit.nameRequired': string;
+  'profileEdit.enterName': string;
+  'profileEdit.englishName': string;
+  'profileEdit.enterEnglishName': string;
+  'profileEdit.enterPhone': string;
+  'profileEdit.enterEmail': string;
+  'profileEdit.selectDate': string;
+  'profileEdit.stampBonus': string;
+  'profileEdit.bonusTitle': string;
+  'profileEdit.bonusNote': string;
+  'profileEdit.uploadAvatar': string;
+  'profileEdit.registerBirthday': string;
+  'profileEdit.saveChanges': string;
+  'profileEdit.updated': string;
+  'profileEdit.congratulations': string;
+  'profileEdit.totalBonus': string;
+
+  // Parking
+  'parking.title': string;
+  'parking.currentParking': string;
+  'parking.duration': string;
+  'parking.currentFee': string;
+  'parking.payNow': string;
+  'parking.myPlates': string;
+  'parking.addPlate': string;
+  'parking.noPlates': string;
+  'parking.default': string;
+  'parking.car': string;
+  'parking.motorcycle': string;
+  'parking.plateNumber': string;
+  'parking.plateNumberPlaceholder': string;
+  'parking.vehicleType': string;
+  'parking.enterPlateNumber': string;
+  'parking.plateAdded': string;
+  'parking.confirmDeletePlate': string;
+  'parking.plateDeleted': string;
+  'parking.defaultPlateSet': string;
+  'parking.stampRedemption': string;
+  'parking.stampRate': string;
+  'parking.availableStamps': string;
+  'parking.history': string;
+  'parking.noHistory': string;
+  'parking.paid': string;
+  'parking.pending': string;
+  'parking.payment': string;
+  'parking.totalFee': string;
+  'parking.paymentMethod': string;
+  'parking.payCash': string;
+  'parking.payStamps': string;
+  'parking.stamps': string;
+  'parking.insufficient': string;
+  'parking.insufficientStamps': string;
+  'parking.confirmPayment': string;
+  'parking.paymentSuccess': string;
 };
 
 const translations: Record<Locale, TranslationKeys> = {
@@ -330,6 +388,60 @@ const translations: Record<Locale, TranslationKeys> = {
     'campaign.credentialCode': '憑證編號',
     'campaign.validUntil': '有效期至',
     'campaign.credentialTip': '請於活動商戶出示此二維碼進行核銷',
+    'profileEdit.title': '編輯資料',
+    'profileEdit.changeAvatar': '點擊更換頭像',
+    'profileEdit.nameRequired': '請輸入姓名',
+    'profileEdit.enterName': '請輸入姓名',
+    'profileEdit.englishName': '英文名',
+    'profileEdit.enterEnglishName': '請輸入英文名',
+    'profileEdit.enterPhone': '請輸入手機號碼',
+    'profileEdit.enterEmail': '請輸入電郵地址',
+    'profileEdit.selectDate': '選擇日期',
+    'profileEdit.stampBonus': '印花',
+    'profileEdit.bonusTitle': '完善資料賺印花',
+    'profileEdit.bonusNote': '每項任務僅首次完成可獲得印花獎勵',
+    'profileEdit.uploadAvatar': '上傳頭像',
+    'profileEdit.registerBirthday': '登記生日',
+    'profileEdit.saveChanges': '保存修改',
+    'profileEdit.updated': '資料已更新',
+    'profileEdit.congratulations': '恭喜獲得印花獎勵！',
+    'profileEdit.totalBonus': '共',
+    'parking.title': '停車繳費',
+    'parking.currentParking': '當前停車',
+    'parking.duration': '停車時長',
+    'parking.currentFee': '當前費用',
+    'parking.payNow': '立即繳費',
+    'parking.myPlates': '我的車牌',
+    'parking.addPlate': '添加車牌',
+    'parking.noPlates': '暫無車牌',
+    'parking.default': '預設',
+    'parking.car': '汽車',
+    'parking.motorcycle': '摩托車',
+    'parking.plateNumber': '車牌號碼',
+    'parking.plateNumberPlaceholder': '例如：AB 1234',
+    'parking.vehicleType': '車輛類型',
+    'parking.enterPlateNumber': '請輸入車牌號碼',
+    'parking.plateAdded': '車牌已添加',
+    'parking.confirmDeletePlate': '確定要刪除此車牌嗎？',
+    'parking.plateDeleted': '車牌已刪除',
+    'parking.defaultPlateSet': '已設為預設車牌',
+    'parking.stampRedemption': '印花抵扣停車費',
+    'parking.stampRate': '{stamps} 印花 = HK$1',
+    'parking.availableStamps': '可用印花',
+    'parking.history': '停車記錄',
+    'parking.noHistory': '暫無記錄',
+    'parking.paid': '已繳費',
+    'parking.pending': '待繳費',
+    'parking.payment': '停車繳費',
+    'parking.totalFee': '應付金額',
+    'parking.paymentMethod': '付款方式',
+    'parking.payCash': '現金支付',
+    'parking.payStamps': '印花抵扣',
+    'parking.stamps': '印花',
+    'parking.insufficient': '不足',
+    'parking.insufficientStamps': '印花餘額不足',
+    'parking.confirmPayment': '確認付款',
+    'parking.paymentSuccess': '繳費成功',
   },
 
   'zh-CN': {
@@ -484,6 +596,60 @@ const translations: Record<Locale, TranslationKeys> = {
     'campaign.credentialCode': '凭证编号',
     'campaign.validUntil': '有效期至',
     'campaign.credentialTip': '请于活动商户出示此二维码进行核销',
+    'profileEdit.title': '编辑资料',
+    'profileEdit.changeAvatar': '点击更换头像',
+    'profileEdit.nameRequired': '请输入姓名',
+    'profileEdit.enterName': '请输入姓名',
+    'profileEdit.englishName': '英文名',
+    'profileEdit.enterEnglishName': '请输入英文名',
+    'profileEdit.enterPhone': '请输入手机号码',
+    'profileEdit.enterEmail': '请输入邮箱地址',
+    'profileEdit.selectDate': '选择日期',
+    'profileEdit.stampBonus': '印花',
+    'profileEdit.bonusTitle': '完善资料赚印花',
+    'profileEdit.bonusNote': '每项任务仅首次完成可获得印花奖励',
+    'profileEdit.uploadAvatar': '上传头像',
+    'profileEdit.registerBirthday': '登记生日',
+    'profileEdit.saveChanges': '保存修改',
+    'profileEdit.updated': '资料已更新',
+    'profileEdit.congratulations': '恭喜获得印花奖励！',
+    'profileEdit.totalBonus': '共',
+    'parking.title': '停车缴费',
+    'parking.currentParking': '当前停车',
+    'parking.duration': '停车时长',
+    'parking.currentFee': '当前费用',
+    'parking.payNow': '立即缴费',
+    'parking.myPlates': '我的车牌',
+    'parking.addPlate': '添加车牌',
+    'parking.noPlates': '暂无车牌',
+    'parking.default': '默认',
+    'parking.car': '汽车',
+    'parking.motorcycle': '摩托车',
+    'parking.plateNumber': '车牌号码',
+    'parking.plateNumberPlaceholder': '例如：AB 1234',
+    'parking.vehicleType': '车辆类型',
+    'parking.enterPlateNumber': '请输入车牌号码',
+    'parking.plateAdded': '车牌已添加',
+    'parking.confirmDeletePlate': '确定要删除此车牌吗？',
+    'parking.plateDeleted': '车牌已删除',
+    'parking.defaultPlateSet': '已设为默认车牌',
+    'parking.stampRedemption': '印花抵扣停车费',
+    'parking.stampRate': '{stamps} 印花 = HK$1',
+    'parking.availableStamps': '可用印花',
+    'parking.history': '停车记录',
+    'parking.noHistory': '暂无记录',
+    'parking.paid': '已缴费',
+    'parking.pending': '待缴费',
+    'parking.payment': '停车缴费',
+    'parking.totalFee': '应付金额',
+    'parking.paymentMethod': '付款方式',
+    'parking.payCash': '现金支付',
+    'parking.payStamps': '印花抵扣',
+    'parking.stamps': '印花',
+    'parking.insufficient': '不足',
+    'parking.insufficientStamps': '印花余额不足',
+    'parking.confirmPayment': '确认付款',
+    'parking.paymentSuccess': '缴费成功',
   },
 
   en: {
@@ -638,6 +804,60 @@ const translations: Record<Locale, TranslationKeys> = {
     'campaign.credentialCode': 'Code',
     'campaign.validUntil': 'Valid until',
     'campaign.credentialTip': 'Show this QR code to merchant for verification',
+    'profileEdit.title': 'Edit Profile',
+    'profileEdit.changeAvatar': 'Tap to change avatar',
+    'profileEdit.nameRequired': 'Please enter name',
+    'profileEdit.enterName': 'Enter name',
+    'profileEdit.englishName': 'English Name',
+    'profileEdit.enterEnglishName': 'Enter English name',
+    'profileEdit.enterPhone': 'Enter phone number',
+    'profileEdit.enterEmail': 'Enter email address',
+    'profileEdit.selectDate': 'Select date',
+    'profileEdit.stampBonus': 'stamps',
+    'profileEdit.bonusTitle': 'Complete profile for stamps',
+    'profileEdit.bonusNote': 'Each task can only earn stamps once',
+    'profileEdit.uploadAvatar': 'Upload avatar',
+    'profileEdit.registerBirthday': 'Register birthday',
+    'profileEdit.saveChanges': 'Save Changes',
+    'profileEdit.updated': 'Profile updated',
+    'profileEdit.congratulations': 'Congratulations on earning stamps!',
+    'profileEdit.totalBonus': 'Total',
+    'parking.title': 'Parking Payment',
+    'parking.currentParking': 'Current Parking',
+    'parking.duration': 'Duration',
+    'parking.currentFee': 'Current Fee',
+    'parking.payNow': 'Pay Now',
+    'parking.myPlates': 'My Plates',
+    'parking.addPlate': 'Add Plate',
+    'parking.noPlates': 'No license plates',
+    'parking.default': 'Default',
+    'parking.car': 'Car',
+    'parking.motorcycle': 'Motorcycle',
+    'parking.plateNumber': 'License Plate',
+    'parking.plateNumberPlaceholder': 'e.g., AB 1234',
+    'parking.vehicleType': 'Vehicle Type',
+    'parking.enterPlateNumber': 'Please enter license plate',
+    'parking.plateAdded': 'Plate added',
+    'parking.confirmDeletePlate': 'Delete this license plate?',
+    'parking.plateDeleted': 'Plate deleted',
+    'parking.defaultPlateSet': 'Set as default',
+    'parking.stampRedemption': 'Redeem Stamps for Parking',
+    'parking.stampRate': '{stamps} stamps = HK$1',
+    'parking.availableStamps': 'Available Stamps',
+    'parking.history': 'Parking History',
+    'parking.noHistory': 'No history',
+    'parking.paid': 'Paid',
+    'parking.pending': 'Pending',
+    'parking.payment': 'Parking Payment',
+    'parking.totalFee': 'Total Fee',
+    'parking.paymentMethod': 'Payment Method',
+    'parking.payCash': 'Pay with Cash',
+    'parking.payStamps': 'Pay with Stamps',
+    'parking.stamps': 'stamps',
+    'parking.insufficient': 'Insufficient',
+    'parking.insufficientStamps': 'Insufficient stamps',
+    'parking.confirmPayment': 'Confirm Payment',
+    'parking.paymentSuccess': 'Payment successful',
   },
 };
 

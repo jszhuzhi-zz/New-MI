@@ -54,24 +54,24 @@ const merchantsData: MerchantData[] = [
 
 const campaignsData: CampaignData[] = [
   {
-    id: '1',
-    title: { 'zh-TW': '週末雙倍印花', 'zh-CN': '周末双倍印花', en: 'Double Stamps Weekend' },
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400',
+    id: 'c1',
+    title: { 'zh-TW': '新春印花三倍賞', 'zh-CN': '新春印花三倍赏', en: 'Triple Stamps for CNY' },
+    image: 'https://images.unsplash.com/photo-1549451371-64aa98a6f660?w=400',
     validUntil: '2026-02-28',
-    stampMultiplier: 2,
-  },
-  {
-    id: '2',
-    title: { 'zh-TW': '新春特別優惠', 'zh-CN': '新春特别优惠', en: 'Chinese New Year Special' },
-    image: 'https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=400',
-    validUntil: '2026-02-15',
-  },
-  {
-    id: '3',
-    title: { 'zh-TW': '情人節限定活動', 'zh-CN': '情人节限定活动', en: "Valentine's Day Special" },
-    image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400',
-    validUntil: '2026-02-14',
     stampMultiplier: 3,
+  },
+  {
+    id: 'c2',
+    title: { 'zh-TW': '春日美食節', 'zh-CN': '春日美食节', en: 'Spring Food Festival' },
+    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
+    validUntil: '2026-03-31',
+  },
+  {
+    id: 'c3',
+    title: { 'zh-TW': '會員生日禮遇', 'zh-CN': '会员生日礼遇', en: 'Birthday Rewards' },
+    image: 'https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400',
+    validUntil: '2026-12-31',
+    stampMultiplier: 2,
   },
 ];
 
@@ -242,7 +242,7 @@ export default function FavoritesPage() {
                 {campaigns.map((campaign) => (
                   <Card
                     key={campaign.id}
-                    onClick={() => navigate(`/offers/campaign/${campaign.id}`)}
+                    onClick={() => navigate(`/campaign/${campaign.id}`)}
                     style={{ borderRadius: 12, overflow: 'hidden', padding: 0 }}
                   >
                     <Image

@@ -472,71 +472,40 @@ export default function CampaignDetail() {
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         padding: '12px 16px', background: '#fff', borderTop: '1px solid #f0f0f0',
-        display: 'flex', gap: 12
       }}>
         {isJoined ? (
-          <>
-            <Button
-              block
-              size="large"
-              color="primary"
-              onClick={handleShowQRCode}
-              style={{
-                '--background-color': PRIMARY,
-                '--border-color': PRIMARY,
-                borderRadius: 12,
-                fontWeight: 600,
-              } as React.CSSProperties}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <QrcodeIcon />
-                {t('campaign.showCredential')}
-              </span>
-            </Button>
-            <Button
-              size="large"
-              onClick={() => navigate('/scan')}
-              style={{
-                '--border-color': PRIMARY,
-                '--text-color': PRIMARY,
-                borderRadius: 12,
-                fontWeight: 600,
-                minWidth: 100,
-              } as React.CSSProperties}
-            >
-              {t('common.scan')}
-            </Button>
-          </>
+          <Button
+            block
+            size="large"
+            color="primary"
+            onClick={handleShowQRCode}
+            style={{
+              '--background-color': PRIMARY,
+              '--border-color': PRIMARY,
+              borderRadius: 12,
+              fontWeight: 600,
+            } as React.CSSProperties}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <QrcodeIcon />
+              {t('campaign.showCredential')}
+            </span>
+          </Button>
         ) : (
-          <>
-            <Button
-              block
-              size="large"
-              color="primary"
-              onClick={handleJoin}
-              style={{
-                '--background-color': PRIMARY,
-                '--border-color': PRIMARY,
-                borderRadius: 12,
-                fontWeight: 600
-              } as React.CSSProperties}
-            >
-              {t('campaign.joinNow')}
-            </Button>
-            <Button
-              size="large"
-              onClick={() => navigate('/scan')}
-              style={{
-                '--border-color': PRIMARY,
-                '--text-color': PRIMARY,
-                borderRadius: 12,
-                fontWeight: 600,
-                minWidth: 100,
-              } as React.CSSProperties}
-            >
-              {t('common.scan')}
-            </Button>
-          </>
+          <Button
+            block
+            size="large"
+            color="primary"
+            onClick={handleJoin}
+            style={{
+              '--background-color': PRIMARY,
+              '--border-color': PRIMARY,
+              borderRadius: 12,
+              fontWeight: 600
+            } as React.CSSProperties}
+          >
+            {t('campaign.joinNow')}
+          </Button>
         )}
       </div>
 
