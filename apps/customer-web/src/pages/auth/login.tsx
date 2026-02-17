@@ -6,8 +6,6 @@ import { useAuthStore } from '../../store/auth';
 import { useSettingsStore, type Locale } from '../../store/settings';
 import { authApi } from '../../services/api';
 
-const PRIMARY = '#00694B';
-
 // Country codes with phone validation rules
 const COUNTRY_CODES = [
   { code: '+852', country: 'HK', flag: '🇭🇰', name: { 'zh-TW': '香港', 'zh-CN': '香港', en: 'Hong Kong' }, minLength: 8, maxLength: 8 },
@@ -76,7 +74,8 @@ const labels: Record<string, Record<Locale, string>> = {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const locale = useSettingsStore((s) => s.locale);
+  const { locale, getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const { setToken, setUser, isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState('sms');
   const [countdown, setCountdown] = useState(0);
@@ -364,7 +363,7 @@ export default function LoginPage() {
       content: (
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-          <div style={{ fontSize: 18, fontWeight: 600, color: PRIMARY }}>
+          <div style={{ fontSize: 18, fontWeight: 600, color: colors.primary }}>
             {t('welcomeBonus')}
           </div>
           <div style={{ fontSize: 14, color: '#666', marginTop: 8 }}>
@@ -384,7 +383,7 @@ export default function LoginPage() {
         {/* Header */}
         <div
           style={{
-            background: `linear-gradient(135deg, ${PRIMARY} 0%, #004D36 100%)`,
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
             padding: '40px 16px 60px',
             color: '#fff',
             textAlign: 'center',
@@ -434,7 +433,7 @@ export default function LoginPage() {
                   disabled={countdown > 0}
                   onClick={handleSendCode}
                   style={{
-                    '--background-color': countdown > 0 ? '#ccc' : PRIMARY,
+                    '--background-color': countdown > 0 ? '#ccc' : colors.primary,
                     '--text-color': '#fff',
                     minWidth: 100,
                   } as React.CSSProperties}
@@ -477,7 +476,7 @@ export default function LoginPage() {
             {/* Welcome bonus info */}
             <div
               style={{
-                background: `linear-gradient(135deg, ${PRIMARY}15 0%, ${PRIMARY}08 100%)`,
+                background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.primary}08 100%)`,
                 borderRadius: 12,
                 padding: 16,
                 marginBottom: 20,
@@ -488,7 +487,7 @@ export default function LoginPage() {
             >
               <span style={{ fontSize: 28 }}>🎁</span>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: PRIMARY }}>{t('welcomeBonus')}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: colors.primary }}>{t('welcomeBonus')}</div>
                 <div style={{ fontSize: 12, color: '#666' }}>
                   {locale === 'en' ? 'Register now and get bonus stamps!' : '立即註冊獲得迎新印花！'}
                 </div>
@@ -499,14 +498,14 @@ export default function LoginPage() {
               block
               color="primary"
               onClick={handleRegister}
-              style={{ '--background-color': PRIMARY, marginBottom: 16 } as React.CSSProperties}
+              style={{ '--background-color': colors.primary, marginBottom: 16 } as React.CSSProperties}
             >
               {t('register')}
             </Button>
 
             <div
               onClick={() => setShowRegister(false)}
-              style={{ textAlign: 'center', color: PRIMARY, fontSize: 14, cursor: 'pointer' }}
+              style={{ textAlign: 'center', color: colors.primary, fontSize: 14, cursor: 'pointer' }}
             >
               {t('alreadyHaveAccount')}
             </div>
@@ -521,7 +520,7 @@ export default function LoginPage() {
       {/* Header */}
       <div
         style={{
-          background: `linear-gradient(135deg, ${PRIMARY} 0%, #004D36 100%)`,
+          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
           padding: '40px 16px 60px',
           color: '#fff',
           textAlign: 'center',
@@ -546,7 +545,7 @@ export default function LoginPage() {
                       block
                       type="submit"
                       color="primary"
-                      style={{ '--background-color': PRIMARY, marginTop: 16 } as React.CSSProperties}
+                      style={{ '--background-color': colors.primary, marginTop: 16 } as React.CSSProperties}
                     >
                       {t('login')}
                     </Button>
@@ -595,7 +594,7 @@ export default function LoginPage() {
                         fill="none"
                         disabled={countdown > 0 || isSending}
                         onClick={() => handleSendCode()}
-                        style={{ color: (countdown > 0 || isSending) ? '#999' : PRIMARY }}
+                        style={{ color: (countdown > 0 || isSending) ? '#999' : colors.primary }}
                       >
                         {isSending ? t('sendingCode') : countdown > 0 ? `${t('resendIn')} ${countdown}s` : t('sendCode')}
                       </Button>
@@ -618,12 +617,12 @@ export default function LoginPage() {
                         block
                         type="submit"
                         color="primary"
-                        style={{ '--background-color': PRIMARY, marginTop: 16 } as React.CSSProperties}
+                        style={{ '--background-color': colors.primary, marginTop: 16 } as React.CSSProperties}
                       >
                         {t('login')}
                       </Button>
                       <div style={{ textAlign: 'right', marginTop: 12 }}>
-                        <span style={{ color: PRIMARY, fontSize: 13, cursor: 'pointer' }}>
+                        <span style={{ color: colors.primary, fontSize: 13, cursor: 'pointer' }}>
                           {t('forgotPassword')}
                         </span>
                       </div>
@@ -710,8 +709,8 @@ export default function LoginPage() {
               block
               onClick={handleDemoLogin}
               style={{
-                '--border-color': PRIMARY,
-                '--text-color': PRIMARY,
+                '--border-color': colors.primary,
+                '--text-color': colors.primary,
                 marginTop: 16,
               } as React.CSSProperties}
             >
@@ -734,9 +733,9 @@ export default function LoginPage() {
       <div style={{ padding: '32px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 12, color: '#999' }}>
           {t('agreeTerms')}
-          <span style={{ color: PRIMARY }}> {t('termsOfService')} </span>
+          <span style={{ color: colors.primary }}> {t('termsOfService')} </span>
           {t('and')}
-          <span style={{ color: PRIMARY }}> {t('privacyPolicy')}</span>
+          <span style={{ color: colors.primary }}> {t('privacyPolicy')}</span>
         </div>
       </div>
 

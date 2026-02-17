@@ -6,7 +6,6 @@ import { useTranslation } from '../../locales';
 import { useSettingsStore, type Locale } from '../../store/settings';
 import { useAuthStore } from '../../store/auth';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 interface CampaignData {
@@ -105,7 +104,7 @@ const campaignsData: CampaignData[] = [
     mall: { 'zh-TW': '全線商場', 'zh-CN': '全线商场', en: 'All Malls' },
     date: { 'zh-TW': '全年適用', 'zh-CN': '全年适用', en: 'Year-round' },
     type: { 'zh-TW': '會員專屬', 'zh-CN': '会员专属', en: 'Member Exclusive' },
-    color: PRIMARY,
+    color: '#00694B',
     desc: { 'zh-TW': '生日月份享雙倍印花及神秘禮品', 'zh-CN': '生日月份享双倍印花及神秘礼品', en: 'Double stamps and mystery gifts' },
   },
   {
@@ -133,7 +132,7 @@ const luckyDrawsData: LuckyDrawData[] = [
 ];
 
 const giftsData: GiftData[] = [
-  { id: 'g1', title: { 'zh-TW': '領展環保購物袋', 'zh-CN': '领展环保购物袋', en: 'Link Eco Shopping Bag' }, stamps: 200, stock: true, color: PRIMARY },
+  { id: 'g1', title: { 'zh-TW': '領展環保購物袋', 'zh-CN': '领展环保购物袋', en: 'Link Eco Shopping Bag' }, stamps: 200, stock: true, color: '#00694B' },
   { id: 'g2', title: { 'zh-TW': '精選咖啡禮盒', 'zh-CN': '精选咖啡礼盒', en: 'Premium Coffee Gift Set' }, stamps: 500, stock: true, color: '#795548' },
   { id: 'g3', title: { 'zh-TW': '藍牙無線耳機', 'zh-CN': '蓝牙无线耳机', en: 'Bluetooth Wireless Earbuds' }, stamps: 1500, stock: true, color: '#1565C0' },
   { id: 'g4', title: { 'zh-TW': '日本和風餐具套裝', 'zh-CN': '日本和风餐具套装', en: 'Japanese Style Tableware Set' }, stamps: 800, stock: true, color: '#C62828' },
@@ -144,7 +143,8 @@ const giftsData: GiftData[] = [
 export default function OffersPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const locale = useSettingsStore((s) => s.locale);
+  const { locale, getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeTab, setActiveTab] = useState('campaigns');
 
@@ -192,7 +192,7 @@ export default function OffersPage() {
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 60 }}>
-      <div style={{ background: PRIMARY, padding: '20px 16px 12px', color: '#fff' }}>
+      <div style={{ background: colors.primary, padding: '20px 16px 12px', color: '#fff' }}>
         <div style={{ fontSize: 20, fontWeight: 700 }}>{t('offers.title')}</div>
         <div style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>{t('offers.exploreOffers')}</div>
       </div>
@@ -201,8 +201,8 @@ export default function OffersPage() {
         activeKey={activeTab}
         onChange={setActiveTab}
         style={{
-          '--active-line-color': PRIMARY,
-          '--active-title-color': PRIMARY,
+          '--active-line-color': colors.primary,
+          '--active-title-color': colors.primary,
           background: '#fff',
           position: 'sticky',
           top: 0,
@@ -232,7 +232,7 @@ export default function OffersPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <Tag color="primary" fill="outline" style={{ '--border-color': PRIMARY, '--text-color': PRIMARY, fontSize: 11 } as React.CSSProperties}>{c.type}</Tag>
+                    <Tag color="primary" fill="outline" style={{ '--border-color': colors.primary, '--text-color': colors.primary, fontSize: 11 } as React.CSSProperties}>{c.type}</Tag>
                     <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>{c.mall}</span>
                   </div>
                   <span style={{ fontSize: 12, color: '#999' }}>{c.date}</span>
@@ -254,7 +254,7 @@ export default function OffersPage() {
                       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                         <div style={{
                           width: 60, height: 60, borderRadius: 8,
-                          background: isActive ? `linear-gradient(135deg, ${PRIMARY}, #004D36)` : '#ccc',
+                          background: isActive ? `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})` : '#ccc',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           color: '#fff', fontSize: 20, flexShrink: 0,
                         }}>🎟️</div>
@@ -290,7 +290,7 @@ export default function OffersPage() {
               <Button
                 color="primary"
                 onClick={() => navigate('/login')}
-                style={{ '--background-color': PRIMARY, '--border-color': PRIMARY, borderRadius: 20, padding: '8px 32px' } as React.CSSProperties}
+                style={{ '--background-color': colors.primary, '--border-color': colors.primary, borderRadius: 20, padding: '8px 32px' } as React.CSSProperties}
               >
                 {loginLabels.login[locale]}
               </Button>
@@ -350,7 +350,7 @@ export default function OffersPage() {
                     {!g.stock && <Tag color="default" style={{ fontSize: 10 }}>{t('offers.soldOut')}</Tag>}
                   </div>
                   <Button block size="small" color="primary" disabled={!g.stock}
-                    style={{ marginTop: 8, '--background-color': g.stock ? PRIMARY : '#ccc', '--border-color': g.stock ? PRIMARY : '#ccc', borderRadius: 8, fontSize: 13 } as React.CSSProperties}
+                    style={{ marginTop: 8, '--background-color': g.stock ? colors.primary : '#ccc', '--border-color': g.stock ? colors.primary : '#ccc', borderRadius: 8, fontSize: 13 } as React.CSSProperties}
                   >{g.stock ? t('gifts.redeem') : t('offers.soldOut')}</Button>
                 </Card>
               </Grid.Item>
