@@ -44,11 +44,48 @@ interface AuthState {
   logout: () => void;
 }
 
+// Helper to safely get initial auth state - ensures data consistency
+const getInitialAuthState = (): { token: string | null; user: any | null; isAuthenticated: boolean } => {
+  try {
+    const token = localStorage.getItem('token');
+
+    // If no token, ensure no user data (security measure)
+    if (!token) {
+      localStorage.removeItem('user');
+      return { token: null, user: null, isAuthenticated: false };
+    }
+
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      localStorage.removeItem('token');
+      return { token: null, user: null, isAuthenticated: false };
+    }
+
+    const user = JSON.parse(userStr);
+
+    // Validate user object has required fields
+    if (!user || typeof user !== 'object' || !user.id) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      return { token: null, user: null, isAuthenticated: false };
+    }
+
+    return { token, user, isAuthenticated: true };
+  } catch {
+    // Any error during initialization - clear everything for safety
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return { token: null, user: null, isAuthenticated: false };
+  }
+};
+
+const initialAuthState = getInitialAuthState();
+
 export const useAuthStore = create<AuthState>((set) => ({
-  token: localStorage.getItem('token'),
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  token: initialAuthState.token,
+  user: initialAuthState.user,
   locale: (localStorage.getItem('locale') as Locale) || 'zh-TW',
-  isAuthenticated: !!localStorage.getItem('token'),
+  isAuthenticated: initialAuthState.isAuthenticated,
   currentMallId: localStorage.getItem('currentMallId') || 'fw',
   setToken: (token) => {
     if (token) localStorage.setItem('token', token);

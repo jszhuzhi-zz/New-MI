@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, List, Tag, ProgressBar, Button } from 'antd-mobile';
 import { useLocale } from '../../hooks/useLocale';
 import { useAuthStore } from '../../store/auth';
+import { useSettingsStore } from '../../store/settings';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 // Sample transactions data - in real app this would come from API
@@ -28,6 +28,8 @@ export default function StampPage() {
   const { t, locale } = useLocale();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const [tab, setTab] = useState('all');
 
   // Derive locale-specific transactions
@@ -79,7 +81,7 @@ export default function StampPage() {
         {/* Header */}
         <div
           style={{
-            background: `linear-gradient(135deg, ${PRIMARY}, #004D36)`,
+            background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
             padding: '28px 20px 80px', color: '#fff', textAlign: 'center',
           }}
         >
@@ -102,13 +104,13 @@ export default function StampPage() {
               size="large"
               onClick={() => navigate('/login')}
               style={{
-                '--background-color': PRIMARY,
-                '--border-color': PRIMARY,
+                '--background-color': colors.primary,
+                '--border-color': colors.primary,
                 borderRadius: 12,
                 height: 48,
                 fontSize: 16,
                 fontWeight: 600,
-              } as any}
+              } as React.CSSProperties}
             >
               {loginLabels.login[locale]}
             </Button>
@@ -149,7 +151,7 @@ export default function StampPage() {
       {/* Balance Header */}
       <div
         style={{
-          background: `linear-gradient(135deg, ${PRIMARY}, #004D36)`,
+          background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
           padding: '28px 20px 32px', color: '#fff', textAlign: 'center',
         }}
       >
@@ -191,7 +193,7 @@ export default function StampPage() {
         }}
       >
         {[
-          { label: t('customerApp.monthlyEarned'), value: `+${monthlyEarned}`, color: PRIMARY },
+          { label: t('customerApp.monthlyEarned'), value: `+${monthlyEarned}`, color: colors.primary },
           { label: t('customerApp.monthlyUsed'), value: `-${monthlyUsed}`, color: '#E65100' },
           { label: t('customerApp.expiringSoon'), value: expiringSoon.toString(), color: '#C62828' },
         ].map((s, i) => (
@@ -204,7 +206,7 @@ export default function StampPage() {
 
       {/* Transaction Tabs */}
       <div style={{ padding: '16px 16px 0' }}>
-        <Tabs activeKey={tab} onChange={setTab} style={{ '--active-line-color': PRIMARY, '--active-title-color': PRIMARY } as any}>
+        <Tabs activeKey={tab} onChange={setTab} style={{ '--active-line-color': colors.primary, '--active-title-color': colors.primary } as React.CSSProperties}>
           <Tabs.Tab title={t('customerApp.filterAll')} key="all" />
           <Tabs.Tab title={t('customerApp.filterEarn')} key="earn" />
           <Tabs.Tab title={t('customerApp.filterUse')} key="redeem" />
@@ -240,7 +242,7 @@ export default function StampPage() {
                   <span
                     style={{
                       fontSize: 18, fontWeight: 700,
-                      color: tx.type === 'earn' ? PRIMARY : tx.type === 'expire' ? '#999' : '#E65100',
+                      color: tx.type === 'earn' ? colors.primary : tx.type === 'expire' ? '#999' : '#E65100',
                     }}
                   >
                     {tx.amount > 0 ? `+${tx.amount}` : tx.amount}

@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { List, Badge, Avatar, Dialog, Toast, Button } from 'antd-mobile';
-import { RightOutline, SetOutline } from 'antd-mobile-icons';
+import { RightOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
 import { useSettingsStore, type Locale } from '../../store/settings';
 import { useTranslation } from '../../locales';
+
+// Helper to get unread message count from localStorage
+const getUnreadMessageCount = (): number => {
+  try {
+    // Message IDs with their default read status
+    const defaultMessages = [
+      { id: '1', read: false },
+      { id: '2', read: false },
+      { id: '3', read: true },
+      { id: '4', read: true },
+      { id: '5', read: true },
+      { id: '6', read: true },
+    ];
+
+    const readStatusStr = localStorage.getItem('messages_read_status');
+    const deletedStr = localStorage.getItem('messages_deleted');
+
+    const readStatus: Record<string, boolean> = readStatusStr ? JSON.parse(readStatusStr) : {};
+    const deletedIds: string[] = deletedStr ? JSON.parse(deletedStr) : [];
+
+    return defaultMessages
+      .filter(m => !deletedIds.includes(m.id))
+      .filter(m => !(readStatus[m.id] ?? m.read))
+      .length;
+  } catch {
+    return 0;
+  }
+};
 
 const GOLD = '#C4A962';
 
@@ -22,13 +50,6 @@ const labels: Record<string, Record<Locale, string>> = {
 };
 
 // Custom SVG Icons
-const EditIcon = ({ color }: { color: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M16.474 5.408l2.118 2.117m-.756-3.982L12.109 9.27a2.118 2.118 0 00-.58 1.082L11 13l2.648-.53c.41-.082.786-.283 1.082-.579l5.727-5.727a1.853 1.853 0 10-2.621-2.621z" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M19 15v3a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h3" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 const TrophyIcon = ({ color }: { color: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
     <path d="M12 15a6 6 0 006-6V4H6v5a6 6 0 006 6z" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -98,11 +119,13 @@ export default function ProfilePage() {
 
   const tl = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
 
+  // Calculate unread message count dynamically
+  const unreadMessageCount = useMemo(() => getUnreadMessageCount(), []);
+
   const menuItems = [
-    { label: t('profile.editProfile'), icon: <EditIcon color={colors.primary} />, path: '/profile/edit', badge: 0, requireAuth: true },
     { label: t('profile.stampHistory'), icon: <TrophyIcon color={colors.primary} />, path: '/tier', badge: 0, requireAuth: true },
     { label: t('parking.title'), icon: <CarIcon color={colors.primary} />, path: '/parking', badge: 0, requireAuth: true },
-    { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3, requireAuth: true },
+    { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: unreadMessageCount, requireAuth: true },
     { label: t('favorites.title'), icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0, requireAuth: true },
     { label: t('settings.languageSettings'), icon: <LanguageIcon color={colors.primary} />, path: '/settings', badge: 0, requireAuth: false },
     { label: t('settings.themeSettings'), icon: <PaletteIcon color={colors.primary} />, path: '/settings', badge: 0, requireAuth: false },
@@ -143,15 +166,8 @@ export default function ProfilePage() {
             color: '#fff',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-            <SetOutline
-              fontSize={22}
-              onClick={() => navigate('/settings')}
-              style={{ cursor: 'pointer', opacity: 0.9 }}
-            />
-          </div>
           <div
-            style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer', marginTop: 8 }}
             onClick={() => navigate('/login')}
           >
             <Avatar
@@ -254,15 +270,8 @@ export default function ProfilePage() {
           color: '#fff',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-          <SetOutline
-            fontSize={22}
-            onClick={() => navigate('/settings')}
-            style={{ cursor: 'pointer', opacity: 0.9 }}
-          />
-        </div>
         <div
-          style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer', marginTop: 8 }}
           onClick={() => navigate('/profile/edit')}
         >
           <Avatar

@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { NavBar, Card, Button, Tag, Toast, Dialog, Tabs, SearchBar, Grid } from 'antd-mobile';
 import { GiftOutline, RightOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
+import { useSettingsStore } from '../../store/settings';
 import { useLocale } from '../../hooks/useLocale';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 interface Gift {
@@ -37,6 +37,8 @@ export default function GiftsPage() {
   const navigate = useNavigate();
   const { t } = useLocale();
   const { user, setUser } = useAuthStore();
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const [activeTab, setActiveTab] = useState('all');
   const [searchText, setSearchText] = useState('');
   const [redeeming, setRedeeming] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export default function GiftsPage() {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
             <div style={{ marginBottom: 8 }}>{t('customerApp.youHaveRedeemed')}</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: PRIMARY }}>{gift.nameTW}</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: colors.primary }}>{gift.nameTW}</div>
             <div style={{ marginTop: 12, fontSize: 13, color: '#999' }}>
               {t('customerApp.viewInCoupons')}
             </div>
@@ -118,7 +120,7 @@ export default function GiftsPage() {
         onBack={() => navigate(-1)}
         style={{
           '--height': '44px',
-          background: PRIMARY,
+          background: colors.primary,
           color: '#fff',
         } as React.CSSProperties}
         right={
@@ -171,7 +173,7 @@ export default function GiftsPage() {
               fontSize: 13,
               whiteSpace: 'nowrap',
               cursor: 'pointer',
-              background: activeTab === cat.key ? PRIMARY : '#fff',
+              background: activeTab === cat.key ? colors.primary : '#fff',
               color: activeTab === cat.key ? '#fff' : '#666',
               fontWeight: activeTab === cat.key ? 600 : 400,
             }}
@@ -257,8 +259,8 @@ export default function GiftsPage() {
                       disabled={stampBalance < gift.stamps}
                       onClick={() => handleRedeem(gift)}
                       style={{
-                        '--background-color': stampBalance >= gift.stamps ? PRIMARY : '#ccc',
-                        '--border-color': stampBalance >= gift.stamps ? PRIMARY : '#ccc',
+                        '--background-color': stampBalance >= gift.stamps ? colors.primary : '#ccc',
+                        '--border-color': stampBalance >= gift.stamps ? colors.primary : '#ccc',
                         fontSize: 12,
                         padding: '4px 10px',
                       } as React.CSSProperties}
