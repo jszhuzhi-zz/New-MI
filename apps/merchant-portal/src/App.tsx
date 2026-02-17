@@ -16,6 +16,8 @@ import TransactionStats from './pages/statistics/TransactionStats';
 import MemberStats from './pages/statistics/MemberStats';
 import ShopInfo from './pages/settings/ShopInfo';
 import StaffManagement from './pages/settings/StaffManagement';
+import OfferList from './pages/offers/OfferList';
+import OfferForm from './pages/offers/OfferForm';
 
 // Auth guard component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -69,6 +71,11 @@ const App: React.FC = () => {
 
           {/* Coupon Verification */}
           <Route path="/coupon/verification" element={<CouponVerification />} />
+
+          {/* Offer Management */}
+          <Route path="/offers" element={<OfferList />} />
+          <Route path="/offers/create" element={<OfferForm />} />
+          <Route path="/offers/edit/:id" element={<OfferForm />} />
 
           {/* Statistics */}
           <Route path="/statistics/transactions" element={<TransactionStats />} />

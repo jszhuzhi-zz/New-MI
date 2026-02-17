@@ -19,6 +19,9 @@ import {
   UserOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  TagsOutlined,
+  PlusCircleOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import type { MenuProps } from 'antd';
@@ -39,6 +42,9 @@ const menuLabels: Record<string, Record<string, string>> = {
   scanQR: { 'zh-CN': '扫码查询', 'zh-TW': '掃碼查詢', en: 'Scan QR' },
   phoneSearch: { 'zh-CN': '手机号查询', 'zh-TW': '手機號查詢', en: 'Phone Search' },
   couponVerification: { 'zh-CN': '优惠券核销', 'zh-TW': '優惠券核銷', en: 'Coupon Verification' },
+  offerMgmt: { 'zh-CN': '优惠活动', 'zh-TW': '優惠活動', en: 'Offer Management' },
+  offerList: { 'zh-CN': '我的优惠', 'zh-TW': '我的優惠', en: 'My Offers' },
+  createOffer: { 'zh-CN': '发布优惠', 'zh-TW': '發布優惠', en: 'Create Offer' },
   statistics: { 'zh-CN': '数据统计', 'zh-TW': '數據統計', en: 'Statistics' },
   transactionStats: { 'zh-CN': '交易统计', 'zh-TW': '交易統計', en: 'Transaction Stats' },
   memberStats: { 'zh-CN': '会员统计', 'zh-TW': '會員統計', en: 'Member Stats' },
@@ -104,6 +110,23 @@ const MainLayout: React.FC = () => {
       key: '/coupon/verification',
       icon: <CheckCircleOutlined />,
       label: getLabel('couponVerification'),
+    },
+    {
+      key: '/offer-mgmt',
+      icon: <TagsOutlined />,
+      label: getLabel('offerMgmt'),
+      children: [
+        {
+          key: '/offers',
+          icon: <FileTextOutlined />,
+          label: getLabel('offerList'),
+        },
+        {
+          key: '/offers/create',
+          icon: <PlusCircleOutlined />,
+          label: getLabel('createOffer'),
+        },
+      ],
     },
     {
       key: '/statistics',
