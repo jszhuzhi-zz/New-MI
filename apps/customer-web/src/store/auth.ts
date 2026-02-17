@@ -91,6 +91,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       'orderHistory',
       'notificationSettings',
       'userPreferences',
+      'lotteryHistory',
     ];
     keysToRemove.forEach(key => localStorage.removeItem(key));
     // Also clear all session storage

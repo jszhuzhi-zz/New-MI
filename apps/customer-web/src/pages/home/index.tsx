@@ -108,32 +108,48 @@ const campaignsData: CampaignData[] = [
     title: { 'zh-TW': '新春印花三倍賞', 'zh-CN': '新春印花三倍赏', en: 'CNY Triple Stamps' },
     mall: { 'zh-TW': '又一城', 'zh-CN': '又一城', en: 'Festival Walk' },
     type: { 'zh-TW': '印花加倍', 'zh-CN': '印花加倍', en: 'Stamp Bonus' },
-    date: '2/1 - 2/28',
+    date: '1/15 - 2/28',
     image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400&q=80'
   },
   {
-    id: 'c2',
-    title: { 'zh-TW': '新年幸運大抽獎', 'zh-CN': '新年幸运大抽奖', en: 'New Year Lucky Draw' },
-    mall: { 'zh-TW': '荷里活廣場', 'zh-CN': '荷里活广场', en: 'Hollywood Plaza' },
-    type: { 'zh-TW': '抽獎', 'zh-CN': '抽奖', en: 'Lucky Draw' },
-    date: '1/15 - 3/15',
-    image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80'
+    id: 'c5',
+    title: { 'zh-TW': '春季購物祭', 'zh-CN': '春季购物祭', en: 'Spring Shopping' },
+    mall: { 'zh-TW': '荷里活廣場', 'zh-CN': '荷里活广场', en: 'Plaza Hollywood' },
+    type: { 'zh-TW': '購物優惠', 'zh-CN': '购物优惠', en: 'Shopping' },
+    date: '2/15 - 3/31',
+    image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80'
   },
   {
-    id: 'c3',
-    title: { 'zh-TW': '冬日禮品換購', 'zh-CN': '冬日礼品换购', en: 'Winter Gift Redemption' },
-    mall: { 'zh-TW': '大埔超級城', 'zh-CN': '大埔超级城', en: 'Tai Po Mega Mall' },
-    type: { 'zh-TW': '禮品兌換', 'zh-CN': '礼品兑换', en: 'Gift Redemption' },
-    date: '1/1 - 2/28',
-    image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80'
-  },
-  {
-    id: 'c4',
-    title: { 'zh-TW': '美食節', 'zh-CN': '美食节', en: 'Food Festival' },
+    id: 'c6',
+    title: { 'zh-TW': '美食嘉年華', 'zh-CN': '美食嘉年华', en: 'Food Carnival' },
     mall: { 'zh-TW': '屯門市廣場', 'zh-CN': '屯门市广场', en: 'Tuen Mun Town Plaza' },
     type: { 'zh-TW': '美食優惠', 'zh-CN': '美食优惠', en: 'Food Deals' },
-    date: '2/1 - 2/14',
+    date: '2/1 - 2/28',
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80'
+  },
+  {
+    id: 'c7',
+    title: { 'zh-TW': '親子樂園', 'zh-CN': '亲子乐园', en: 'Family Fun' },
+    mall: { 'zh-TW': '大埔超級城', 'zh-CN': '大埔超级城', en: 'Tai Po Mega Mall' },
+    type: { 'zh-TW': '親子活動', 'zh-CN': '亲子活动', en: 'Family Event' },
+    date: '2/10 - 3/15',
+    image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80'
+  },
+  {
+    id: 'c8',
+    title: { 'zh-TW': '週年慶大抽獎', 'zh-CN': '周年庆大抽奖', en: 'Anniversary Draw' },
+    mall: { 'zh-TW': '樂富廣場', 'zh-CN': '乐富广场', en: 'Lok Fu Place' },
+    type: { 'zh-TW': '抽獎', 'zh-CN': '抽奖', en: 'Lucky Draw' },
+    date: '3/1 - 3/31',
+    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80'
+  },
+  {
+    id: 'c9',
+    title: { 'zh-TW': '電子產品展', 'zh-CN': '电子产品展', en: 'Tech Expo' },
+    mall: { 'zh-TW': '將軍澳廣場', 'zh-CN': '将军澳广场', en: 'TKO Gateway' },
+    type: { 'zh-TW': '科技展覽', 'zh-CN': '科技展览', en: 'Tech Expo' },
+    date: '2/20 - 3/10',
+    image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=400&q=80'
   },
 ];
 

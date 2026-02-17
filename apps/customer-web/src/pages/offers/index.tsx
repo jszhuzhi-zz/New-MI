@@ -32,8 +32,7 @@ interface LuckyDrawData {
   title: Record<Locale, string>;
   prize: Record<Locale, string>;
   endDate: string;
-  entries: number;
-  maxEntries: number;
+  stampCost: number;
   color: string;
 }
 
@@ -56,13 +55,49 @@ const campaignsData: CampaignData[] = [
     desc: { 'zh-TW': '農曆新年期間所有消費可獲三倍印花獎賞', 'zh-CN': '农历新年期间所有消费可获三倍印花奖赏', en: 'Earn triple stamps on all purchases during Chinese New Year' },
   },
   {
-    id: 'c2',
-    title: { 'zh-TW': '春日美食節', 'zh-CN': '春日美食节', en: 'Spring Food Festival' },
-    mall: { 'zh-TW': 'T Town', 'zh-CN': 'T Town', en: 'T Town' },
-    date: { 'zh-TW': '2026.02.01 - 2026.03.31', 'zh-CN': '2026.02.01 - 2026.03.31', en: 'Feb 1 - Mar 31, 2026' },
-    type: { 'zh-TW': '餐飲優惠', 'zh-CN': '餐饮优惠', en: 'Dining Offers' },
-    color: '#E65100',
-    desc: { 'zh-TW': '指定餐廳消費享額外印花及折扣優惠', 'zh-CN': '指定餐厅消费享额外印花及折扣优惠', en: 'Earn extra stamps and discounts at selected restaurants' },
+    id: 'c5',
+    title: { 'zh-TW': '荷里活廣場春季購物祭', 'zh-CN': '荷里活广场春季购物祭', en: 'Plaza Hollywood Spring Shopping' },
+    mall: { 'zh-TW': '荷里活廣場', 'zh-CN': '荷里活广场', en: 'Plaza Hollywood' },
+    date: { 'zh-TW': '2026.02.15 - 2026.03.31', 'zh-CN': '2026.02.15 - 2026.03.31', en: 'Feb 15 - Mar 31, 2026' },
+    type: { 'zh-TW': '購物優惠', 'zh-CN': '购物优惠', en: 'Shopping Offers' },
+    color: '#1565C0',
+    desc: { 'zh-TW': '春季購物消費滿額送電子禮券', 'zh-CN': '春季购物消费满额送电子礼券', en: 'Spend and earn e-vouchers during spring shopping' },
+  },
+  {
+    id: 'c6',
+    title: { 'zh-TW': '屯門市廣場美食嘉年華', 'zh-CN': '屯门市广场美食嘉年华', en: 'Tuen Mun Food Carnival' },
+    mall: { 'zh-TW': '屯門市廣場', 'zh-CN': '屯门市广场', en: 'Tuen Mun Town Plaza' },
+    date: { 'zh-TW': '2026.02.01 - 2026.02.28', 'zh-CN': '2026.02.01 - 2026.02.28', en: 'Feb 1 - Feb 28, 2026' },
+    type: { 'zh-TW': '美食活動', 'zh-CN': '美食活动', en: 'Food Event' },
+    color: '#FF6F00',
+    desc: { 'zh-TW': '精選餐廳限定美食及會員專屬優惠', 'zh-CN': '精选餐厅限定美食及会员专属优惠', en: 'Exclusive dishes and member-only offers' },
+  },
+  {
+    id: 'c7',
+    title: { 'zh-TW': '大埔超級城親子樂園', 'zh-CN': '大埔超级城亲子乐园', en: 'Tai Po Family Fun' },
+    mall: { 'zh-TW': '大埔超級城', 'zh-CN': '大埔超级城', en: 'Tai Po Mega Mall' },
+    date: { 'zh-TW': '2026.02.10 - 2026.03.15', 'zh-CN': '2026.02.10 - 2026.03.15', en: 'Feb 10 - Mar 15, 2026' },
+    type: { 'zh-TW': '親子活動', 'zh-CN': '亲子活动', en: 'Family Event' },
+    color: '#43A047',
+    desc: { 'zh-TW': '親子消費享三倍印花及免費工作坊', 'zh-CN': '亲子消费享三倍印花及免费工作坊', en: 'Triple stamps plus free workshops' },
+  },
+  {
+    id: 'c8',
+    title: { 'zh-TW': '樂富廣場週年慶', 'zh-CN': '乐富广场周年庆', en: 'Lok Fu Anniversary' },
+    mall: { 'zh-TW': '樂富廣場', 'zh-CN': '乐富广场', en: 'Lok Fu Place' },
+    date: { 'zh-TW': '2026.03.01 - 2026.03.31', 'zh-CN': '2026.03.01 - 2026.03.31', en: 'Mar 1 - Mar 31, 2026' },
+    type: { 'zh-TW': '週年慶', 'zh-CN': '周年庆', en: 'Anniversary' },
+    color: '#8E24AA',
+    desc: { 'zh-TW': '週年慶期間消費可參加幸運大抽獎', 'zh-CN': '周年庆期间消费可参加幸运大抽奖', en: 'Join lucky draw during anniversary' },
+  },
+  {
+    id: 'c9',
+    title: { 'zh-TW': '將軍澳廣場電子產品展', 'zh-CN': '将军澳广场电子产品展', en: 'TKO Tech Expo' },
+    mall: { 'zh-TW': '將軍澳廣場', 'zh-CN': '将军澳广场', en: 'TKO Gateway' },
+    date: { 'zh-TW': '2026.02.20 - 2026.03.10', 'zh-CN': '2026.02.20 - 2026.03.10', en: 'Feb 20 - Mar 10, 2026' },
+    type: { 'zh-TW': '科技展覽', 'zh-CN': '科技展览', en: 'Tech Expo' },
+    color: '#00897B',
+    desc: { 'zh-TW': '電子產品優惠及會員專屬折扣', 'zh-CN': '电子产品优惠及会员专属折扣', en: 'Tech deals and member discounts' },
   },
   {
     id: 'c3',
@@ -71,25 +106,16 @@ const campaignsData: CampaignData[] = [
     date: { 'zh-TW': '全年適用', 'zh-CN': '全年适用', en: 'Year-round' },
     type: { 'zh-TW': '會員專屬', 'zh-CN': '会员专属', en: 'Member Exclusive' },
     color: PRIMARY,
-    desc: { 'zh-TW': '生日月份享雙倍印花及神秘禮品', 'zh-CN': '生日月份享双倍印花及神秘礼品', en: 'Enjoy double stamps and mystery gifts during birthday month' },
+    desc: { 'zh-TW': '生日月份享雙倍印花及神秘禮品', 'zh-CN': '生日月份享双倍印花及神秘礼品', en: 'Double stamps and mystery gifts' },
   },
   {
-    id: 'c4',
-    title: { 'zh-TW': '新年幸運大抽獎', 'zh-CN': '新年幸运大抽奖', en: 'New Year Lucky Draw' },
-    mall: { 'zh-TW': '九龍城廣場', 'zh-CN': '九龙城广场', en: 'Kowloon City Plaza' },
-    date: { 'zh-TW': '2026.01.15 - 2026.03.15', 'zh-CN': '2026.01.15 - 2026.03.15', en: 'Jan 15 - Mar 15, 2026' },
-    type: { 'zh-TW': '抽獎', 'zh-CN': '抽奖', en: 'Lucky Draw' },
-    color: '#6A1B9A',
-    desc: { 'zh-TW': '消費滿HK$300即可參加抽獎', 'zh-CN': '消费满HK$300即可参加抽奖', en: 'Spend HK$300 to join the lucky draw' },
-  },
-  {
-    id: 'c5',
-    title: { 'zh-TW': '冬日禮品換購', 'zh-CN': '冬日礼品换购', en: 'Winter Gift Redemption' },
-    mall: { 'zh-TW': '赤柱廣場', 'zh-CN': '赤柱广场', en: 'Stanley Plaza' },
-    date: { 'zh-TW': '2026.01.01 - 2026.02.28', 'zh-CN': '2026.01.01 - 2026.02.28', en: 'Jan 1 - Feb 28, 2026' },
-    type: { 'zh-TW': '禮品兌換', 'zh-CN': '礼品兑换', en: 'Gift Redemption' },
-    color: '#1565C0',
-    desc: { 'zh-TW': '以印花換購精選冬日限定禮品', 'zh-CN': '以印花换购精选冬日限定礼品', en: 'Redeem stamps for exclusive winter gifts' },
+    id: 'c10',
+    title: { 'zh-TW': '晚間免費泊車優惠', 'zh-CN': '晚间免费泊车优惠', en: 'Evening Free Parking' },
+    mall: { 'zh-TW': '又一城', 'zh-CN': '又一城', en: 'Festival Walk' },
+    date: { 'zh-TW': '長期優惠', 'zh-CN': '长期优惠', en: 'Ongoing' },
+    type: { 'zh-TW': '泊車優惠', 'zh-CN': '泊车优惠', en: 'Parking' },
+    color: '#546E7A',
+    desc: { 'zh-TW': '晚上7時後消費滿HK$100享免費泊車', 'zh-CN': '晚上7时后消费满HK$100享免费泊车', en: 'Free parking after 7pm with HK$100 spend' },
   },
 ];
 
@@ -101,8 +127,9 @@ const couponsData: CouponData[] = [
 ];
 
 const luckyDrawsData: LuckyDrawData[] = [
-  { id: 'ld1', title: { 'zh-TW': '新年幸運大抽獎', 'zh-CN': '新年幸运大抽奖', en: 'New Year Lucky Draw' }, prize: { 'zh-TW': '日本來回機票 + 酒店住宿', 'zh-CN': '日本来回机票 + 酒店住宿', en: 'Round-trip flight to Japan + Hotel' }, endDate: '2026-03-15', entries: 2, maxEntries: 5, color: '#C62828' },
-  { id: 'ld2', title: { 'zh-TW': '春日驚喜扭蛋機', 'zh-CN': '春日惊喜扭蛋机', en: 'Spring Surprise Gacha' }, prize: { 'zh-TW': '最高可贏取 5,000 印花', 'zh-CN': '最高可赢取 5,000 印花', en: 'Win up to 5,000 stamps' }, endDate: '2026-04-30', entries: 0, maxEntries: 3, color: '#6A1B9A' },
+  { id: 'ld1', title: { 'zh-TW': '印花幸運轉盤', 'zh-CN': '印花幸运转盘', en: 'Stamp Lucky Wheel' }, prize: { 'zh-TW': '最高贏取HK$500現金券', 'zh-CN': '最高赢取HK$500现金券', en: 'Win up to HK$500 voucher' }, endDate: '2026-06-30', stampCost: 100, color: '#C62828' },
+  { id: 'ld2', title: { 'zh-TW': '新春黃金大抽獎', 'zh-CN': '新春黄金大抽奖', en: 'Spring Golden Draw' }, prize: { 'zh-TW': '最高贏取Apple iPad Air', 'zh-CN': '最高赢取Apple iPad Air', en: 'Win up to Apple iPad Air' }, endDate: '2026-04-30', stampCost: 500, color: '#6A1B9A' },
+  { id: 'ld3', title: { 'zh-TW': '週年慶鑽石抽獎', 'zh-CN': '周年庆钻石抽奖', en: 'Anniversary Diamond Draw' }, prize: { 'zh-TW': '最高贏取日本機票酒店', 'zh-CN': '最高赢取日本机票酒店', en: 'Win Japan trip + hotel' }, endDate: '2026-12-31', stampCost: 1000, color: '#00695C' },
 ];
 
 const giftsData: GiftData[] = [
@@ -278,29 +305,29 @@ export default function OffersPage() {
                 <div style={{
                   height: 100, background: `linear-gradient(135deg, ${ld.color}, ${ld.color}BB)`,
                   margin: '-12px -12px 12px', display: 'flex', flexDirection: 'column',
-                  justifyContent: 'center', padding: '0 20px', color: '#fff',
+                  justifyContent: 'center', padding: '0 20px', color: '#fff', position: 'relative',
                 }}>
                   <div style={{ fontSize: 18, fontWeight: 700 }}>{ld.title}</div>
                   <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>🎁 {ld.prize}</div>
+                  <div style={{
+                    position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+                    background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 12px', textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: 20, fontWeight: 700 }}>{ld.stampCost}</div>
+                    <div style={{ fontSize: 10, opacity: 0.9 }}>{locale === 'en' ? 'STAMPS' : '印花'}</div>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    {isAuthenticated ? (
-                      <div style={{ fontSize: 13, color: '#666' }}>
-                        {t('offers.drawnTimes', { times: ld.entries, max: ld.maxEntries })}
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: 13, color: '#666' }}>
-                        {loginLabels.loginToDraws[locale]}
-                      </div>
-                    )}
+                    <div style={{ fontSize: 13, color: '#666' }}>
+                      {locale === 'en' ? `Cost: ${ld.stampCost} stamps per draw` : `每次抽獎消耗 ${ld.stampCost} 印花`}
+                    </div>
                     <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('offers.deadline')}: {ld.endDate}</div>
                   </div>
                   <Button color="primary" size="small"
                     onClick={(e) => { e.stopPropagation(); navigate(isAuthenticated ? `/lottery/${ld.id}` : '/login'); }}
-                    style={{ '--background-color': PRIMARY, '--border-color': PRIMARY, borderRadius: 20 } as React.CSSProperties}
-                    disabled={isAuthenticated && ld.entries >= ld.maxEntries}
-                  >{!isAuthenticated ? loginLabels.login[locale] : (ld.entries >= ld.maxEntries ? t('offers.noMoreDraws') : t('offers.drawNow'))}</Button>
+                    style={{ '--background-color': ld.color, '--border-color': ld.color, borderRadius: 20 } as React.CSSProperties}
+                  >{!isAuthenticated ? loginLabels.login[locale] : t('offers.drawNow')}</Button>
                 </div>
               </Card>
             ))}

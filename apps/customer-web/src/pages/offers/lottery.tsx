@@ -16,17 +16,20 @@ const labels: Record<string, Record<Locale, string>> = {
   secondPrize: { 'zh-TW': '二獎', 'zh-CN': '二奖', en: '2nd Prize' },
   thirdPrize: { 'zh-TW': '三獎', 'zh-CN': '三奖', en: '3rd Prize' },
   consolationPrize: { 'zh-TW': '安慰獎', 'zh-CN': '安慰奖', en: 'Consolation' },
-  myChances: { 'zh-TW': '我的抽獎次數', 'zh-CN': '我的抽奖次数', en: 'My Draw Chances' },
+  myStamps: { 'zh-TW': '我的印花', 'zh-CN': '我的印花', en: 'My Stamps' },
+  stampCost: { 'zh-TW': '每次消耗', 'zh-CN': '每次消耗', en: 'Cost per draw' },
+  stamps: { 'zh-TW': '印花', 'zh-CN': '印花', en: 'stamps' },
   remaining: { 'zh-TW': '剩餘', 'zh-CN': '剩余', en: 'Remaining' },
   times: { 'zh-TW': '次', 'zh-CN': '次', en: 'times' },
   drawNow: { 'zh-TW': '立即抽獎', 'zh-CN': '立即抽奖', en: 'Draw Now' },
   drawing: { 'zh-TW': '抽獎中...', 'zh-CN': '抽奖中...', en: 'Drawing...' },
-  noChances: { 'zh-TW': '沒有抽獎機會', 'zh-CN': '没有抽奖机会', en: 'No chances left' },
+  notEnoughStamps: { 'zh-TW': '印花不足', 'zh-CN': '印花不足', en: 'Not enough stamps' },
+  needMoreStamps: { 'zh-TW': '需要更多印花', 'zh-CN': '需要更多印花', en: 'Need more stamps' },
   drawHistory: { 'zh-TW': '抽獎記錄', 'zh-CN': '抽奖记录', en: 'Draw History' },
   noHistory: { 'zh-TW': '暫無抽獎記錄', 'zh-CN': '暂无抽奖记录', en: 'No draw history yet' },
-  howToGetChances: { 'zh-TW': '如何獲得抽獎機會', 'zh-CN': '如何获得抽奖机会', en: 'How to Get Chances' },
-  spendToEarn: { 'zh-TW': '消費滿 HK$300 獲得 1 次', 'zh-CN': '消费满 HK$300 获得 1 次', en: 'Spend HK$300 to earn 1 chance' },
-  maxChances: { 'zh-TW': '每人最多 5 次機會', 'zh-CN': '每人最多 5 次机会', en: 'Max 5 chances per person' },
+  howItWorks: { 'zh-TW': '抽獎說明', 'zh-CN': '抽奖说明', en: 'How It Works' },
+  spendStamps: { 'zh-TW': '消耗印花抽獎', 'zh-CN': '消耗印花抽奖', en: 'Spend stamps to draw' },
+  unlimitedDraws: { 'zh-TW': '印花充足時不限抽獎次數', 'zh-CN': '印花充足时不限抽奖次数', en: 'Unlimited draws with enough stamps' },
   validPeriod: { 'zh-TW': '有效期', 'zh-CN': '有效期', en: 'Valid Period' },
   congratulations: { 'zh-TW': '恭喜你！', 'zh-CN': '恭喜你！', en: 'Congratulations!' },
   youWon: { 'zh-TW': '你獲得了', 'zh-CN': '你获得了', en: 'You won' },
@@ -35,6 +38,9 @@ const labels: Record<string, Record<Locale, string>> = {
   terms: { 'zh-TW': '條款及細則', 'zh-CN': '条款及细则', en: 'Terms & Conditions' },
   prizePool: { 'zh-TW': '獎品池', 'zh-CN': '奖品池', en: 'Prize Pool' },
   probability: { 'zh-TW': '中獎率', 'zh-CN': '中奖率', en: 'Probability' },
+  loginRequired: { 'zh-TW': '請先登入', 'zh-CN': '请先登录', en: 'Please login first' },
+  loginToDraw: { 'zh-TW': '登入後即可參與抽獎', 'zh-CN': '登录后即可参与抽奖', en: 'Login to participate in lottery' },
+  login: { 'zh-TW': '立即登入', 'zh-CN': '立即登录', en: 'Login Now' },
 };
 
 interface LotteryData {
@@ -43,52 +49,81 @@ interface LotteryData {
   desc: Record<Locale, string>;
   endDate: string;
   color: string;
+  stampCost: number; // Stamps required per draw
   prizes: {
     level: string;
     name: Record<Locale, string>;
     value: string;
     probability: number;
     icon: string;
+    stampReward?: number; // For stamp rewards
   }[];
 }
 
 const lotteriesData: Record<string, LotteryData> = {
   ld1: {
     id: 'ld1',
-    title: { 'zh-TW': '新年幸運大抽獎', 'zh-CN': '新年幸运大抽奖', en: 'New Year Lucky Draw' },
-    desc: { 'zh-TW': '消費滿HK$300即可參加，贏取豐富大獎！', 'zh-CN': '消费满HK$300即可参加，赢取丰富大奖！', en: 'Spend HK$300 to join and win amazing prizes!' },
-    endDate: '2026-03-15',
+    title: { 'zh-TW': '印花幸運轉盤', 'zh-CN': '印花幸运转盘', en: 'Lucky Stamp Wheel' },
+    desc: { 'zh-TW': '消耗100印花抽獎，贏取豐富獎品！', 'zh-CN': '消耗100印花抽奖，赢取丰富奖品！', en: 'Spend 100 stamps to draw and win prizes!' },
+    endDate: '2026-06-30',
     color: '#C62828',
+    stampCost: 100,
     prizes: [
-      { level: 'grandPrize', name: { 'zh-TW': '日本來回機票 + 酒店', 'zh-CN': '日本来回机票 + 酒店', en: 'Japan Round Trip + Hotel' }, value: 'HK$15,000', probability: 0.1, icon: '✈️' },
-      { level: 'secondPrize', name: { 'zh-TW': 'Apple iPad Air', 'zh-CN': 'Apple iPad Air', en: 'Apple iPad Air' }, value: 'HK$5,000', probability: 0.5, icon: '📱' },
-      { level: 'thirdPrize', name: { 'zh-TW': '商場現金券 HK$500', 'zh-CN': '商场现金券 HK$500', en: 'Mall Voucher HK$500' }, value: 'HK$500', probability: 5, icon: '🎟️' },
-      { level: 'consolationPrize', name: { 'zh-TW': '100 印花', 'zh-CN': '100 印花', en: '100 Stamps' }, value: '100 Stamps', probability: 94.4, icon: '⭐' },
+      { level: 'grandPrize', name: { 'zh-TW': '商場現金券 HK$500', 'zh-CN': '商场现金券 HK$500', en: 'Mall Voucher HK$500' }, value: 'HK$500', probability: 1, icon: '🎟️' },
+      { level: 'secondPrize', name: { 'zh-TW': '商場現金券 HK$100', 'zh-CN': '商场现金券 HK$100', en: 'Mall Voucher HK$100' }, value: 'HK$100', probability: 5, icon: '💳' },
+      { level: 'thirdPrize', name: { 'zh-TW': '200 印花', 'zh-CN': '200 印花', en: '200 Stamps' }, value: '200', probability: 15, icon: '✨', stampReward: 200 },
+      { level: 'consolationPrize', name: { 'zh-TW': '50 印花', 'zh-CN': '50 印花', en: '50 Stamps' }, value: '50', probability: 79, icon: '⭐', stampReward: 50 },
     ],
   },
   ld2: {
     id: 'ld2',
-    title: { 'zh-TW': '春日驚喜扭蛋機', 'zh-CN': '春日惊喜扭蛋机', en: 'Spring Surprise Gacha' },
-    desc: { 'zh-TW': '每次消費可獲得扭蛋機會，最高贏取5,000印花！', 'zh-CN': '每次消费可获得扭蛋机会，最高赢取5,000印花！', en: 'Every purchase gives you a gacha chance. Win up to 5,000 stamps!' },
+    title: { 'zh-TW': '新春黃金大抽獎', 'zh-CN': '新春黄金大抽奖', en: 'Spring Golden Draw' },
+    desc: { 'zh-TW': '消耗500印花抽大獎！獎品更豐富！', 'zh-CN': '消耗500印花抽大奖！奖品更丰富！', en: 'Spend 500 stamps for bigger prizes!' },
     endDate: '2026-04-30',
     color: '#6A1B9A',
+    stampCost: 500,
     prizes: [
-      { level: 'grandPrize', name: { 'zh-TW': '5,000 印花', 'zh-CN': '5,000 印花', en: '5,000 Stamps' }, value: '5,000', probability: 0.5, icon: '🌟' },
-      { level: 'secondPrize', name: { 'zh-TW': '1,000 印花', 'zh-CN': '1,000 印花', en: '1,000 Stamps' }, value: '1,000', probability: 2, icon: '✨' },
-      { level: 'thirdPrize', name: { 'zh-TW': '500 印花', 'zh-CN': '500 印花', en: '500 Stamps' }, value: '500', probability: 10, icon: '💫' },
-      { level: 'consolationPrize', name: { 'zh-TW': '50 印花', 'zh-CN': '50 印花', en: '50 Stamps' }, value: '50', probability: 87.5, icon: '⭐' },
+      { level: 'grandPrize', name: { 'zh-TW': 'Apple iPad Air', 'zh-CN': 'Apple iPad Air', en: 'Apple iPad Air' }, value: 'HK$5,000', probability: 0.5, icon: '📱' },
+      { level: 'secondPrize', name: { 'zh-TW': '商場現金券 HK$1,000', 'zh-CN': '商场现金券 HK$1,000', en: 'Mall Voucher HK$1,000' }, value: 'HK$1,000', probability: 3, icon: '🎟️' },
+      { level: 'thirdPrize', name: { 'zh-TW': '1,000 印花', 'zh-CN': '1,000 印花', en: '1,000 Stamps' }, value: '1,000', probability: 15, icon: '🌟', stampReward: 1000 },
+      { level: 'consolationPrize', name: { 'zh-TW': '200 印花', 'zh-CN': '200 印花', en: '200 Stamps' }, value: '200', probability: 81.5, icon: '✨', stampReward: 200 },
+    ],
+  },
+  ld3: {
+    id: 'ld3',
+    title: { 'zh-TW': '週年慶鑽石抽獎', 'zh-CN': '周年庆钻石抽奖', en: 'Anniversary Diamond Draw' },
+    desc: { 'zh-TW': '消耗1000印花贏取終極豪禮！', 'zh-CN': '消耗1000印花赢取终极豪礼！', en: 'Spend 1000 stamps for ultimate prizes!' },
+    endDate: '2026-12-31',
+    color: '#00695C',
+    stampCost: 1000,
+    prizes: [
+      { level: 'grandPrize', name: { 'zh-TW': '日本來回機票 + 酒店', 'zh-CN': '日本来回机票 + 酒店', en: 'Japan Round Trip + Hotel' }, value: 'HK$15,000', probability: 1, icon: '✈️' },
+      { level: 'secondPrize', name: { 'zh-TW': 'Apple iPhone 16', 'zh-CN': 'Apple iPhone 16', en: 'Apple iPhone 16' }, value: 'HK$8,000', probability: 2, icon: '📱' },
+      { level: 'thirdPrize', name: { 'zh-TW': '商場現金券 HK$2,000', 'zh-CN': '商场现金券 HK$2,000', en: 'Mall Voucher HK$2,000' }, value: 'HK$2,000', probability: 5, icon: '🎟️' },
+      { level: 'consolationPrize', name: { 'zh-TW': '500 印花', 'zh-CN': '500 印花', en: '500 Stamps' }, value: '500', probability: 92, icon: '⭐', stampReward: 500 },
     ],
   },
 };
 
-// User's lottery data (in real app, this would come from API)
-const getUserLotteryData = () => ({
-  ld1: { chances: 3, maxChances: 5, history: [
-    { date: '2026-02-15', prize: 'consolationPrize', name: { 'zh-TW': '100 印花', 'zh-CN': '100 印花', en: '100 Stamps' } },
-    { date: '2026-02-10', prize: 'thirdPrize', name: { 'zh-TW': '商場現金券 HK$500', 'zh-CN': '商场现金券 HK$500', en: 'Mall Voucher HK$500' } },
-  ]},
-  ld2: { chances: 3, maxChances: 3, history: [] },
-});
+// Get user's lottery history from localStorage
+const getUserLotteryHistory = () => {
+  try {
+    return JSON.parse(localStorage.getItem('lotteryHistory') || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Save lottery history to localStorage
+const saveLotteryHistory = (lotteryId: string, historyEntry: { date: string; prize: string; name: Record<Locale, string> }) => {
+  const history = getUserLotteryHistory();
+  if (!history[lotteryId]) {
+    history[lotteryId] = [];
+  }
+  history[lotteryId].unshift(historyEntry);
+  localStorage.setItem('lotteryHistory', JSON.stringify(history));
+  return history;
+};
 
 export default function LotteryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -96,28 +131,31 @@ export default function LotteryDetailPage() {
   const locale = useSettingsStore((s) => s.locale);
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [wonPrize, setWonPrize] = useState<typeof lottery.prizes[0] | null>(null);
-  const [userLotteryData, setUserLotteryData] = useState(getUserLotteryData);
+  const [wonPrize, setWonPrize] = useState<LotteryData['prizes'][0] | null>(null);
+  const [lotteryHistory, setLotteryHistory] = useState(getUserLotteryHistory);
   const [showTerms, setShowTerms] = useState(false);
 
   const t = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
 
   const lottery = lotteriesData[id || 'ld1'];
-  const userData = userLotteryData[id as keyof typeof userLotteryData] || { chances: 0, maxChances: 5, history: [] };
+  const stampBalance = user?.stampBalance || 0;
+  const hasEnoughStamps = stampBalance >= (lottery?.stampCost || 0);
+  const currentHistory = lotteryHistory[id || 'ld1'] || [];
 
-  const localizedPrizes = useMemo(() => lottery.prizes.map(p => ({
+  const localizedPrizes = useMemo(() => lottery?.prizes.map(p => ({
     ...p,
     levelName: t(p.level),
-    name: p.name[locale],
-  })), [lottery.prizes, locale, t]);
+    localizedName: p.name[locale],
+  })) || [], [lottery?.prizes, locale, t]);
 
-  const localizedHistory = useMemo(() => userData.history.map(h => ({
+  const localizedHistory = useMemo(() => currentHistory.map((h: { date: string; prize: string; name: Record<Locale, string> }) => ({
     ...h,
-    name: h.name[locale],
-  })), [userData.history, locale]);
+    localizedName: h.name[locale],
+  })), [currentHistory, locale]);
 
   // Simulate lottery draw with weighted probability
   const doDraw = useCallback(() => {
@@ -133,12 +171,24 @@ export default function LotteryDetailPage() {
   }, [lottery.prizes]);
 
   const handleDraw = async () => {
-    if (userData.chances <= 0) {
-      Toast.show({ content: t('noChances'), icon: 'fail' });
+    if (!isAuthenticated) {
+      Toast.show({ content: t('loginRequired'), icon: 'fail' });
+      return;
+    }
+
+    if (!hasEnoughStamps) {
+      Toast.show({ content: `${t('notEnoughStamps')} - ${t('needMoreStamps')} ${lottery.stampCost - stampBalance} ${t('stamps')}`, icon: 'fail' });
       return;
     }
 
     setIsDrawing(true);
+
+    // First, deduct the stamp cost
+    const newStampBalance = stampBalance - lottery.stampCost;
+    setUser({
+      ...user,
+      stampBalance: newStampBalance,
+    });
 
     // Simulate animation delay
     await new Promise(resolve => setTimeout(resolve, 2500));
@@ -148,28 +198,18 @@ export default function LotteryDetailPage() {
     setIsDrawing(false);
     setShowResult(true);
 
-    // Update user data
-    setUserLotteryData(prev => ({
-      ...prev,
-      [id as string]: {
-        ...prev[id as keyof typeof prev],
-        chances: prev[id as keyof typeof prev].chances - 1,
-        history: [
-          { date: new Date().toISOString().split('T')[0], prize: prize.level, name: prize.name },
-          ...prev[id as keyof typeof prev].history,
-        ],
-      },
-    }));
+    // Save to history
+    const historyEntry = { date: new Date().toISOString().split('T')[0], prize: prize.level, name: prize.name };
+    const updatedHistory = saveLotteryHistory(id || 'ld1', historyEntry);
+    setLotteryHistory(updatedHistory);
 
     // If won stamps, add to user balance
-    if (prize.level === 'consolationPrize' || prize.level === 'thirdPrize') {
-      const stampAmount = parseInt(prize.value.replace(/[^0-9]/g, '')) || 0;
-      if (stampAmount > 0 && user) {
-        setUser({
-          ...user,
-          stampBalance: (user.stampBalance || 0) + stampAmount,
-        });
-      }
+    if (prize.stampReward) {
+      setUser({
+        ...user,
+        stampBalance: newStampBalance + prize.stampReward,
+      });
+      Toast.show({ content: `+${prize.stampReward} ${t('stamps')}`, icon: 'success' });
     }
   };
 
@@ -233,47 +273,97 @@ export default function LotteryDetailPage() {
             </div>
           </div>
 
-          {/* Chances Display */}
+          {/* Stamp Balance and Cost Display */}
           <div style={{
-            background: `${lottery.color}10`,
-            borderRadius: 12,
-            padding: 16,
+            display: 'flex',
+            gap: 12,
             marginBottom: 16,
-            textAlign: 'center',
           }}>
-            <div style={{ fontSize: 13, color: '#666' }}>{t('myChances')}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: lottery.color }}>
-              {userData.chances} <span style={{ fontSize: 14, fontWeight: 400 }}>/ {userData.maxChances}</span>
+            <div style={{
+              flex: 1,
+              background: `${lottery.color}10`,
+              borderRadius: 12,
+              padding: 16,
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 12, color: '#666' }}>{t('myStamps')}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: hasEnoughStamps ? lottery.color : '#ff4d4f' }}>
+                {isAuthenticated ? stampBalance.toLocaleString() : '--'}
+              </div>
             </div>
-            <ProgressBar
-              percent={(userData.chances / userData.maxChances) * 100}
-              style={{
-                '--fill-color': lottery.color,
-                '--track-color': '#e0e0e0',
-                '--track-width': '8px',
-                marginTop: 12,
-              } as React.CSSProperties}
-            />
+            <div style={{
+              flex: 1,
+              background: `${GOLD}20`,
+              borderRadius: 12,
+              padding: 16,
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 12, color: '#666' }}>{t('stampCost')}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: GOLD }}>
+                {lottery.stampCost.toLocaleString()}
+              </div>
+            </div>
           </div>
 
+          {/* Progress indicator */}
+          {isAuthenticated && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 12, color: '#666' }}>{t('stamps')}</span>
+                <span style={{ fontSize: 12, color: hasEnoughStamps ? '#52c41a' : '#ff4d4f' }}>
+                  {hasEnoughStamps ? '✓' : `${t('needMoreStamps')} ${lottery.stampCost - stampBalance}`}
+                </span>
+              </div>
+              <ProgressBar
+                percent={Math.min((stampBalance / lottery.stampCost) * 100, 100)}
+                style={{
+                  '--fill-color': hasEnoughStamps ? '#52c41a' : '#ff4d4f',
+                  '--track-color': '#e0e0e0',
+                  '--track-width': '8px',
+                } as React.CSSProperties}
+              />
+            </div>
+          )}
+
           {/* Draw Button */}
-          <Button
-            block
-            color="primary"
-            size="large"
-            onClick={handleDraw}
-            disabled={userData.chances <= 0 || isDrawing}
-            style={{
-              '--background-color': userData.chances > 0 ? lottery.color : '#ccc',
-              '--border-color': userData.chances > 0 ? lottery.color : '#ccc',
-              borderRadius: 12,
-              height: 50,
-              fontSize: 17,
-              fontWeight: 600,
-            } as React.CSSProperties}
-          >
-            {isDrawing ? t('drawing') : userData.chances > 0 ? t('drawNow') : t('noChances')}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              block
+              color="primary"
+              size="large"
+              onClick={handleDraw}
+              disabled={!hasEnoughStamps || isDrawing}
+              style={{
+                '--background-color': hasEnoughStamps ? lottery.color : '#ccc',
+                '--border-color': hasEnoughStamps ? lottery.color : '#ccc',
+                borderRadius: 12,
+                height: 50,
+                fontSize: 17,
+                fontWeight: 600,
+              } as React.CSSProperties}
+            >
+              {isDrawing ? t('drawing') : hasEnoughStamps ? `${t('drawNow')} (-${lottery.stampCost} ${t('stamps')})` : t('notEnoughStamps')}
+            </Button>
+          ) : (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 14, color: '#666', marginBottom: 12 }}>{t('loginToDraw')}</div>
+              <Button
+                block
+                color="primary"
+                size="large"
+                onClick={() => navigate('/login')}
+                style={{
+                  '--background-color': lottery.color,
+                  borderRadius: 12,
+                  height: 50,
+                  fontSize: 17,
+                  fontWeight: 600,
+                } as React.CSSProperties}
+              >
+                {t('login')}
+              </Button>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -311,7 +401,7 @@ export default function LotteryDetailPage() {
                   >
                     {prize.levelName}
                   </Tag>
-                  <span style={{ fontSize: 14, fontWeight: 500 }}>{prize.name}</span>
+                  <span style={{ fontSize: 14, fontWeight: 500 }}>{prize.localizedName}</span>
                 </div>
                 <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
                   {t('probability')}: {prize.probability}%
@@ -325,13 +415,13 @@ export default function LotteryDetailPage() {
         </Card>
       </div>
 
-      {/* How to Get Chances */}
+      {/* How It Works */}
       <div style={{ padding: '0 16px' }}>
-        <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{t('howToGetChances')}</div>
+        <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{t('howItWorks')}</div>
         <Card style={{ borderRadius: 12 }}>
           <List style={{ '--border-top': 'none', '--border-bottom': 'none' }}>
-            <List.Item prefix={<span style={{ fontSize: 20 }}>💰</span>}>{t('spendToEarn')}</List.Item>
-            <List.Item prefix={<span style={{ fontSize: 20 }}>🎯</span>}>{t('maxChances')}</List.Item>
+            <List.Item prefix={<span style={{ fontSize: 20 }}>🎫</span>}>{t('spendStamps')}: {lottery.stampCost} {t('stamps')}</List.Item>
+            <List.Item prefix={<span style={{ fontSize: 20 }}>♾️</span>}>{t('unlimitedDraws')}</List.Item>
           </List>
         </Card>
       </div>
@@ -353,7 +443,7 @@ export default function LotteryDetailPage() {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 500 }}>{h.name}</div>
+                  <div style={{ fontSize: 14, fontWeight: 500 }}>{h.localizedName}</div>
                   <div style={{ fontSize: 12, color: '#999' }}>{h.date}</div>
                 </div>
                 <Tag color={h.prize === 'grandPrize' ? 'warning' : h.prize === 'secondPrize' ? 'primary' : 'default'}>
@@ -411,7 +501,7 @@ export default function LotteryDetailPage() {
               onClick={() => setShowResult(false)}
               style={{ '--border-color': lottery.color, '--text-color': lottery.color, borderRadius: 12 } as React.CSSProperties}
             >
-              {userData.chances > 0 ? t('tryAgain') : t('back')}
+              {hasEnoughStamps ? t('tryAgain') : t('back')}
             </Button>
             <Button
               block
