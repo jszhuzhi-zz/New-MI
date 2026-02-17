@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd-mobile';
 import zhTW from 'antd-mobile/es/locales/zh-TW';
 import TabLayout from './components/TabLayout';
@@ -41,6 +41,25 @@ function RedirectHandler() {
   }, [navigate, location]);
 
   return null;
+}
+
+// Auth Guard - Redirect to login if not authenticated
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    // Save the intended destination for redirect after login
+    sessionStorage.setItem('redirect_after_login', location.pathname);
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// Protected Route wrapper
+function ProtectedRoute({ element }: { element: React.ReactElement }) {
+  return <AuthGuard>{element}</AuthGuard>;
 }
 
 const globalStyles = `
@@ -114,34 +133,13 @@ const globalStyles = `
 `;
 
 export default function App() {
-  const setToken = useAuthStore((s) => s.setToken);
-  const setUser = useAuthStore((s) => s.setUser);
-
-  // Auto-login for demo
-  useEffect(() => {
-    if (!useAuthStore.getState().token) {
-      setToken('demo-token-2026');
-      setUser({
-        id: 'member_001',
-        name: '陳小明',
-        nameEn: 'Chan Siu Ming',
-        phone: '+852 9123 4567',
-        email: 'siuming@example.com',
-        cardNo: 'LM-2024-0088',
-        tier: 'gold',
-        tierName: '金卡會員',
-        stampBalance: 2580,
-        avatar: null,
-      });
-    }
-  }, []);
-
   return (
     <ConfigProvider locale={zhTW}>
       <style>{globalStyles}</style>
       <BrowserRouter>
         <RedirectHandler />
         <Routes>
+          {/* Public routes - can browse freely */}
           <Route element={<TabLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/stamp" element={<StampPage />} />
@@ -149,23 +147,27 @@ export default function App() {
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
-          <Route path="/stamp/:id" element={<StampDetail />} />
+
+          {/* Public detail pages */}
           <Route path="/campaign/:id" element={<CampaignDetail />} />
-          <Route path="/coupon/:id" element={<CouponDetail />} />
-          <Route path="/lottery/:id" element={<LotteryDetail />} />
-          <Route path="/tier" element={<TierPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/mall" element={<MallDirectory />} />
           <Route path="/merchant/:id" element={<MerchantDetail />} />
-          <Route path="/checkin" element={<CheckInPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/gifts" element={<GiftsPage />} />
-          <Route path="/support" element={<AICustomerServicePage />} />
-          <Route path="/messages" element={<MessagesPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/parking" element={<ParkingPage />} />
           <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Member-only routes - require authentication */}
+          <Route path="/stamp/:id" element={<ProtectedRoute element={<StampDetail />} />} />
+          <Route path="/coupon/:id" element={<ProtectedRoute element={<CouponDetail />} />} />
+          <Route path="/lottery/:id" element={<ProtectedRoute element={<LotteryDetail />} />} />
+          <Route path="/tier" element={<ProtectedRoute element={<TierPage />} />} />
+          <Route path="/profile/edit" element={<ProtectedRoute element={<ProfileEditPage />} />} />
+          <Route path="/checkin" element={<ProtectedRoute element={<CheckInPage />} />} />
+          <Route path="/gifts" element={<ProtectedRoute element={<GiftsPage />} />} />
+          <Route path="/support" element={<ProtectedRoute element={<AICustomerServicePage />} />} />
+          <Route path="/messages" element={<ProtectedRoute element={<MessagesPage />} />} />
+          <Route path="/favorites" element={<ProtectedRoute element={<FavoritesPage />} />} />
+          <Route path="/parking" element={<ProtectedRoute element={<ParkingPage />} />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

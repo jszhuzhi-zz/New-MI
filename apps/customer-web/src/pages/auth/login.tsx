@@ -68,6 +68,13 @@ export default function LoginPage() {
 
   const t = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
 
+  // Get redirect path after login
+  const getRedirectPath = () => {
+    const path = sessionStorage.getItem('redirect_after_login');
+    sessionStorage.removeItem('redirect_after_login');
+    return path || '/';
+  };
+
   // Countdown timer for SMS code
   useEffect(() => {
     if (countdown <= 0) return;
@@ -80,7 +87,7 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate(getRedirectPath());
     }
   }, [isAuthenticated, navigate]);
 
@@ -112,7 +119,7 @@ export default function LoginPage() {
     });
 
     Toast.show({ icon: 'success', content: t('loginSuccess') });
-    navigate('/');
+    navigate(getRedirectPath());
   };
 
   const handlePasswordLogin = async (values: { phone: string; password: string }) => {
@@ -138,7 +145,7 @@ export default function LoginPage() {
         birthday: '1990-05-15',
       });
       Toast.show({ icon: 'success', content: t('loginSuccess') });
-      navigate('/');
+      navigate(getRedirectPath());
     } else {
       Toast.show({ icon: 'fail', content: t('invalidCredentials') });
     }
@@ -160,7 +167,7 @@ export default function LoginPage() {
       birthday: '1990-05-15',
     });
     Toast.show({ icon: 'success', content: t('loginSuccess') });
-    navigate('/');
+    navigate(getRedirectPath());
   };
 
   const handleRegister = async () => {

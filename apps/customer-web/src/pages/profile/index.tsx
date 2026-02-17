@@ -1,12 +1,25 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, Badge, Avatar, Dialog, Toast } from 'antd-mobile';
+import { List, Badge, Avatar, Dialog, Toast, Button } from 'antd-mobile';
 import { RightOutline, SetOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
-import { useSettingsStore } from '../../store/settings';
+import { useSettingsStore, type Locale } from '../../store/settings';
 import { useTranslation } from '../../locales';
 
 const GOLD = '#C4A962';
+
+// Multilingual labels for login prompt
+const labels: Record<string, Record<Locale, string>> = {
+  loginTitle: { 'zh-TW': '登入會員', 'zh-CN': '登录会员', en: 'Login' },
+  loginDesc: { 'zh-TW': '登入後享受專屬會員權益', 'zh-CN': '登录后享受专属会员权益', en: 'Login to enjoy member benefits' },
+  loginBtn: { 'zh-TW': '立即登入', 'zh-CN': '立即登录', en: 'Login Now' },
+  registerBtn: { 'zh-TW': '新會員註冊', 'zh-CN': '新会员注册', en: 'Register' },
+  benefits: { 'zh-TW': '會員權益', 'zh-CN': '会员权益', en: 'Member Benefits' },
+  benefit1: { 'zh-TW': '消費賺取印花獎賞', 'zh-CN': '消费赚取印花奖赏', en: 'Earn stamps on purchases' },
+  benefit2: { 'zh-TW': '專屬優惠及活動', 'zh-CN': '专属优惠及活动', en: 'Exclusive offers & events' },
+  benefit3: { 'zh-TW': '生日雙倍印花', 'zh-CN': '生日双倍印花', en: 'Birthday double stamps' },
+  benefit4: { 'zh-TW': '免費泊車優惠', 'zh-CN': '免费泊车优惠', en: 'Free parking benefits' },
+};
 
 // Custom SVG Icons
 const EditIcon = ({ color }: { color: string }) => (
@@ -76,22 +89,25 @@ const CarIcon = ({ color }: { color: string }) => (
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
   const { getThemeColors } = useSettingsStore();
   const colors = getThemeColors();
 
+  const tl = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
+
   const menuItems = [
-    { label: t('profile.editProfile'), icon: <EditIcon color={colors.primary} />, path: '/profile/edit', badge: 0 },
-    { label: t('profile.stampHistory'), icon: <TrophyIcon color={colors.primary} />, path: '/tier', badge: 0 },
-    { label: t('parking.title'), icon: <CarIcon color={colors.primary} />, path: '/parking', badge: 0 },
-    { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3 },
-    { label: t('favorites.title'), icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0 },
-    { label: t('settings.languageSettings'), icon: <LanguageIcon color={colors.primary} />, path: '/settings', badge: 0 },
-    { label: t('settings.themeSettings'), icon: <PaletteIcon color={colors.primary} />, path: '/settings', badge: 0 },
-    { label: t('support.aiService'), icon: <ChatIcon color={colors.primary} />, path: '/support', badge: 0 },
-    { label: t('profile.about'), icon: <InfoIcon color={colors.primary} />, path: '', badge: 0 },
+    { label: t('profile.editProfile'), icon: <EditIcon color={colors.primary} />, path: '/profile/edit', badge: 0, requireAuth: true },
+    { label: t('profile.stampHistory'), icon: <TrophyIcon color={colors.primary} />, path: '/tier', badge: 0, requireAuth: true },
+    { label: t('parking.title'), icon: <CarIcon color={colors.primary} />, path: '/parking', badge: 0, requireAuth: true },
+    { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3, requireAuth: true },
+    { label: t('favorites.title'), icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0, requireAuth: true },
+    { label: t('settings.languageSettings'), icon: <LanguageIcon color={colors.primary} />, path: '/settings', badge: 0, requireAuth: false },
+    { label: t('settings.themeSettings'), icon: <PaletteIcon color={colors.primary} />, path: '/settings', badge: 0, requireAuth: false },
+    { label: t('support.aiService'), icon: <ChatIcon color={colors.primary} />, path: '/support', badge: 0, requireAuth: true },
+    { label: t('profile.about'), icon: <InfoIcon color={colors.primary} />, path: '', badge: 0, requireAuth: false },
   ];
 
   const handleLogout = () => {
@@ -102,6 +118,7 @@ export default function ProfilePage() {
       onConfirm: () => {
         logout();
         Toast.show({ content: t('profile.logoutSuccess'), icon: 'success' });
+        navigate('/');
       },
     });
   };
@@ -113,6 +130,119 @@ export default function ProfilePage() {
       Toast.show({ content: t('profile.featureInDev'), icon: 'fail' });
     }
   };
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 60 }}>
+        {/* Header */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
+            padding: '28px 20px 24px',
+            color: '#fff',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+            <SetOutline
+              fontSize={22}
+              onClick={() => navigate('/settings')}
+              style={{ cursor: 'pointer', opacity: 0.9 }}
+            />
+          </div>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
+            onClick={() => navigate('/login')}
+          >
+            <Avatar
+              style={{
+                '--size': '64px',
+                '--border-radius': '32px',
+                background: 'rgba(255,255,255,0.2)',
+                fontSize: 28,
+              } as React.CSSProperties}
+            >
+              👤
+            </Avatar>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>{tl('loginTitle')}</div>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>{tl('loginDesc')}</div>
+            </div>
+            <RightOutline style={{ fontSize: 18, opacity: 0.6 }} />
+          </div>
+        </div>
+
+        {/* Login Buttons */}
+        <div style={{ padding: '16px' }}>
+          <Button
+            block
+            color="primary"
+            onClick={() => navigate('/login')}
+            style={{ '--background-color': colors.primary, borderRadius: 12, height: 48, fontSize: 16, marginBottom: 12 } as React.CSSProperties}
+          >
+            {tl('loginBtn')}
+          </Button>
+          <Button
+            block
+            onClick={() => navigate('/login')}
+            style={{ '--border-color': colors.primary, '--text-color': colors.primary, borderRadius: 12, height: 48, fontSize: 16 } as React.CSSProperties}
+          >
+            {tl('registerBtn')}
+          </Button>
+        </div>
+
+        {/* Member Benefits */}
+        <div style={{ padding: '0 16px' }}>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{tl('benefits')}</div>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 16 }}>
+            {[
+              { icon: '🎁', text: tl('benefit1') },
+              { icon: '🎉', text: tl('benefit2') },
+              { icon: '🎂', text: tl('benefit3') },
+              { icon: '🚗', text: tl('benefit4') },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '12px 0',
+                  borderBottom: idx < 3 ? '1px solid #f0f0f0' : 'none',
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{item.icon}</span>
+                <span style={{ fontSize: 14, color: '#333' }}>{item.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Settings */}
+        <div style={{ padding: '16px' }}>
+          <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+            <List style={{ '--border-top': 'none', '--border-bottom': 'none' } as React.CSSProperties}>
+              {menuItems.filter(item => !item.requireAuth).map((item, idx) => (
+                <List.Item
+                  key={idx}
+                  prefix={<span style={{ display: 'flex', alignItems: 'center' }}>{item.icon}</span>}
+                  onClick={() => handleMenuClick(item)}
+                  arrow={<RightOutline />}
+                >
+                  {item.label}
+                </List.Item>
+              ))}
+            </List>
+          </div>
+        </div>
+
+        {/* Version */}
+        <div style={{ textAlign: 'center', padding: '8px 0 16px', color: '#ccc', fontSize: 12 }}>
+          Link Mall v2.0.0
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 60 }}>
@@ -176,7 +306,7 @@ export default function ProfilePage() {
           }}
         >
           {[
-            { label: t('common.stamp'), value: (user?.stampBalance || 2580).toLocaleString(), path: '/stamp' },
+            { label: t('common.stamp'), value: (user?.stampBalance || 0).toLocaleString(), path: '/stamp' },
             { label: t('offers.myCoupons'), value: '5', path: '/offers' },
           ].map((stat, i) => (
             <div

@@ -69,16 +69,32 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   logout: () => {
     // Clear all user-related data for privacy protection
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('favorites');
-    localStorage.removeItem('joinedCampaigns');
-    localStorage.removeItem('parkingPlates');
-    localStorage.removeItem('parkingHistory');
-    localStorage.removeItem('messages');
-    localStorage.removeItem('readMessages');
-    localStorage.removeItem('aiChatHistory');
-    localStorage.removeItem('feedbackHistory');
+    const keysToRemove = [
+      'token',
+      'user',
+      'favorites',
+      'joinedCampaigns',
+      'parkingPlates',
+      'parkingHistory',
+      'messages',
+      'readMessages',
+      'messages_read_status',
+      'messages_deleted',
+      'aiChatHistory',
+      'feedbackHistory',
+      'stampHistory',
+      'couponHistory',
+      'transactionHistory',
+      'searchHistory',
+      'recentViewed',
+      'cartItems',
+      'orderHistory',
+      'notificationSettings',
+      'userPreferences',
+    ];
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    // Also clear all session storage
+    sessionStorage.clear();
     set({ token: null, user: null, isAuthenticated: false });
   },
 }));
