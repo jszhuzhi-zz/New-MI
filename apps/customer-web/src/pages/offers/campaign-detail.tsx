@@ -20,9 +20,26 @@ const QrcodeIcon = () => (
 );
 import { useTranslation } from '../../locales';
 import { useSettingsStore, type Locale } from '../../store/settings';
+import { useAuthStore } from '../../store/auth';
 import { QRCodeSVG } from 'qrcode.react';
 
 const PRIMARY = '#00694B';
+
+// Helper to get joined campaigns from localStorage (user-specific)
+const getJoinedCampaigns = (): Record<string, { code: string; joinedAt: string }> => {
+  try {
+    return JSON.parse(localStorage.getItem('joinedCampaigns') || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Helper to save joined campaign
+const saveJoinedCampaign = (campaignId: string, code: string) => {
+  const joined = getJoinedCampaigns();
+  joined[campaignId] = { code, joinedAt: new Date().toISOString() };
+  localStorage.setItem('joinedCampaigns', JSON.stringify(joined));
+};
 
 interface CampaignData {
   id: string;
@@ -42,7 +59,6 @@ interface CampaignData {
   maxParticipants: number;
   merchants: string[];
   tags: Record<Locale, string[]>;
-  isJoined?: boolean;
 }
 
 interface Campaign {
@@ -63,7 +79,6 @@ interface Campaign {
   maxParticipants: number;
   merchants: string[];
   tags: string[];
-  isJoined?: boolean;
 }
 
 const campaignDataSource: Record<string, CampaignData> = {
@@ -98,7 +113,6 @@ const campaignDataSource: Record<string, CampaignData> = {
     maxParticipants: 0,
     merchants: ['All Merchants'],
     tags: { 'zh-TW': ['新春限定', '三倍印花', '限時優惠'], 'zh-CN': ['新春限定', '三倍印花', '限时优惠'], en: ['CNY Special', 'Triple Stamps', 'Limited Time'] },
-    isJoined: true,
   },
   c2: {
     id: 'c2',
@@ -130,7 +144,6 @@ const campaignDataSource: Record<string, CampaignData> = {
     maxParticipants: 10000,
     merchants: ['Pacific Coffee', 'Starbucks', "Dan Ryan's Chicago Grill", "Triple O's", 'PizzaExpress', 'Pepper Lunch', 'Genki Sushi', 'Tamjai Yunnan Mixian'],
     tags: { 'zh-TW': ['餐飲', '額外印花', '會員優惠'], 'zh-CN': ['餐饮', '额外印花', '会员优惠'], en: ['Dining', 'Extra Stamps', 'Member Offers'] },
-    isJoined: false,
   },
   c3: {
     id: 'c3',
@@ -163,7 +176,6 @@ const campaignDataSource: Record<string, CampaignData> = {
     maxParticipants: 0,
     merchants: ['All Merchants'],
     tags: { 'zh-TW': ['生日', '雙倍印花', '免費禮物'], 'zh-CN': ['生日', '双倍印花', '免费礼物'], en: ['Birthday', 'Double Stamps', 'Free Gift'] },
-    isJoined: true,
   },
   c4: {
     id: 'c4',
@@ -192,7 +204,6 @@ const campaignDataSource: Record<string, CampaignData> = {
     maxParticipants: 2000,
     merchants: ['UNIQLO (L1)'],
     tags: { 'zh-TW': ['快閃', '限時', 'UNIQLO'], 'zh-CN': ['快闪', '限时', 'UNIQLO'], en: ['Flash', 'Limited Time', 'UNIQLO'] },
-    isJoined: false,
   },
 };
 
@@ -228,11 +239,24 @@ export default function CampaignDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
   const locale = useSettingsStore((s) => s.locale);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
   const campaignSource = campaignDataSource[id || ''] || defaultCampaignData;
   const [isFavorite, setIsFavorite] = useState(false);
-  const [isJoined, setIsJoined] = useState(campaignSource.isJoined || false);
   const [showQRCode, setShowQRCode] = useState(false);
-  const [participationCode, setParticipationCode] = useState('');
+
+  // Get joined status from localStorage (only for authenticated users)
+  const joinedCampaigns = isAuthenticated ? getJoinedCampaigns() : {};
+  const joinedData = joinedCampaigns[id || ''];
+  const [isJoined, setIsJoined] = useState(isAuthenticated && !!joinedData);
+  const [participationCode, setParticipationCode] = useState(joinedData?.code || '');
+
+  // Multilingual labels for login prompt
+  const loginLabels = {
+    loginRequired: { 'zh-TW': '請先登入', 'zh-CN': '请先登录', en: 'Please Login First' },
+    loginToJoin: { 'zh-TW': '登入後即可參與活動', 'zh-CN': '登录后即可参与活动', en: 'Login to participate in this campaign' },
+    login: { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' },
+  };
 
   // Derive locale-specific campaign data
   const campaign = useMemo<Campaign>(() => ({
@@ -253,7 +277,6 @@ export default function CampaignDetail() {
     maxParticipants: campaignSource.maxParticipants,
     merchants: campaignSource.merchants,
     tags: campaignSource.tags[locale],
-    isJoined: campaignSource.isJoined,
   }), [campaignSource, locale]);
 
   const handleShare = () => {
@@ -276,6 +299,22 @@ export default function CampaignDetail() {
   };
 
   const handleJoin = () => {
+    // Check authentication first
+    if (!isAuthenticated) {
+      Modal.confirm({
+        title: loginLabels.loginRequired[locale],
+        content: loginLabels.loginToJoin[locale],
+        confirmText: loginLabels.login[locale],
+        cancelText: t('common.cancel'),
+        onConfirm: () => {
+          // Save redirect path and go to login
+          sessionStorage.setItem('redirect_after_login', `/campaign/${id}`);
+          navigate('/login');
+        },
+      });
+      return;
+    }
+
     if (isJoined) {
       // If already joined, show QR code
       setShowQRCode(true);
@@ -289,6 +328,8 @@ export default function CampaignDetail() {
           const code = generateParticipationCode();
           setParticipationCode(code);
           setIsJoined(true);
+          // Save to localStorage
+          saveJoinedCampaign(id || '', code);
           Toast.show({ content: t('campaign.joinSuccess'), icon: 'success' });
           // Show QR code after a short delay
           setTimeout(() => setShowQRCode(true), 500);
@@ -298,8 +339,24 @@ export default function CampaignDetail() {
   };
 
   const handleShowQRCode = () => {
+    // Check authentication first
+    if (!isAuthenticated) {
+      Modal.confirm({
+        title: loginLabels.loginRequired[locale],
+        content: loginLabels.loginToJoin[locale],
+        confirmText: loginLabels.login[locale],
+        cancelText: t('common.cancel'),
+        onConfirm: () => {
+          sessionStorage.setItem('redirect_after_login', `/campaign/${id}`);
+          navigate('/login');
+        },
+      });
+      return;
+    }
     if (!participationCode) {
-      setParticipationCode(generateParticipationCode());
+      const code = generateParticipationCode();
+      setParticipationCode(code);
+      saveJoinedCampaign(id || '', code);
     }
     setShowQRCode(true);
   };
@@ -473,7 +530,24 @@ export default function CampaignDetail() {
         position: 'fixed', bottom: 0, left: 0, right: 0,
         padding: '12px 16px', background: '#fff', borderTop: '1px solid #f0f0f0',
       }}>
-        {isJoined ? (
+        {!isAuthenticated ? (
+          // Guest - show login button
+          <Button
+            block
+            size="large"
+            color="primary"
+            onClick={handleJoin}
+            style={{
+              '--background-color': PRIMARY,
+              '--border-color': PRIMARY,
+              borderRadius: 12,
+              fontWeight: 600
+            } as React.CSSProperties}
+          >
+            {loginLabels.login[locale]}
+          </Button>
+        ) : isJoined ? (
+          // Authenticated and joined - show credential button
           <Button
             block
             size="large"
@@ -492,6 +566,7 @@ export default function CampaignDetail() {
             </span>
           </Button>
         ) : (
+          // Authenticated but not joined - show join button
           <Button
             block
             size="large"
