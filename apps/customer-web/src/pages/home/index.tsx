@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swiper, Card, Tag, PullToRefresh, Toast } from 'antd-mobile';
+import { Swiper, Card, Tag, PullToRefresh, Toast, Image } from 'antd-mobile';
 import { RightOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
-import { useSettingsStore } from '../../store/settings';
+import { useSettingsStore, type Locale } from '../../store/settings';
 import { getMallById } from '../../data/malls';
 import MallSelector from '../../components/MallSelector';
 import { useLocale } from '../../hooks/useLocale';
@@ -45,31 +45,134 @@ const BellIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-const banners = [
-  { id: 1, title: '新春印花三倍賞', sub: '農曆新年期間消費可獲三倍印花', bg: '#00694B' },
-  { id: 2, title: '全新會員專屬優惠', sub: '註冊即送200印花', bg: '#1976D2' },
-  { id: 3, title: '聖誕購物節', sub: '消費滿HK$500送精美禮品', bg: '#C62828' },
+interface BannerData {
+  id: number;
+  title: Record<Locale, string>;
+  sub: Record<Locale, string>;
+  image: string;
+}
+
+interface CampaignData {
+  id: string;
+  title: Record<Locale, string>;
+  mall: Record<Locale, string>;
+  type: Record<Locale, string>;
+  date: string;
+  image: string;
+}
+
+interface NewsData {
+  id: string;
+  title: Record<Locale, string>;
+  date: string;
+  image: string;
+}
+
+const bannersData: BannerData[] = [
+  {
+    id: 1,
+    title: { 'zh-TW': '新春印花三倍賞', 'zh-CN': '新春印花三倍赏', en: 'Triple Stamps for CNY' },
+    sub: { 'zh-TW': '農曆新年期間消費可獲三倍印花', 'zh-CN': '农历新年期间消费可获三倍印花', en: 'Earn triple stamps during Chinese New Year' },
+    image: 'https://images.unsplash.com/photo-1549451371-64aa98a6f660?w=800&q=80'
+  },
+  {
+    id: 2,
+    title: { 'zh-TW': '情人節特惠', 'zh-CN': '情人节特惠', en: "Valentine's Special" },
+    sub: { 'zh-TW': '浪漫好禮等你來換', 'zh-CN': '浪漫好礼等你来换', en: 'Romantic gifts await you' },
+    image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80'
+  },
+  {
+    id: 3,
+    title: { 'zh-TW': '新會員專享', 'zh-CN': '新会员专享', en: 'New Member Exclusive' },
+    sub: { 'zh-TW': '註冊即送200印花', 'zh-CN': '注册即送200印花', en: 'Get 200 stamps upon registration' },
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80'
+  },
 ];
 
-const campaigns = [
-  { id: 'c1', title: '新春印花三倍賞', mall: '又一城', type: '印花加倍', date: '2/1 - 2/28', color: '#00694B' },
-  { id: 'c2', title: '新年幸運大抽獎', mall: '荷里活廣場', type: '抽獎', date: '1/15 - 3/15', color: GOLD },
-  { id: 'c3', title: '冬日禮品換購', mall: '大埔超級城', type: '禮品兌換', date: '1/1 - 2/28', color: '#7B1FA2' },
+const campaignsData: CampaignData[] = [
+  {
+    id: 'c1',
+    title: { 'zh-TW': '新春印花三倍賞', 'zh-CN': '新春印花三倍赏', en: 'CNY Triple Stamps' },
+    mall: { 'zh-TW': '又一城', 'zh-CN': '又一城', en: 'Festival Walk' },
+    type: { 'zh-TW': '印花加倍', 'zh-CN': '印花加倍', en: 'Stamp Bonus' },
+    date: '2/1 - 2/28',
+    image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400&q=80'
+  },
+  {
+    id: 'c2',
+    title: { 'zh-TW': '新年幸運大抽獎', 'zh-CN': '新年幸运大抽奖', en: 'New Year Lucky Draw' },
+    mall: { 'zh-TW': '荷里活廣場', 'zh-CN': '荷里活广场', en: 'Hollywood Plaza' },
+    type: { 'zh-TW': '抽獎', 'zh-CN': '抽奖', en: 'Lucky Draw' },
+    date: '1/15 - 3/15',
+    image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80'
+  },
+  {
+    id: 'c3',
+    title: { 'zh-TW': '冬日禮品換購', 'zh-CN': '冬日礼品换购', en: 'Winter Gift Redemption' },
+    mall: { 'zh-TW': '大埔超級城', 'zh-CN': '大埔超级城', en: 'Tai Po Mega Mall' },
+    type: { 'zh-TW': '禮品兌換', 'zh-CN': '礼品兑换', en: 'Gift Redemption' },
+    date: '1/1 - 2/28',
+    image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80'
+  },
+  {
+    id: 'c4',
+    title: { 'zh-TW': '美食節', 'zh-CN': '美食节', en: 'Food Festival' },
+    mall: { 'zh-TW': '屯門市廣場', 'zh-CN': '屯门市广场', en: 'Tuen Mun Town Plaza' },
+    type: { 'zh-TW': '美食優惠', 'zh-CN': '美食优惠', en: 'Food Deals' },
+    date: '2/1 - 2/14',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80'
+  },
 ];
 
-const news = [
-  { id: 'n1', title: '領展商場推出全新環保倡議', date: '2024-01-25' },
-  { id: 'n2', title: '全新餐飲品牌進駐屯門市廣場', date: '2024-01-20' },
+const newsData: NewsData[] = [
+  {
+    id: 'n1',
+    title: { 'zh-TW': '領展商場推出全新環保倡議', 'zh-CN': '领展商场推出全新环保倡议', en: 'Link REIT Launches New Green Initiative' },
+    date: '2026-02-15',
+    image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&q=80'
+  },
+  {
+    id: 'n2',
+    title: { 'zh-TW': '全新餐飲品牌進駐屯門市廣場', 'zh-CN': '全新餐饮品牌进驻屯门市广场', en: 'New F&B Brands Open at Tuen Mun Town Plaza' },
+    date: '2026-02-10',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80'
+  },
+  {
+    id: 'n3',
+    title: { 'zh-TW': '春季時裝展即將開幕', 'zh-CN': '春季时装展即将开幕', en: 'Spring Fashion Show Coming Soon' },
+    date: '2026-02-08',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'
+  },
 ];
 
 export default function Home() {
   const navigate = useNavigate();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const user = useAuthStore((s) => s.user);
   const currentMallId = useAuthStore((s) => s.currentMallId);
   const currentMall = getMallById(currentMallId);
   const { getThemeColors } = useSettingsStore();
   const colors = getThemeColors();
+
+  const banners = useMemo(() => bannersData.map(b => ({
+    ...b,
+    title: b.title[locale],
+    sub: b.sub[locale],
+  })), [locale]);
+
+  const campaigns = useMemo(() => campaignsData.map(c => ({
+    ...c,
+    title: c.title[locale],
+    mall: c.mall[locale],
+    type: c.type[locale],
+  })), [locale]);
+
+  const news = useMemo(() => newsData.map(n => ({
+    ...n,
+    title: n.title[locale],
+  })), [locale]);
+
+  const goldTierLabel = { 'zh-TW': 'Gold 金卡', 'zh-CN': 'Gold 金卡', en: 'Gold Member' }[locale];
 
   const quickActions = [
     { icon: <ScanIcon color={colors.primary} />, label: t('customerApp.scan'), path: '/scan' },
@@ -106,10 +209,12 @@ export default function Home() {
                 <ScanIcon color="#fff" />
               </div>
               <div
+                onClick={() => navigate('/messages')}
                 style={{
                   width: 32, height: 32, borderRadius: 16,
                   background: 'rgba(255,255,255,0.2)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer',
                 }}
               >
                 <BellIcon color="#fff" />
@@ -141,7 +246,7 @@ export default function Home() {
                   fontSize: 11,
                   marginTop: 4,
                 }}>
-                  Gold 金卡
+                  {goldTierLabel}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -180,28 +285,42 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Banners */}
+        {/* Banners with Images */}
         <div style={{ padding: '16px 16px 0' }}>
           <Swiper autoplay autoplayInterval={3500} loop style={{ '--border-radius': '12px' } as any}>
-            {banners.map((b, idx) => (
+            {banners.map((b) => (
               <Swiper.Item key={b.id}>
                 <div
                   style={{
-                    height: 120, borderRadius: 12,
-                    background: idx === 0 ? colors.primary : b.bg,
-                    display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                    padding: '0 20px', color: '#fff',
+                    height: 160, borderRadius: 12,
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <div style={{ fontSize: 18, fontWeight: 700 }}>{b.title}</div>
-                  <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{b.sub}</div>
+                  <Image
+                    src={b.image}
+                    fit="cover"
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                    padding: '30px 16px 16px',
+                    color: '#fff',
+                  }}>
+                    <div style={{ fontSize: 18, fontWeight: 700 }}>{b.title}</div>
+                    <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{b.sub}</div>
+                  </div>
                 </div>
               </Swiper.Item>
             ))}
           </Swiper>
         </div>
 
-        {/* Campaigns */}
+        {/* Campaigns with Images */}
         <div style={{ padding: '16px 16px 0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 16, fontWeight: 600 }}>{t('customerApp.hotCampaigns')}</span>
@@ -210,7 +329,7 @@ export default function Home() {
             </span>
           </div>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
-            {campaigns.map((c, idx) => (
+            {campaigns.map((c) => (
               <div
                 key={c.id}
                 onClick={() => navigate(`/campaign/${c.id}`)}
@@ -220,16 +339,13 @@ export default function Home() {
                   boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 }}
               >
-                <div style={{
-                  height: 80,
-                  background: idx === 0 ? colors.primary : c.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', fontSize: 14, fontWeight: 600,
-                  padding: '0 10px', textAlign: 'center'
-                }}>
-                  {c.title}
-                </div>
+                <Image
+                  src={c.image}
+                  fit="cover"
+                  style={{ width: '100%', height: 100 }}
+                />
                 <div style={{ padding: 10 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, lineHeight: 1.3 }}>{c.title}</div>
                   <Tag color="primary" fill="outline" style={{ '--border-radius': '4px', fontSize: 10 } as any}>
                     {c.type}
                   </Tag>
@@ -240,13 +356,22 @@ export default function Home() {
           </div>
         </div>
 
-        {/* News */}
+        {/* News with Images */}
         <div style={{ padding: '16px' }}>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 10 }}>{t('customerApp.latestNews')}</div>
           {news.map((n) => (
-            <Card key={n.id} style={{ marginBottom: 8, borderRadius: 10 }}>
-              <div style={{ fontSize: 14, fontWeight: 500 }}>{n.title}</div>
-              <div style={{ fontSize: 11, color: '#999', marginTop: 4 }}>{n.date}</div>
+            <Card key={n.id} style={{ marginBottom: 10, borderRadius: 10, padding: 0, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <Image
+                  src={n.image}
+                  fit="cover"
+                  style={{ width: 100, height: 80, borderRadius: '10px 0 0 10px' }}
+                />
+                <div style={{ flex: 1, padding: '10px 10px 10px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.4 }}>{n.title}</div>
+                  <div style={{ fontSize: 11, color: '#999', marginTop: 6 }}>{n.date}</div>
+                </div>
+              </div>
             </Card>
           ))}
         </div>
