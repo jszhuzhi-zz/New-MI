@@ -4,6 +4,7 @@ import { Tabs, Card, Grid, Tag, Badge, Button } from 'antd-mobile';
 import { RightOutline } from 'antd-mobile-icons';
 import { useTranslation } from '../../locales';
 import { useSettingsStore, type Locale } from '../../store/settings';
+import { useAuthStore } from '../../store/auth';
 
 const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
@@ -117,7 +118,17 @@ export default function OffersPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const locale = useSettingsStore((s) => s.locale);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeTab, setActiveTab] = useState('campaigns');
+
+  // Multilingual labels for login prompt
+  const loginLabels = {
+    loginRequired: { 'zh-TW': '請先登入', 'zh-CN': '请先登录', en: 'Please Login First' },
+    loginToCoupons: { 'zh-TW': '登入後可查看您的優惠券', 'zh-CN': '登录后可查看您的优惠券', en: 'Login to view your coupons' },
+    loginToDraws: { 'zh-TW': '登入後可參與抽獎活動', 'zh-CN': '登录后可参与抽奖活动', en: 'Login to participate in lucky draws' },
+    login: { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' },
+    noCoupons: { 'zh-TW': '暫無優惠券', 'zh-CN': '暂无优惠券', en: 'No coupons yet' },
+  };
 
   // Derive locale-specific data
   const campaigns = useMemo(() => campaignsData.map(c => ({
@@ -205,33 +216,59 @@ export default function OffersPage() {
         )}
 
         {activeTab === 'coupons' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {coupons.map((cp) => {
-              const st = statusMap[cp.status];
-              const isActive = cp.status === 'unused';
-              return (
-                <Card key={cp.id} style={{ borderRadius: 12, opacity: isActive ? 1 : 0.6 }} onClick={() => navigate(`/coupon/${cp.id}`)}>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <div style={{
-                      width: 60, height: 60, borderRadius: 8,
-                      background: isActive ? `linear-gradient(135deg, ${PRIMARY}, #004D36)` : '#ccc',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#fff', fontSize: 20, flexShrink: 0,
-                    }}>🎟️</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cp.title}</div>
-                      <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{cp.merchant}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                        <Tag color={st.color} fill="outline" style={{ fontSize: 10, '--border-radius': '4px' } as React.CSSProperties}>{st.text}</Tag>
-                        <span style={{ fontSize: 11, color: '#bbb' }}>{t('offers.validUntil')} {cp.expire}</span>
+          isAuthenticated ? (
+            coupons.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {coupons.map((cp) => {
+                  const st = statusMap[cp.status];
+                  const isActive = cp.status === 'unused';
+                  return (
+                    <Card key={cp.id} style={{ borderRadius: 12, opacity: isActive ? 1 : 0.6 }} onClick={() => navigate(`/coupon/${cp.id}`)}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <div style={{
+                          width: 60, height: 60, borderRadius: 8,
+                          background: isActive ? `linear-gradient(135deg, ${PRIMARY}, #004D36)` : '#ccc',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#fff', fontSize: 20, flexShrink: 0,
+                        }}>🎟️</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cp.title}</div>
+                          <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{cp.merchant}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                            <Tag color={st.color} fill="outline" style={{ fontSize: 10, '--border-radius': '4px' } as React.CSSProperties}>{st.text}</Tag>
+                            <span style={{ fontSize: 11, color: '#bbb' }}>{t('offers.validUntil')} {cp.expire}</span>
+                          </div>
+                        </div>
+                        <RightOutline style={{ color: '#ccc' }} />
                       </div>
-                    </div>
-                    <RightOutline style={{ color: '#ccc' }} />
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: 60, color: '#999' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🎟️</div>
+                <div>{loginLabels.noCoupons[locale]}</div>
+              </div>
+            )
+          ) : (
+            <Card style={{ borderRadius: 12, textAlign: 'center', padding: 40 }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>🎟️</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: '#333', marginBottom: 8 }}>
+                {loginLabels.loginRequired[locale]}
+              </div>
+              <div style={{ fontSize: 13, color: '#999', marginBottom: 20 }}>
+                {loginLabels.loginToCoupons[locale]}
+              </div>
+              <Button
+                color="primary"
+                onClick={() => navigate('/login')}
+                style={{ '--background-color': PRIMARY, '--border-color': PRIMARY, borderRadius: 20, padding: '8px 32px' } as React.CSSProperties}
+              >
+                {loginLabels.login[locale]}
+              </Button>
+            </Card>
+          )
         )}
 
         {activeTab === 'draws' && (
@@ -248,16 +285,22 @@ export default function OffersPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: 13, color: '#666' }}>
-                      {t('offers.drawnTimes', { times: ld.entries, max: ld.maxEntries })}
-                    </div>
+                    {isAuthenticated ? (
+                      <div style={{ fontSize: 13, color: '#666' }}>
+                        {t('offers.drawnTimes', { times: ld.entries, max: ld.maxEntries })}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 13, color: '#666' }}>
+                        {loginLabels.loginToDraws[locale]}
+                      </div>
+                    )}
                     <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('offers.deadline')}: {ld.endDate}</div>
                   </div>
                   <Button color="primary" size="small"
-                    onClick={(e) => { e.stopPropagation(); navigate(`/lottery/${ld.id}`); }}
+                    onClick={(e) => { e.stopPropagation(); navigate(isAuthenticated ? `/lottery/${ld.id}` : '/login'); }}
                     style={{ '--background-color': PRIMARY, '--border-color': PRIMARY, borderRadius: 20 } as React.CSSProperties}
-                    disabled={ld.entries >= ld.maxEntries}
-                  >{ld.entries >= ld.maxEntries ? t('offers.noMoreDraws') : t('offers.drawNow')}</Button>
+                    disabled={isAuthenticated && ld.entries >= ld.maxEntries}
+                  >{!isAuthenticated ? loginLabels.login[locale] : (ld.entries >= ld.maxEntries ? t('offers.noMoreDraws') : t('offers.drawNow'))}</Button>
                 </div>
               </Card>
             ))}

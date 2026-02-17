@@ -162,6 +162,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { t, locale } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const currentMallId = useAuthStore((s) => s.currentMallId);
   const currentMall = getMallById(currentMallId);
   const { getThemeColors } = useSettingsStore();
@@ -187,6 +188,9 @@ export default function Home() {
   })), [locale]);
 
   const goldTierLabel = { 'zh-TW': 'Gold 金卡', 'zh-CN': 'Gold 金卡', en: 'Gold Member' }[locale];
+  const guestLabel = { 'zh-TW': '訪客', 'zh-CN': '访客', en: 'Guest' }[locale];
+  const loginHint = { 'zh-TW': '登入查看印花', 'zh-CN': '登录查看印花', en: 'Login to view stamps' }[locale];
+  const loginButton = { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' }[locale];
 
   const quickActions = [
     { icon: <MallIcon color={colors.primary} />, label: t('home.mall'), path: '/mall' },
@@ -240,7 +244,7 @@ export default function Home() {
         {/* Member Card - Floating */}
         <div style={{ margin: '-64px 16px 0', position: 'relative', zIndex: 1 }}>
           <div
-            onClick={() => navigate('/stamp')}
+            onClick={() => isAuthenticated ? navigate('/stamp') : navigate('/login')}
             style={{
               background: '#fff',
               borderRadius: 16, padding: 16,
@@ -248,28 +252,52 @@ export default function Home() {
               cursor: 'pointer',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
-                <div style={{ fontSize: 13, color: '#666' }}>{t('home.hello')}，{user?.name || t('home.member')}</div>
-                <div style={{
-                  display: 'inline-block',
-                  background: GOLD,
-                  color: '#fff',
-                  padding: '2px 8px',
-                  borderRadius: 4,
-                  fontSize: 11,
-                  marginTop: 4,
-                }}>
-                  {goldTierLabel}
+            {isAuthenticated ? (
+              // Logged in member view
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: 13, color: '#666' }}>{t('home.hello')}，{user?.name || t('home.member')}</div>
+                  <div style={{
+                    display: 'inline-block',
+                    background: GOLD,
+                    color: '#fff',
+                    padding: '2px 8px',
+                    borderRadius: 4,
+                    fontSize: 11,
+                    marginTop: 4,
+                  }}>
+                    {user?.tier === 'gold' ? goldTierLabel : (user?.tierName || goldTierLabel)}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 11, color: '#999' }}>{t('home.availableStamps')}</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end' }}>
+                    <span style={{ fontSize: 28, fontWeight: 700, color: colors.primary }}>{(user?.stampBalance || 0).toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 11, color: '#999' }}>{t('home.availableStamps')}</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end' }}>
-                  <span style={{ fontSize: 28, fontWeight: 700, color: colors.primary }}>{(user?.stampBalance || 2580).toLocaleString()}</span>
+            ) : (
+              // Guest view - prompt to login
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 13, color: '#666' }}>{t('home.hello')}，{guestLabel}</div>
+                  <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{loginHint}</div>
+                </div>
+                <div
+                  onClick={(e) => { e.stopPropagation(); navigate('/login'); }}
+                  style={{
+                    background: colors.primary,
+                    color: '#fff',
+                    padding: '8px 16px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    fontWeight: 500,
+                  }}
+                >
+                  {loginButton}
                 </div>
               </div>
-            </div>
+            )}
             {/* Quick Actions in Card */}
             <div style={{
               display: 'flex',
