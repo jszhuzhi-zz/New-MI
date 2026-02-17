@@ -1,0 +1,2406 @@
+// ============================================================================
+// Link REIT (領展) Membership System - Prisma Schema
+// Hong Kong Commercial Property Membership & Stamp (印花) System
+// ============================================================================
+// Multi-tenant hierarchy: Group (集团) -> Project (项目/商场) -> Merchant (商户)
+// Multi-language support: zh-CN, zh-TW, en via JSON fields
+// Stamp (印花) mode throughout (referred to as "points/积分" in some UIs)
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  LOCKED
+  PENDING_VERIFICATION
+}
+
+enum UserPortalType {
+  CUSTOMER
+  MERCHANT
+  PROJECT
+  GROUP
+  SYSTEM
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  CLOSED
+  PENDING
+}
+
+enum MemberCardStatus {
+  ACTIVE
+  INACTIVE
+  LOST
+  EXPIRED
+  REPLACED
+  CANCELLED
+}
+
+enum MemberRegistrationSource {
+  APP
+  WEBSITE
+  COUNTER
+  KIOSK
+  IMPORT
+  MIGRATION
+  API
+  WECHAT_MINI_PROGRAM
+}
+
+enum MemberAccountAction {
+  OPEN
+  CLOSE
+  SUSPEND
+  REACTIVATE
+  MERGE
+  UPGRADE
+  DOWNGRADE
+}
+
+enum SpecialListType {
+  WHITELIST
+  BLACKLIST
+}
+
+enum StampTransactionType {
+  EARN
+  REDEEM
+  BONUS
+  ADJUST_ADD
+  ADJUST_DEDUCT
+  EXPIRE
+  TRANSFER_IN
+  TRANSFER_OUT
+  REFUND
+  VOID
+  CAMPAIGN_EARN
+  ONLINE_ACTIVITY_EARN
+}
+
+enum StampTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+  EXPIRED
+}
+
+enum StampRuleStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+  EXPIRED
+}
+
+enum StampExpiryMode {
+  FIXED_DATE
+  ROLLING_DAYS
+  END_OF_MONTH
+  END_OF_YEAR
+  NEVER
+}
+
+enum StampUpperLimitPeriod {
+  PER_TRANSACTION
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  LIFETIME
+}
+
+enum MerchantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum MerchantDataSource {
+  LOCAL
+  GROUP_SYNC
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  PAUSED
+  ENDED
+  CANCELLED
+}
+
+enum CampaignType {
+  STAMP_MULTIPLIER
+  BONUS_STAMP
+  COUPON_DISTRIBUTION
+  LUCKY_DRAW
+  GIFT_REDEMPTION
+  SPECIAL_EVENT
+  ONLINE_ACTIVITY
+}
+
+enum CouponStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  DEPLETED
+}
+
+enum CouponInstanceStatus {
+  AVAILABLE
+  USED
+  EXPIRED
+  VOIDED
+  RESERVED
+}
+
+enum LuckyDrawType {
+  SCRATCH_CARD
+  WHEEL_SPIN
+  CAPSULE_MACHINE
+  RANDOM_DRAW
+  INSTANT_WIN
+}
+
+enum LuckyDrawStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+  CANCELLED
+}
+
+enum LuckyDrawEntryStatus {
+  PENDING
+  WON
+  LOST
+  CLAIMED
+  EXPIRED
+}
+
+enum GiftStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+enum GiftRedemptionStatus {
+  PENDING
+  CONFIRMED
+  COLLECTED
+  CANCELLED
+  EXPIRED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  SCHEDULED
+}
+
+enum BannerPosition {
+  HOME_TOP
+  HOME_MIDDLE
+  HOME_BOTTOM
+  CATEGORY_TOP
+  DETAIL_PAGE
+  POPUP
+  SPLASH
+}
+
+enum NotificationChannel {
+  PUSH
+  SMS
+  EMAIL
+  IN_APP
+  WECHAT
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+enum DataSyncMode {
+  LOCAL_ONLY
+  GROUP_SYNC
+  BIDIRECTIONAL
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  IMPORT
+  EXPORT
+  LOGIN
+  LOGOUT
+  APPROVE
+  REJECT
+}
+
+enum InterfaceStatus {
+  HEALTHY
+  DEGRADED
+  DOWN
+  UNKNOWN
+}
+
+enum ReportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+// ============================================================================
+// ORGANIZATION - Group / OrganizationUnit / Project
+// ============================================================================
+
+/// Group (集团) - Top level tenant in the multi-tenant hierarchy.
+/// Link REIT is a group that owns multiple mall projects.
+model Group {
+  id              String  @id @default(uuid()) @db.Uuid
+  code            String  @unique @db.VarChar(50)
+  /// Multi-language name: { "zh-CN": "...", "zh-TW": "...", "en": "..." }
+  name            Json    @db.JsonB
+  /// Multi-language description
+  description     Json?   @db.JsonB
+  logo            String? @db.VarChar(500)
+  /// Group-wide settings: branding, features, integrations config
+  settings        Json?   @db.JsonB
+  /// Stamp mode configuration: base ratio, rounding, display format, etc.
+  stampModeConfig Json?   @db.JsonB
+  /// Contact and business info
+  contactEmail    String? @db.VarChar(255)
+  contactPhone    String? @db.VarChar(50)
+  website         String? @db.VarChar(500)
+  timezone        String  @default("Asia/Hong_Kong") @db.VarChar(50)
+  currency        String  @default("HKD") @db.VarChar(10)
+  isActive        Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  projects              Project[]
+  organizationUnits     OrganizationUnit[]
+  users                 User[]
+  roles                 Role[]
+  permissions           Permission[]
+  merchants             Merchant[]
+  memberTiers           MemberTier[]
+  memberLabels          MemberLabel[]
+  campaigns             Campaign[]
+  coupons               Coupon[]
+  gifts                 Gift[]
+  notificationTemplates NotificationTemplate[]
+  interfaceMonitors     InterfaceMonitor[]
+  stampEarningRules     StampEarningRule[]
+  stampConsumptionRules StampConsumptionRule[]
+  stampExpiryRules      StampExpiryRule[]
+  stampUpperLimitRules  StampUpperLimitRule[]
+  stampInfos            StampInfo[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("groups")
+}
+
+/// OrganizationUnit - Tree structure for organizational hierarchy within a group.
+model OrganizationUnit {
+  id        String  @id @default(uuid()) @db.Uuid
+  groupId   String  @db.Uuid
+  parentId  String? @db.Uuid
+  code      String  @db.VarChar(50)
+  /// Multi-language name
+  name      Json    @db.JsonB
+  level     Int     @default(0)
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+  /// Additional metadata
+  metadata  Json?   @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group    Group              @relation(fields: [groupId], references: [id])
+  parent   OrganizationUnit?  @relation("OrgUnitTree", fields: [parentId], references: [id])
+  children OrganizationUnit[] @relation("OrgUnitTree")
+  users    User[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([parentId])
+  @@index([level])
+  @@map("organization_units")
+}
+
+/// Project (项目/商场) - A mall or property under a group.
+model Project {
+  id           String       @id @default(uuid()) @db.Uuid
+  groupId      String       @db.Uuid
+  code         String       @db.VarChar(50)
+  /// Multi-language name
+  name         Json         @db.JsonB
+  /// Multi-language description
+  description  Json?        @db.JsonB
+  /// Multi-language address
+  address      Json?        @db.JsonB
+  logo         String?      @db.VarChar(500)
+  coverImage   String?      @db.VarChar(500)
+  latitude     Decimal?     @db.Decimal(10, 7)
+  longitude    Decimal?     @db.Decimal(10, 7)
+  phone        String?      @db.VarChar(50)
+  email        String?      @db.VarChar(255)
+  /// Opening hours, facilities, features, dataSyncMode, etc.
+  settings     Json?        @db.JsonB
+  /// Data sync mode: whether shop data is local-only or synced from group
+  dataSyncMode DataSyncMode @default(LOCAL_ONLY)
+  isActive     Boolean      @default(true)
+  openDate     DateTime?
+  /// Geographical region within HK
+  region       String?      @db.VarChar(100)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group                 Group                  @relation(fields: [groupId], references: [id])
+  merchants             Merchant[]
+  members               Member[]
+  stampAccounts         StampAccount[]
+  campaigns             Campaign[]
+  venues                Venue[]
+  floorPlans            FloorPlan[]
+  contentArticles       ContentArticle[]
+  serviceDirectories    ServiceDirectory[]
+  banners               Banner[]
+  users                 User[]
+  stampEarningRules     StampEarningRule[]
+  stampConsumptionRules StampConsumptionRule[]
+  stampExpiryRules      StampExpiryRule[]
+  stampUpperLimitRules  StampUpperLimitRule[]
+  stampInfos            StampInfo[]
+  luckyDraws            LuckyDraw[]
+  pushNotifications     PushNotification[]
+  feedbacks             Feedback[]
+  parkingRecords        ParkingRecord[]
+  parkingRates          ParkingRate[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([isActive])
+  @@index([region])
+  @@map("projects")
+}
+
+// ============================================================================
+// AUTH & ACCESS - User / Role / Permission / LoginLog / AuditLog
+// ============================================================================
+
+/// User - Accounts for all portal types (customer / mall / group / merchant).
+/// Supports Microsoft 365 AD integration for staff accounts.
+model User {
+  id           String         @id @default(uuid()) @db.Uuid
+  groupId      String?        @db.Uuid
+  projectId    String?        @db.Uuid
+  orgUnitId    String?        @db.Uuid
+  merchantId   String?        @db.Uuid
+  username     String         @unique @db.VarChar(100)
+  email        String?        @db.VarChar(255)
+  phone        String?        @db.VarChar(50)
+  passwordHash String?        @db.VarChar(255)
+  portalType   UserPortalType
+  status       UserStatus     @default(ACTIVE)
+  /// Display name (may differ from member name)
+  displayName  String?        @db.VarChar(200)
+  avatar       String?        @db.VarChar(500)
+
+  // Microsoft 365 / Azure AD integration
+  m365Id           String?   @unique @db.VarChar(255)
+  m365TenantId     String?   @db.VarChar(255)
+  m365Email        String?   @db.VarChar(255)
+  m365AccessToken  String?   @db.Text
+  m365RefreshToken String?   @db.Text
+  m365TokenExpiry  DateTime?
+
+  // Security
+  lastLoginAt        DateTime?
+  lastLoginIp        String?   @db.VarChar(45)
+  failedLoginCount   Int       @default(0)
+  lockedUntil        DateTime?
+  passwordChangedAt  DateTime?
+  mustChangePassword Boolean   @default(false)
+
+  // Linked member (for customer portal users)
+  memberId String? @unique @db.Uuid
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group           Group?            @relation(fields: [groupId], references: [id])
+  project         Project?          @relation(fields: [projectId], references: [id])
+  orgUnit         OrganizationUnit? @relation(fields: [orgUnitId], references: [id])
+  merchant        Merchant?         @relation(fields: [merchantId], references: [id])
+  member          Member?           @relation(fields: [memberId], references: [id])
+  userRoles       UserRole[]
+  loginLogs       LoginLog[]
+  auditLogs       AuditLog[]
+  operationLogs   OperationLog[]
+  reportDownloads ReportDownload[]
+
+  @@index([groupId])
+  @@index([projectId])
+  @@index([merchantId])
+  @@index([portalType])
+  @@index([status])
+  @@index([email])
+  @@index([phone])
+  @@index([m365Id])
+  @@map("users")
+}
+
+/// Role - Named role with a set of permission codes.
+model Role {
+  id              String   @id @default(uuid()) @db.Uuid
+  groupId         String   @db.Uuid
+  code            String   @db.VarChar(100)
+  /// Multi-language name
+  name            Json     @db.JsonB
+  /// Multi-language description
+  description     Json?    @db.JsonB
+  /// Array of permission codes assigned to this role
+  permissionCodes String[]
+  isSystem        Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group     Group      @relation(fields: [groupId], references: [id])
+  userRoles UserRole[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([isActive])
+  @@map("roles")
+}
+
+/// Permission - Hierarchical permission tree defining all system capabilities.
+model Permission {
+  id          String  @id @default(uuid()) @db.Uuid
+  groupId     String  @db.Uuid
+  parentId    String? @db.Uuid
+  code        String  @db.VarChar(200)
+  /// Multi-language name
+  name        Json    @db.JsonB
+  /// Multi-language description
+  description Json?   @db.JsonB
+  /// Module this permission belongs to
+  module      String  @db.VarChar(100)
+  /// Type: menu, button, api
+  type        String  @default("menu") @db.VarChar(20)
+  /// Resource path or API endpoint
+  resource    String? @db.VarChar(500)
+  /// HTTP method for API permissions
+  method      String? @db.VarChar(10)
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  group    Group        @relation(fields: [groupId], references: [id])
+  parent   Permission?  @relation("PermissionTree", fields: [parentId], references: [id])
+  children Permission[] @relation("PermissionTree")
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([parentId])
+  @@index([module])
+  @@map("permissions")
+}
+
+/// UserRole - Many-to-many relationship between users and roles.
+model UserRole {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  roleId          String    @db.Uuid
+  /// Optional scope restriction: specific project or merchant
+  scopeProjectId  String?   @db.Uuid
+  scopeMerchantId String?   @db.Uuid
+  assignedBy      String?   @db.Uuid
+  assignedAt      DateTime  @default(now())
+  expiresAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId, scopeProjectId, scopeMerchantId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+/// LoginLog - Login history with IP and user agent tracking.
+model LoginLog {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  loginAt    DateTime  @default(now())
+  logoutAt   DateTime?
+  ipAddress  String?   @db.VarChar(45)
+  userAgent  String?   @db.Text
+  device     String?   @db.VarChar(200)
+  platform   String?   @db.VarChar(50)
+  location   String?   @db.VarChar(200)
+  success    Boolean   @default(true)
+  failReason String?   @db.VarChar(500)
+  sessionId  String?   @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([loginAt])
+  @@index([ipAddress])
+  @@map("login_logs")
+}
+
+/// AuditLog - All write operations logged for compliance and auditing.
+model AuditLog {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String?     @db.Uuid
+  action      AuditAction
+  entityType  String      @db.VarChar(100)
+  entityId    String?     @db.VarChar(255)
+  /// Previous state (for updates/deletes)
+  oldValues   Json?       @db.JsonB
+  /// New state (for creates/updates)
+  newValues   Json?       @db.JsonB
+  /// Additional context
+  metadata    Json?       @db.JsonB
+  ipAddress   String?     @db.VarChar(45)
+  userAgent   String?     @db.Text
+  description String?     @db.Text
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// MEMBER - Member / MemberCard / MemberTier / Labels / Change Records
+// ============================================================================
+
+/// Member - Core member entity with profile, registration source, and tags.
+model Member {
+  id                 String                   @id @default(uuid()) @db.Uuid
+  projectId          String                   @db.Uuid
+  memberNo           String                   @unique @db.VarChar(50)
+  /// Multi-language name fields
+  firstName          String?                  @db.VarChar(100)
+  lastName           String?                  @db.VarChar(100)
+  firstNameZhCN      String?                  @db.VarChar(100)
+  lastNameZhCN       String?                  @db.VarChar(100)
+  firstNameZhTW      String?                  @db.VarChar(100)
+  lastNameZhTW       String?                  @db.VarChar(100)
+  email              String?                  @db.VarChar(255)
+  phone              String?                  @db.VarChar(50)
+  countryCode        String?                  @default("+852") @db.VarChar(10)
+  gender             Gender?
+  dateOfBirth        DateTime?                @db.Date
+  /// Full profile data as JSON (addresses, preferences, interests, etc.)
+  profile            Json?                    @db.JsonB
+  avatar             String?                  @db.VarChar(500)
+  /// Preferred language
+  preferredLanguage  String                   @default("zh-TW") @db.VarChar(10)
+  /// Registration info
+  registrationSource MemberRegistrationSource @default(APP)
+  registeredAt       DateTime                 @default(now())
+  /// Current tier
+  tierId             String?                  @db.Uuid
+  status             MemberStatus             @default(ACTIVE)
+  /// Tags for segmentation (array of label IDs)
+  tags               String[]
+  /// Consent and opt-in flags
+  marketingConsent   Boolean                  @default(false)
+  dataConsent        Boolean                  @default(true)
+  smsOptIn           Boolean                  @default(false)
+  emailOptIn         Boolean                  @default(false)
+  pushOptIn          Boolean                  @default(true)
+  /// Identity verification
+  idType             String?                  @db.VarChar(50)
+  idNumber           String?                  @db.VarChar(100)
+  isVerified         Boolean                  @default(false)
+  verifiedAt         DateTime?
+  /// Referral
+  referralCode       String?                  @unique @db.VarChar(50)
+  referredByMemberId String?                  @db.Uuid
+  /// Additional metadata
+  metadata           Json?                    @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project            Project               @relation(fields: [projectId], references: [id])
+  tier               MemberTier?           @relation(fields: [tierId], references: [id])
+  referredBy         Member?               @relation("MemberReferral", fields: [referredByMemberId], references: [id])
+  referrals          Member[]              @relation("MemberReferral")
+  user               User?
+  memberCards        MemberCard[]
+  stampAccounts      StampAccount[]
+  stampTransactions  StampTransaction[]
+  changeRecords      MemberChangeRecord[]
+  accountRecords     MemberAccountRecord[]
+  specialListEntries SpecialListMember[]
+  couponInstances    CouponInstance[]
+  luckyDrawEntries   LuckyDrawEntry[]
+  giftRedemptions    GiftRedemption[]
+  pushNotifications  PushNotification[]
+  memberLabels       MemberMemberLabel[]
+  favorites          MemberFavorite[]
+  feedbacks          Feedback[]
+  parkingRecords     ParkingRecord[]
+
+  @@index([projectId])
+  @@index([email])
+  @@index([phone])
+  @@index([tierId])
+  @@index([status])
+  @@index([registrationSource])
+  @@index([registeredAt])
+  @@index([referralCode])
+  @@map("members")
+}
+
+/// MemberCard - Physical or digital card numbers with tier linking and QR/barcode.
+model MemberCard {
+  id               String           @id @default(uuid()) @db.Uuid
+  memberId         String           @db.Uuid
+  cardNumber       String           @unique @db.VarChar(50)
+  tierId           String?          @db.Uuid
+  status           MemberCardStatus @default(ACTIVE)
+  /// Card type: physical, digital, virtual
+  cardType         String           @default("digital") @db.VarChar(20)
+  /// QR code content (usually the card number or a token)
+  qrCode           String?          @db.VarChar(500)
+  /// Barcode content
+  barcode          String?          @db.VarChar(500)
+  /// Barcode format: CODE128, QR, EAN13, etc.
+  barcodeFormat    String?          @db.VarChar(20)
+  issuedAt         DateTime         @default(now())
+  activatedAt      DateTime?
+  expiresAt        DateTime?
+  replacedByCardId String?          @db.Uuid
+  /// Additional card metadata
+  metadata         Json?            @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  member Member      @relation(fields: [memberId], references: [id])
+  tier   MemberTier? @relation(fields: [tierId], references: [id])
+
+  @@index([memberId])
+  @@index([cardNumber])
+  @@index([tierId])
+  @@index([status])
+  @@map("member_cards")
+}
+
+/// MemberTier - Tier levels (Standard, Silver, Gold, Platinum, Diamond) with benefits and card design.
+model MemberTier {
+  id              String  @id @default(uuid()) @db.Uuid
+  groupId         String  @db.Uuid
+  code            String  @db.VarChar(50)
+  /// Multi-language tier name
+  name            Json    @db.JsonB
+  /// Multi-language description
+  description     Json?   @db.JsonB
+  /// Tier level number (higher = better)
+  level           Int     @default(0)
+  /// Minimum stamps required to reach/maintain this tier
+  minStamps       Int     @default(0)
+  /// Maximum stamps for this tier range (null = no upper limit)
+  maxStamps       Int?
+  /// Benefits configuration (parking, discounts, lounges, etc.)
+  benefits        Json?   @db.JsonB
+  /// Card visual design (colors, background, template)
+  cardDesign      Json?   @db.JsonB
+  /// Stamp multiplier for this tier (e.g., Gold gets 1.5x)
+  stampMultiplier Decimal @default(1.0) @db.Decimal(5, 2)
+  /// Tier icon/badge image
+  icon            String? @db.VarChar(500)
+  /// Tier color for display
+  color           String? @db.VarChar(20)
+  isDefault       Boolean @default(false)
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group       Group        @relation(fields: [groupId], references: [id])
+  members     Member[]
+  memberCards MemberCard[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([level])
+  @@index([isActive])
+  @@map("member_tiers")
+}
+
+/// MemberLabel - Tags/labels for member segmentation.
+model MemberLabel {
+  id        String  @id @default(uuid()) @db.Uuid
+  groupId   String  @db.Uuid
+  code      String  @db.VarChar(50)
+  /// Multi-language label name
+  name      Json    @db.JsonB
+  /// Label category (e.g., lifestyle, spending_level, demographics)
+  category  String? @db.VarChar(100)
+  color     String? @db.VarChar(20)
+  icon      String? @db.VarChar(500)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group   Group               @relation(fields: [groupId], references: [id])
+  members MemberMemberLabel[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([category])
+  @@map("member_labels")
+}
+
+/// MemberMemberLabel - Many-to-many between Member and MemberLabel.
+model MemberMemberLabel {
+  id         String   @id @default(uuid()) @db.Uuid
+  memberId   String   @db.Uuid
+  labelId    String   @db.Uuid
+  assignedAt DateTime @default(now())
+  assignedBy String?  @db.Uuid
+
+  // Relations
+  member Member      @relation(fields: [memberId], references: [id])
+  label  MemberLabel @relation(fields: [labelId], references: [id])
+
+  @@unique([memberId, labelId])
+  @@index([memberId])
+  @@index([labelId])
+  @@map("member_member_labels")
+}
+
+/// MemberChangeRecord - All changes to member data tracked for auditing.
+model MemberChangeRecord {
+  id           String  @id @default(uuid()) @db.Uuid
+  memberId     String  @db.Uuid
+  fieldName    String  @db.VarChar(100)
+  oldValue     String? @db.Text
+  newValue     String? @db.Text
+  changedBy    String? @db.Uuid
+  changeReason String? @db.VarChar(500)
+  /// Source: admin, self-service, api, import, system
+  source       String  @default("admin") @db.VarChar(50)
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([memberId])
+  @@index([fieldName])
+  @@index([createdAt])
+  @@map("member_change_records")
+}
+
+/// MemberAccountRecord - Open/close/suspend/reactivate records.
+model MemberAccountRecord {
+  id          String              @id @default(uuid()) @db.Uuid
+  memberId    String              @db.Uuid
+  action      MemberAccountAction
+  reason      String?             @db.VarChar(500)
+  performedBy String?             @db.Uuid
+  /// Additional details
+  details     Json?               @db.JsonB
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([memberId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("member_account_records")
+}
+
+/// SpecialListMember - Whitelist/blacklist entries for members.
+model SpecialListMember {
+  id            String          @id @default(uuid()) @db.Uuid
+  memberId      String          @db.Uuid
+  listType      SpecialListType
+  reason        String?         @db.VarChar(500)
+  addedBy       String?         @db.Uuid
+  effectiveFrom DateTime        @default(now())
+  effectiveTo   DateTime?
+  isActive      Boolean         @default(true)
+  /// Additional notes or metadata
+  metadata      Json?           @db.JsonB
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([memberId])
+  @@index([listType])
+  @@index([isActive])
+  @@map("special_list_members")
+}
+
+// ============================================================================
+// STAMP SYSTEM (印花体系) - Accounts, Transactions, Rules
+// ============================================================================
+
+/// StampAccount - Stamp balance per member per project.
+model StampAccount {
+  id              String  @id @default(uuid()) @db.Uuid
+  memberId        String  @db.Uuid
+  projectId       String  @db.Uuid
+  /// Current available stamp balance
+  balance         Decimal @default(0) @db.Decimal(15, 2)
+  /// Total stamps ever earned
+  totalEarned     Decimal @default(0) @db.Decimal(15, 2)
+  /// Total stamps ever redeemed/used
+  totalRedeemed   Decimal @default(0) @db.Decimal(15, 2)
+  /// Total stamps expired
+  totalExpired    Decimal @default(0) @db.Decimal(15, 2)
+  /// Total stamps adjusted (net)
+  totalAdjusted   Decimal @default(0) @db.Decimal(15, 2)
+  /// Pending stamps (not yet available)
+  pendingBalance  Decimal @default(0) @db.Decimal(15, 2)
+  /// Stamps expiring soon (within next 30 days)
+  expiringBalance Decimal @default(0) @db.Decimal(15, 2)
+  isActive        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  member       Member             @relation(fields: [memberId], references: [id])
+  project      Project            @relation(fields: [projectId], references: [id])
+  transactions StampTransaction[]
+
+  @@unique([memberId, projectId])
+  @@index([memberId])
+  @@index([projectId])
+  @@index([balance])
+  @@map("stamp_accounts")
+}
+
+/// StampTransaction - All stamp movements (earn/redeem/bonus/adjust/expire/transfer/refund).
+model StampTransaction {
+  id                    String                 @id @default(uuid()) @db.Uuid
+  stampAccountId        String                 @db.Uuid
+  memberId              String                 @db.Uuid
+  transactionType       StampTransactionType
+  status                StampTransactionStatus @default(COMPLETED)
+  /// Positive for credits, negative for debits
+  amount                Decimal                @db.Decimal(15, 2)
+  /// Balance after this transaction
+  balanceAfter          Decimal                @db.Decimal(15, 2)
+  /// Reference number for external tracking
+  referenceNo           String?                @db.VarChar(100)
+  /// External transaction/receipt number
+  externalRef           String?                @db.VarChar(200)
+  /// Multi-language description
+  description           Json?                  @db.JsonB
+  /// Source merchant for earn transactions
+  merchantId            String?                @db.Uuid
+  /// Spending amount that generated these stamps
+  spendingAmount        Decimal?               @db.Decimal(15, 2)
+  /// Applied earning rule
+  earningRuleId         String?                @db.Uuid
+  /// Applied campaign rule
+  campaignId            String?                @db.Uuid
+  /// Related coupon instance (if stamps used for coupon)
+  couponInstanceId      String?                @db.Uuid
+  /// Related gift redemption
+  giftRedemptionId      String?                @db.Uuid
+  /// Stamps expiry date for this batch
+  expiresAt             DateTime?
+  /// For void/refund: the original transaction being reversed
+  originalTransactionId String?                @db.Uuid
+  /// Who processed this transaction
+  processedBy           String?                @db.Uuid
+  /// Channel: app, pos, admin, api, system
+  channel               String?                @db.VarChar(50)
+  /// Additional metadata
+  metadata              Json?                  @db.JsonB
+  /// Remark from operator
+  remark                String?                @db.Text
+
+  transactionAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  stampAccount StampAccount      @relation(fields: [stampAccountId], references: [id])
+  member       Member            @relation(fields: [memberId], references: [id])
+  merchant     Merchant?         @relation(fields: [merchantId], references: [id])
+  earningRule  StampEarningRule? @relation(fields: [earningRuleId], references: [id])
+  campaign     Campaign?         @relation(fields: [campaignId], references: [id])
+
+  @@index([stampAccountId])
+  @@index([memberId])
+  @@index([transactionType])
+  @@index([status])
+  @@index([merchantId])
+  @@index([campaignId])
+  @@index([referenceNo])
+  @@index([transactionAt])
+  @@index([expiresAt])
+  @@map("stamp_transactions")
+}
+
+/// StampEarningRule - Rules for earning stamps from spending.
+model StampEarningRule {
+  id                 String          @id @default(uuid()) @db.Uuid
+  groupId            String          @db.Uuid
+  projectId          String?         @db.Uuid
+  code               String          @db.VarChar(50)
+  /// Multi-language rule name
+  name               Json            @db.JsonB
+  /// Multi-language description
+  description        Json?           @db.JsonB
+  /// Spending amount per stamp (e.g., HKD 100 = 1 stamp)
+  spendingPerStamp   Decimal         @db.Decimal(15, 2)
+  /// Minimum spending amount to qualify
+  minSpending        Decimal?        @db.Decimal(15, 2)
+  /// Maximum stamps earnable per transaction
+  maxStampsPerTx     Int?
+  /// Merchant category restrictions (JSON array)
+  merchantCategories Json?           @db.JsonB
+  /// Specific merchant restrictions
+  merchantIds        String[]
+  /// Applicable member tiers (empty = all tiers)
+  applicableTierIds  String[]
+  /// Day-of-week restrictions (0=Sun, 6=Sat)
+  applicableDays     Int[]
+  /// Time range restrictions
+  startTime          String?         @db.VarChar(5)
+  endTime            String?         @db.VarChar(5)
+  /// Rounding mode: floor, ceil, round
+  roundingMode       String          @default("floor") @db.VarChar(10)
+  priority           Int             @default(0)
+  status             StampRuleStatus @default(ACTIVE)
+  effectiveFrom      DateTime
+  effectiveTo        DateTime?
+  /// Additional rule configuration
+  ruleConfig         Json?           @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group              Group               @relation(fields: [groupId], references: [id])
+  project            Project?            @relation(fields: [projectId], references: [id])
+  transactions       StampTransaction[]
+  campaignStampRules CampaignStampRule[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([status])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("stamp_earning_rules")
+}
+
+/// StampConsumptionRule - Rules for using/redeeming stamps.
+model StampConsumptionRule {
+  id                String          @id @default(uuid()) @db.Uuid
+  groupId           String          @db.Uuid
+  projectId         String?         @db.Uuid
+  code              String          @db.VarChar(50)
+  /// Multi-language rule name
+  name              Json            @db.JsonB
+  /// Multi-language description
+  description       Json?           @db.JsonB
+  /// Minimum stamps required to redeem
+  minStamps         Int             @default(1)
+  /// Stamps must be redeemed in multiples of
+  stepSize          Int             @default(1)
+  /// What can stamps be used for: coupon, gift, cash_value, parking
+  consumptionType   String          @db.VarChar(50)
+  /// Stamps-to-value ratio (e.g., 10 stamps = HKD 1)
+  stampsPerUnit     Decimal?        @db.Decimal(15, 2)
+  /// Applicable member tiers
+  applicableTierIds String[]
+  status            StampRuleStatus @default(ACTIVE)
+  effectiveFrom     DateTime
+  effectiveTo       DateTime?
+  /// Additional configuration
+  ruleConfig        Json?           @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group   Group    @relation(fields: [groupId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([status])
+  @@map("stamp_consumption_rules")
+}
+
+/// StampExpiryRule - Rules for stamp expiry and clearing.
+model StampExpiryRule {
+  id                 String          @id @default(uuid()) @db.Uuid
+  groupId            String          @db.Uuid
+  projectId          String?         @db.Uuid
+  code               String          @db.VarChar(50)
+  /// Multi-language rule name
+  name               Json            @db.JsonB
+  /// Expiry mode
+  expiryMode         StampExpiryMode
+  /// For FIXED_DATE: the date stamps expire
+  fixedExpiryDate    DateTime?
+  /// For ROLLING_DAYS: number of days after earning
+  rollingDays        Int?
+  /// For END_OF_MONTH/YEAR: months/years after earning
+  rollingPeriods     Int?
+  /// Grace period in days before actual expiry
+  gracePeriodDays    Int             @default(0)
+  /// Whether to send notification before expiry
+  notifyBeforeExpiry Boolean         @default(true)
+  /// Days before expiry to send notification
+  notifyDaysBefore   Int             @default(30)
+  status             StampRuleStatus @default(ACTIVE)
+  effectiveFrom      DateTime
+  effectiveTo        DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group   Group    @relation(fields: [groupId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([status])
+  @@map("stamp_expiry_rules")
+}
+
+/// StampUpperLimitRule - Caps per transaction/day/month/year/lifetime.
+model StampUpperLimitRule {
+  id                String                @id @default(uuid()) @db.Uuid
+  groupId           String                @db.Uuid
+  projectId         String?               @db.Uuid
+  code              String                @db.VarChar(50)
+  /// Multi-language rule name
+  name              Json                  @db.JsonB
+  /// Which period this limit applies to
+  period            StampUpperLimitPeriod
+  /// Maximum stamp amount for this period
+  maxAmount         Decimal               @db.Decimal(15, 2)
+  /// Applicable member tiers (empty = all)
+  applicableTierIds String[]
+  status            StampRuleStatus       @default(ACTIVE)
+  effectiveFrom     DateTime
+  effectiveTo       DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group   Group    @relation(fields: [groupId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([period])
+  @@index([status])
+  @@map("stamp_upper_limit_rules")
+}
+
+/// CampaignStampRule - Campaign-specific stamp rules (multipliers, bonus stamps).
+model CampaignStampRule {
+  id            String   @id @default(uuid()) @db.Uuid
+  campaignId    String   @db.Uuid
+  earningRuleId String?  @db.Uuid
+  /// Multiplier to apply on top of base earning (e.g., 2.0 = double stamps)
+  multiplier    Decimal? @db.Decimal(5, 2)
+  /// Fixed bonus stamps to add
+  bonusStamps   Decimal? @db.Decimal(15, 2)
+  /// Conditions for this campaign rule (spending thresholds, categories, etc.)
+  conditions    Json?    @db.JsonB
+  priority      Int      @default(0)
+  isActive      Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  campaign    Campaign          @relation(fields: [campaignId], references: [id])
+  earningRule StampEarningRule? @relation(fields: [earningRuleId], references: [id])
+
+  @@index([campaignId])
+  @@index([earningRuleId])
+  @@map("campaign_stamp_rules")
+}
+
+/// OnlineActivityStampRule - Online activity stamp rules (check-in, survey, social share, etc.).
+model OnlineActivityStampRule {
+  id                String          @id @default(uuid()) @db.Uuid
+  campaignId        String?         @db.Uuid
+  code              String          @db.VarChar(50)
+  /// Multi-language name
+  name              Json            @db.JsonB
+  /// Activity type: check_in, survey, social_share, referral, profile_complete, game, qr_scan
+  activityType      String          @db.VarChar(50)
+  /// Stamps awarded per completion
+  stampsPerAction   Decimal         @db.Decimal(15, 2)
+  /// Max times a member can earn from this activity
+  maxTimesPerMember Int?
+  /// Max times per day
+  maxTimesPerDay    Int?
+  /// Applicable tiers
+  applicableTierIds String[]
+  status            StampRuleStatus @default(ACTIVE)
+  effectiveFrom     DateTime
+  effectiveTo       DateTime?
+  /// Additional config
+  ruleConfig        Json?           @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([campaignId])
+  @@index([activityType])
+  @@index([status])
+  @@map("online_activity_stamp_rules")
+}
+
+/// StampInfo - Stamp info display items (help text, FAQs, explanations).
+model StampInfo {
+  id        String  @id @default(uuid()) @db.Uuid
+  groupId   String  @db.Uuid
+  projectId String? @db.Uuid
+  code      String  @db.VarChar(50)
+  /// Multi-language title
+  title     Json    @db.JsonB
+  /// Multi-language content (rich text)
+  content   Json    @db.JsonB
+  /// Category: faq, help, terms, guide
+  category  String  @db.VarChar(50)
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group   Group    @relation(fields: [groupId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([category])
+  @@map("stamp_infos")
+}
+
+// ============================================================================
+// MERCHANT - Merchant / MerchantAccount
+// ============================================================================
+
+/// Merchant - Stores/shops in malls. Data can be local or synced from group data center.
+model Merchant {
+  id                String             @id @default(uuid()) @db.Uuid
+  groupId           String             @db.Uuid
+  projectId         String             @db.Uuid
+  code              String             @db.VarChar(50)
+  /// Multi-language merchant name
+  name              Json               @db.JsonB
+  /// Multi-language description
+  description       Json?              @db.JsonB
+  /// Multi-language short description
+  shortDescription  Json?              @db.JsonB
+  logo              String?            @db.VarChar(500)
+  coverImage        String?            @db.VarChar(500)
+  images            String[]
+  /// Category: F&B, fashion, lifestyle, services, etc.
+  category          String?            @db.VarChar(100)
+  subCategory       String?            @db.VarChar(100)
+  /// Floor and unit info
+  floor             String?            @db.VarChar(20)
+  unit              String?            @db.VarChar(50)
+  phone             String?            @db.VarChar(50)
+  email             String?            @db.VarChar(255)
+  website           String?            @db.VarChar(500)
+  /// Opening hours as structured JSON
+  openingHours      Json?              @db.JsonB
+  /// Whether this merchant participates in stamp program
+  stampEnabled      Boolean            @default(true)
+  /// Data source: locally managed or synced from group data center
+  dataSource        MerchantDataSource @default(LOCAL)
+  /// External ID from group data center (for synced merchants)
+  externalId        String?            @db.VarChar(255)
+  /// Last sync timestamp
+  lastSyncedAt      DateTime?
+  status            MerchantStatus     @default(ACTIVE)
+  /// Contract dates
+  contractStartDate DateTime?
+  contractEndDate   DateTime?
+  /// Additional metadata
+  metadata          Json?              @db.JsonB
+  sortOrder         Int                @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group             Group              @relation(fields: [groupId], references: [id])
+  project           Project            @relation(fields: [projectId], references: [id])
+  merchantAccounts  MerchantAccount[]
+  stampTransactions StampTransaction[]
+  users             User[]
+  favoritedBy       MemberFavorite[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([category])
+  @@index([status])
+  @@index([dataSource])
+  @@index([externalId])
+  @@map("merchants")
+}
+
+/// MerchantAccount - Staff accounts for the merchant portal.
+model MerchantAccount {
+  id          String   @id @default(uuid()) @db.Uuid
+  merchantId  String   @db.Uuid
+  name        String   @db.VarChar(200)
+  email       String?  @db.VarChar(255)
+  phone       String?  @db.VarChar(50)
+  /// Role within merchant: owner, manager, staff
+  role        String   @default("staff") @db.VarChar(50)
+  isActive    Boolean  @default(true)
+  /// Permissions specific to merchant portal operations
+  permissions String[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  @@index([merchantId])
+  @@index([email])
+  @@map("merchant_accounts")
+}
+
+// ============================================================================
+// CAMPAIGN & PROMOTIONS - Campaign / Coupon / LuckyDraw / Gift
+// ============================================================================
+
+/// Campaign - Activities/promotions with audience targeting.
+model Campaign {
+  id                    String         @id @default(uuid()) @db.Uuid
+  groupId               String         @db.Uuid
+  projectId             String?        @db.Uuid
+  code                  String         @db.VarChar(50)
+  /// Multi-language campaign name
+  name                  Json           @db.JsonB
+  /// Multi-language description
+  description           Json?          @db.JsonB
+  /// Multi-language short description for listings
+  shortDescription      Json?          @db.JsonB
+  /// Multi-language terms and conditions
+  termsConditions       Json?          @db.JsonB
+  coverImage            String?        @db.VarChar(500)
+  images                String[]
+  campaignType          CampaignType
+  status                CampaignStatus @default(DRAFT)
+  startDate             DateTime
+  endDate               DateTime
+  /// Registration/participation period (may differ from campaign period)
+  registrationStartDate DateTime?
+  registrationEndDate   DateTime?
+  /// Target audience criteria (tier, labels, demographics, etc.)
+  audienceTargeting     Json?          @db.JsonB
+  /// Budget and limits
+  totalBudget           Decimal?       @db.Decimal(15, 2)
+  maxParticipants       Int?
+  currentParticipants   Int            @default(0)
+  /// Campaign-specific settings
+  settings              Json?          @db.JsonB
+  /// Approval workflow
+  approvedBy            String?        @db.Uuid
+  approvedAt            DateTime?
+  rejectedReason        String?        @db.Text
+  /// Analytics summary (cached)
+  analyticsSummary      Json?          @db.JsonB
+
+  createdBy String?   @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group              Group               @relation(fields: [groupId], references: [id])
+  project            Project?            @relation(fields: [projectId], references: [id])
+  stampTransactions  StampTransaction[]
+  campaignStampRules CampaignStampRule[]
+  coupons            Coupon[]
+  luckyDraws         LuckyDraw[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([campaignType])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@map("campaigns")
+}
+
+/// Coupon - Coupon templates.
+model Coupon {
+  id                    String       @id @default(uuid()) @db.Uuid
+  groupId               String       @db.Uuid
+  campaignId            String?      @db.Uuid
+  code                  String       @db.VarChar(50)
+  /// Multi-language coupon name
+  name                  Json         @db.JsonB
+  /// Multi-language description
+  description           Json?        @db.JsonB
+  /// Multi-language terms
+  terms                 Json?        @db.JsonB
+  /// Coupon type: discount, cash_voucher, free_item, service, stamp_multiplier
+  couponType            String       @db.VarChar(50)
+  /// Discount value or cash amount
+  value                 Decimal?     @db.Decimal(15, 2)
+  /// Discount percentage (if percentage-based)
+  discountPercent       Decimal?     @db.Decimal(5, 2)
+  /// Minimum spending to use coupon
+  minSpending           Decimal?     @db.Decimal(15, 2)
+  image                 String?      @db.VarChar(500)
+  /// Stamps required to redeem this coupon (0 = free coupon)
+  stampCost             Int          @default(0)
+  /// Total quantity available
+  totalQuantity         Int
+  /// Remaining quantity
+  remainingQuantity     Int
+  /// Max per member
+  maxPerMember          Int          @default(1)
+  /// Applicable merchant IDs (empty = all)
+  applicableMerchantIds String[]
+  status                CouponStatus @default(ACTIVE)
+  effectiveFrom         DateTime
+  effectiveTo           DateTime
+  /// Validity days after issuance (for issued coupons)
+  validityDays          Int?
+  /// Barcode/QR for coupon usage
+  barcodePrefix         String?      @db.VarChar(50)
+  /// Additional config
+  metadata              Json?        @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group           Group            @relation(fields: [groupId], references: [id])
+  campaign        Campaign?        @relation(fields: [campaignId], references: [id])
+  couponInstances CouponInstance[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([campaignId])
+  @@index([couponType])
+  @@index([status])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("coupons")
+}
+
+/// CouponInstance - Issued coupons to members.
+model CouponInstance {
+  id                 String               @id @default(uuid()) @db.Uuid
+  couponId           String               @db.Uuid
+  memberId           String               @db.Uuid
+  instanceCode       String               @unique @db.VarChar(100)
+  status             CouponInstanceStatus @default(AVAILABLE)
+  /// Barcode for physical/digital usage
+  barcode            String?              @db.VarChar(200)
+  qrCode             String?              @db.VarChar(500)
+  issuedAt           DateTime             @default(now())
+  usedAt             DateTime?
+  expiresAt          DateTime
+  /// Where it was used
+  usedAtMerchantId   String?              @db.Uuid
+  /// Transaction reference
+  usedTransactionRef String?              @db.VarChar(200)
+  /// Stamps spent to acquire this coupon
+  stampsSpent        Int                  @default(0)
+  /// Additional metadata
+  metadata           Json?                @db.JsonB
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  coupon Coupon @relation(fields: [couponId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([couponId])
+  @@index([memberId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([instanceCode])
+  @@map("coupon_instances")
+}
+
+/// LuckyDraw - Lottery games (scratch card, wheel spin, capsule machine, etc.).
+model LuckyDraw {
+  id                  String          @id @default(uuid()) @db.Uuid
+  projectId           String          @db.Uuid
+  campaignId          String?         @db.Uuid
+  code                String          @db.VarChar(50)
+  /// Multi-language name
+  name                Json            @db.JsonB
+  /// Multi-language description
+  description         Json?           @db.JsonB
+  /// Multi-language rules/terms
+  rules               Json?           @db.JsonB
+  coverImage          String?         @db.VarChar(500)
+  drawType            LuckyDrawType
+  status              LuckyDrawStatus @default(DRAFT)
+  startDate           DateTime
+  endDate             DateTime
+  /// Stamps required per entry
+  stampCostPerEntry   Int             @default(0)
+  /// Free entries per member
+  freeEntries         Int             @default(0)
+  /// Max entries per member
+  maxEntriesPerMember Int?
+  /// Max entries per day per member
+  maxEntriesPerDay    Int?
+  /// Total entries limit
+  totalEntriesLimit   Int?
+  /// Draw time (for scheduled draws)
+  drawTime            DateTime?
+  /// Game configuration (wheel segments, scratch card layout, etc.)
+  gameConfig          Json?           @db.JsonB
+  /// Visual design/theme
+  designConfig        Json?           @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project  Project          @relation(fields: [projectId], references: [id])
+  campaign Campaign?        @relation(fields: [campaignId], references: [id])
+  prizes   LuckyDrawPrize[]
+  entries  LuckyDrawEntry[]
+
+  @@index([projectId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@map("lucky_draws")
+}
+
+/// LuckyDrawPrize - Prizes for lucky draw games.
+model LuckyDrawPrize {
+  id                String   @id @default(uuid()) @db.Uuid
+  luckyDrawId       String   @db.Uuid
+  /// Multi-language prize name
+  name              Json     @db.JsonB
+  /// Multi-language description
+  description       Json?    @db.JsonB
+  image             String?  @db.VarChar(500)
+  /// Prize tier/level (1st, 2nd, 3rd, consolation, etc.)
+  tier              Int      @default(1)
+  /// Total quantity of this prize
+  totalQuantity     Int
+  /// Remaining quantity
+  remainingQuantity Int
+  /// Winning probability (for instant win games, 0.0 - 1.0)
+  probability       Decimal? @db.Decimal(7, 6)
+  /// Cash value of prize
+  value             Decimal? @db.Decimal(15, 2)
+  /// Prize type: physical, coupon, stamps, voucher
+  prizeType         String   @db.VarChar(50)
+  /// If prize is stamps, how many
+  stampReward       Int?
+  /// If prize is coupon, which coupon template
+  couponId          String?  @db.Uuid
+  /// Claim deadline (days after winning)
+  claimDeadlineDays Int      @default(30)
+  sortOrder         Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  luckyDraw LuckyDraw        @relation(fields: [luckyDrawId], references: [id])
+  entries   LuckyDrawEntry[]
+
+  @@index([luckyDrawId])
+  @@map("lucky_draw_prizes")
+}
+
+/// LuckyDrawEntry - Member entries and results.
+model LuckyDrawEntry {
+  id            String               @id @default(uuid()) @db.Uuid
+  luckyDrawId   String               @db.Uuid
+  memberId      String               @db.Uuid
+  prizeId       String?              @db.Uuid
+  entryNumber   String               @db.VarChar(50)
+  status        LuckyDrawEntryStatus @default(PENDING)
+  stampsSpent   Int                  @default(0)
+  /// For instant win: the result
+  result        Json?                @db.JsonB
+  wonAt         DateTime?
+  claimedAt     DateTime?
+  claimDeadline DateTime?
+  /// Claim details
+  claimDetails  Json?                @db.JsonB
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  luckyDraw LuckyDraw       @relation(fields: [luckyDrawId], references: [id])
+  member    Member          @relation(fields: [memberId], references: [id])
+  prize     LuckyDrawPrize? @relation(fields: [prizeId], references: [id])
+
+  @@index([luckyDrawId])
+  @@index([memberId])
+  @@index([status])
+  @@index([entryNumber])
+  @@map("lucky_draw_entries")
+}
+
+/// Gift - Redeemable gifts in the stamp catalog.
+model Gift {
+  id                  String     @id @default(uuid()) @db.Uuid
+  groupId             String     @db.Uuid
+  code                String     @db.VarChar(50)
+  /// Multi-language gift name
+  name                Json       @db.JsonB
+  /// Multi-language description
+  description         Json?      @db.JsonB
+  /// Multi-language terms
+  terms               Json?      @db.JsonB
+  image               String?    @db.VarChar(500)
+  images              String[]
+  /// Category: merchandise, dining, service, experience
+  category            String?    @db.VarChar(100)
+  /// Stamps required to redeem
+  stampCost           Int
+  /// Cash value
+  value               Decimal?   @db.Decimal(15, 2)
+  /// Inventory
+  totalQuantity       Int
+  remainingQuantity   Int
+  /// Max per member
+  maxPerMember        Int        @default(1)
+  /// Max per day (global limit)
+  maxPerDay           Int?
+  /// Applicable member tiers
+  applicableTierIds   String[]
+  /// Collection method: counter, delivery, digital
+  collectionMethod    String     @default("counter") @db.VarChar(50)
+  /// Collection locations
+  collectionLocations Json?      @db.JsonB
+  status              GiftStatus @default(ACTIVE)
+  effectiveFrom       DateTime
+  effectiveTo         DateTime
+  sortOrder           Int        @default(0)
+  /// Additional metadata
+  metadata            Json?      @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group       Group            @relation(fields: [groupId], references: [id])
+  redemptions GiftRedemption[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([category])
+  @@index([status])
+  @@index([stampCost])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("gifts")
+}
+
+/// GiftRedemption - Gift redemption records.
+model GiftRedemption {
+  id                 String               @id @default(uuid()) @db.Uuid
+  giftId             String               @db.Uuid
+  memberId           String               @db.Uuid
+  redemptionCode     String               @unique @db.VarChar(100)
+  status             GiftRedemptionStatus @default(PENDING)
+  stampsSpent        Int
+  /// Collection details
+  collectionMethod   String               @db.VarChar(50)
+  collectionLocation String?              @db.VarChar(200)
+  collectedAt        DateTime?
+  /// For delivery: shipping info
+  shippingInfo       Json?                @db.JsonB
+  expiresAt          DateTime?
+  /// QR/barcode for collection
+  qrCode             String?              @db.VarChar(500)
+  barcode            String?              @db.VarChar(200)
+  /// Staff who processed the collection
+  processedBy        String?              @db.Uuid
+  remark             String?              @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  gift   Gift   @relation(fields: [giftId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([giftId])
+  @@index([memberId])
+  @@index([status])
+  @@index([redemptionCode])
+  @@index([createdAt])
+  @@map("gift_redemptions")
+}
+
+// ============================================================================
+// CONTENT - Venue / FloorPlan / Article / ServiceDirectory / Banner / Notification
+// ============================================================================
+
+/// Venue - Mall/property information pages.
+model Venue {
+  id             String        @id @default(uuid()) @db.Uuid
+  projectId      String        @db.Uuid
+  code           String        @db.VarChar(50)
+  /// Multi-language venue name
+  name           Json          @db.JsonB
+  /// Multi-language description
+  description    Json?         @db.JsonB
+  /// Multi-language address
+  address        Json?         @db.JsonB
+  /// Multi-language opening hours text
+  openingHours   Json?         @db.JsonB
+  /// Multi-language transportation info
+  transportation Json?         @db.JsonB
+  phone          String?       @db.VarChar(50)
+  email          String?       @db.VarChar(255)
+  images         String[]
+  latitude       Decimal?      @db.Decimal(10, 7)
+  longitude      Decimal?      @db.Decimal(10, 7)
+  /// Facilities available (JSON array)
+  facilities     Json?         @db.JsonB
+  status         ContentStatus @default(DRAFT)
+  sortOrder      Int           @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, code])
+  @@index([projectId])
+  @@index([status])
+  @@map("venues")
+}
+
+/// FloorPlan - Floor plan images and data.
+model FloorPlan {
+  id        String  @id @default(uuid()) @db.Uuid
+  projectId String  @db.Uuid
+  /// Multi-language floor name (e.g., "B1", "G/F", "L1")
+  floorName Json    @db.JsonB
+  /// Floor plan image URL
+  image     String  @db.VarChar(500)
+  /// Interactive map data (shop positions, coordinates)
+  mapData   Json?   @db.JsonB
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("floor_plans")
+}
+
+/// ContentArticle - News, articles, and announcements with rich content.
+model ContentArticle {
+  id          String        @id @default(uuid()) @db.Uuid
+  projectId   String?       @db.Uuid
+  /// Multi-language title
+  title       Json          @db.JsonB
+  /// Multi-language slug for URL
+  slug        Json          @db.JsonB
+  /// Multi-language summary/excerpt
+  summary     Json?         @db.JsonB
+  /// Multi-language rich content (HTML or structured JSON)
+  content     Json          @db.JsonB
+  coverImage  String?       @db.VarChar(500)
+  images      String[]
+  /// Category: news, event, announcement, blog, guide
+  category    String        @db.VarChar(100)
+  tags        String[]
+  /// Author info
+  author      String?       @db.VarChar(200)
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?
+  scheduledAt DateTime?
+  /// SEO metadata
+  seoMetadata Json?         @db.JsonB
+  /// View/read statistics
+  viewCount   Int           @default(0)
+  /// Featured/pinned flag
+  isFeatured  Boolean       @default(false)
+  sortOrder   Int           @default(0)
+
+  createdBy String?   @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([category])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([isFeatured])
+  @@map("content_articles")
+}
+
+/// ServiceDirectory - Service guides and facility information.
+model ServiceDirectory {
+  id             String        @id @default(uuid()) @db.Uuid
+  projectId      String        @db.Uuid
+  /// Multi-language service name
+  name           Json          @db.JsonB
+  /// Multi-language description
+  description    Json?         @db.JsonB
+  /// Multi-language location info
+  location       Json?         @db.JsonB
+  /// Category: parking, customer_service, atm, restroom, baby_care, etc.
+  category       String        @db.VarChar(100)
+  icon           String?       @db.VarChar(500)
+  phone          String?       @db.VarChar(50)
+  /// Operating hours
+  operatingHours Json?         @db.JsonB
+  floor          String?       @db.VarChar(20)
+  status         ContentStatus @default(PUBLISHED)
+  sortOrder      Int           @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([category])
+  @@index([status])
+  @@map("service_directories")
+}
+
+/// Banner - Carousel/banner ads for app and website.
+model Banner {
+  id              String         @id @default(uuid()) @db.Uuid
+  projectId       String?        @db.Uuid
+  /// Multi-language title
+  title           Json           @db.JsonB
+  /// Multi-language subtitle
+  subtitle        Json?          @db.JsonB
+  /// Image URL per language: { "zh-CN": "...", "zh-TW": "...", "en": "..." }
+  image           Json           @db.JsonB
+  /// Link URL when banner is tapped
+  linkUrl         String?        @db.VarChar(500)
+  /// Link type: internal, external, campaign, coupon, article
+  linkType        String?        @db.VarChar(50)
+  /// Link target entity ID
+  linkTargetId    String?        @db.VarChar(255)
+  position        BannerPosition @default(HOME_TOP)
+  status          ContentStatus  @default(DRAFT)
+  startDate       DateTime?
+  endDate         DateTime?
+  sortOrder       Int            @default(0)
+  /// Click statistics
+  clickCount      Int            @default(0)
+  impressionCount Int            @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([position])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@map("banners")
+}
+
+/// PushNotification - Push notification records sent to members.
+model PushNotification {
+  id             String              @id @default(uuid()) @db.Uuid
+  projectId      String?             @db.Uuid
+  memberId       String?             @db.Uuid
+  templateId     String?             @db.Uuid
+  channel        NotificationChannel
+  /// Multi-language title
+  title          Json                @db.JsonB
+  /// Multi-language body
+  body           Json                @db.JsonB
+  /// Deep link or action URL
+  actionUrl      String?             @db.VarChar(500)
+  /// Additional data payload
+  data           Json?               @db.JsonB
+  status         NotificationStatus  @default(PENDING)
+  /// Scheduling
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  failReason     String?             @db.Text
+  /// Audience targeting (if sent to group)
+  audienceFilter Json?               @db.JsonB
+  /// Batch ID for bulk sends
+  batchId        String?             @db.VarChar(100)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project  Project?              @relation(fields: [projectId], references: [id])
+  member   Member?               @relation(fields: [memberId], references: [id])
+  template NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([projectId])
+  @@index([memberId])
+  @@index([channel])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([batchId])
+  @@map("push_notifications")
+}
+
+/// NotificationTemplate - Reusable message templates for notifications.
+model NotificationTemplate {
+  id            String                @id @default(uuid()) @db.Uuid
+  groupId       String                @db.Uuid
+  code          String                @db.VarChar(100)
+  /// Multi-language template name
+  name          Json                  @db.JsonB
+  /// Multi-language subject/title template (supports variables like {{memberName}})
+  titleTemplate Json                  @db.JsonB
+  /// Multi-language body template
+  bodyTemplate  Json                  @db.JsonB
+  /// Supported channels for this template
+  channels      NotificationChannel[]
+  /// Template variables definition
+  variables     Json?                 @db.JsonB
+  /// Category: transactional, marketing, system, campaign
+  category      String                @db.VarChar(50)
+  isActive      Boolean               @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  group         Group              @relation(fields: [groupId], references: [id])
+  notifications PushNotification[]
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([category])
+  @@map("notification_templates")
+}
+
+// ============================================================================
+// SYSTEM - InterfaceMonitor / ReportDownload / OperationLog / SmsSendRecord
+// ============================================================================
+
+/// InterfaceMonitor - Third-party interface health monitoring.
+model InterfaceMonitor {
+  id                  String          @id @default(uuid()) @db.Uuid
+  groupId             String          @db.Uuid
+  /// Interface name (e.g., "Payment Gateway", "SMS Provider", "M365 Auth")
+  name                String          @db.VarChar(200)
+  /// Interface URL or endpoint
+  endpoint            String          @db.VarChar(500)
+  /// HTTP method
+  method              String          @default("GET") @db.VarChar(10)
+  /// Current status
+  status              InterfaceStatus @default(UNKNOWN)
+  /// Response time in milliseconds
+  responseTimeMs      Int?
+  /// Last successful check
+  lastSuccessAt       DateTime?
+  /// Last failure
+  lastFailureAt       DateTime?
+  /// Last error message
+  lastErrorMessage    String?         @db.Text
+  /// Check interval in seconds
+  checkIntervalSec    Int             @default(300)
+  /// Alert threshold (consecutive failures)
+  alertThreshold      Int             @default(3)
+  /// Current consecutive failure count
+  consecutiveFailures Int             @default(0)
+  /// Alert recipients (JSON array of emails/phones)
+  alertRecipients     Json?           @db.JsonB
+  isActive            Boolean         @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id])
+
+  @@index([groupId])
+  @@index([status])
+  @@map("interface_monitors")
+}
+
+/// ReportDownload - Export/download history for reports and data.
+model ReportDownload {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @db.Uuid
+  /// Report type: member_list, transaction_report, campaign_analytics, etc.
+  reportType   String       @db.VarChar(100)
+  /// Multi-language report name
+  name         Json?        @db.JsonB
+  /// Filter parameters used
+  parameters   Json?        @db.JsonB
+  /// File format: xlsx, csv, pdf
+  fileFormat   String       @db.VarChar(10)
+  /// File URL (after generation)
+  fileUrl      String?      @db.VarChar(500)
+  /// File size in bytes
+  fileSize     BigInt?
+  status       ReportStatus @default(PENDING)
+  /// Processing progress (0-100)
+  progress     Int          @default(0)
+  /// Error message if failed
+  errorMessage String?      @db.Text
+  /// Expiry time for download link
+  expiresAt    DateTime?
+  startedAt    DateTime?
+  completedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([reportType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("report_downloads")
+}
+
+/// OperationLog - Detailed operation audit trail.
+model OperationLog {
+  id           String  @id @default(uuid()) @db.Uuid
+  userId       String? @db.Uuid
+  /// Module: member, stamp, campaign, merchant, system, etc.
+  module       String  @db.VarChar(100)
+  /// Operation: create, update, delete, approve, reject, import, export, etc.
+  operation    String  @db.VarChar(100)
+  /// Target entity type
+  entityType   String? @db.VarChar(100)
+  /// Target entity ID
+  entityId     String? @db.VarChar(255)
+  /// Multi-language description of the operation
+  description  Json?   @db.JsonB
+  /// Request/response details
+  requestData  Json?   @db.JsonB
+  responseData Json?   @db.JsonB
+  /// Result: success, failure, partial
+  result       String  @default("success") @db.VarChar(20)
+  /// Error details if failed
+  errorMessage String? @db.Text
+  /// Client info
+  ipAddress    String? @db.VarChar(45)
+  userAgent    String? @db.Text
+  /// Duration in milliseconds
+  durationMs   Int?
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([module])
+  @@index([operation])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("operation_logs")
+}
+
+// ============================================================================
+// MEMBER FAVORITES & FEEDBACK
+// ============================================================================
+
+/// MemberFavorite - Member's favorite merchants.
+model MemberFavorite {
+  id         String   @id @default(uuid()) @db.Uuid
+  memberId   String   @db.Uuid
+  merchantId String   @db.Uuid
+  createdAt  DateTime @default(now())
+
+  // Relations
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, merchantId])
+  @@index([memberId])
+  @@index([merchantId])
+  @@map("member_favorites")
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum FeedbackCategory {
+  GENERAL
+  COMPLAINT
+  SUGGESTION
+  INQUIRY
+  PRAISE
+  OTHER
+}
+
+/// Feedback - Customer feedback/AI conversation sessions.
+model Feedback {
+  id          String           @id @default(uuid()) @db.Uuid
+  projectId   String           @db.Uuid
+  memberId    String?          @db.Uuid
+  /// Session/conversation title (auto-generated or from first message)
+  title       String?          @db.VarChar(500)
+  category    FeedbackCategory @default(GENERAL)
+  status      FeedbackStatus   @default(OPEN)
+  /// Priority: 1=low, 2=normal, 3=high, 4=urgent
+  priority    Int              @default(2)
+  /// Rating from customer (1-5)
+  rating      Int?
+  /// Summary generated by AI
+  aiSummary   String?          @db.Text
+  /// Tags for categorization
+  tags        String[]
+  /// Assigned staff member
+  assignedTo  String?          @db.Uuid
+  resolvedAt  DateTime?
+  resolvedBy  String?          @db.Uuid
+  /// Anonymous feedback (no member login)
+  isAnonymous Boolean          @default(false)
+  /// Contact info for anonymous feedback
+  contactInfo Json?            @db.JsonB
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project  Project           @relation(fields: [projectId], references: [id])
+  member   Member?           @relation(fields: [memberId], references: [id])
+  messages FeedbackMessage[]
+
+  @@index([projectId])
+  @@index([memberId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+  @@map("feedbacks")
+}
+
+enum FeedbackMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+/// FeedbackMessage - Individual messages in feedback conversation.
+model FeedbackMessage {
+  id         String              @id @default(uuid()) @db.Uuid
+  feedbackId String              @db.Uuid
+  role       FeedbackMessageRole
+  content    String              @db.Text
+  /// AI model used (e.g., "glm-4-flash")
+  aiModel    String?             @db.VarChar(100)
+  /// Token usage for AI messages
+  tokens     Int?
+  /// Metadata (intent, entities, context used, etc.)
+  metadata   Json?               @db.JsonB
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  feedback Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@index([feedbackId])
+  @@index([role])
+  @@index([createdAt])
+  @@map("feedback_messages")
+}
+
+/// SmsSendRecord - SMS sending records for tracking and billing.
+model SmsSendRecord {
+  id                String             @id @default(uuid()) @db.Uuid
+  /// Recipient phone number
+  phone             String             @db.VarChar(50)
+  countryCode       String             @default("+852") @db.VarChar(10)
+  /// Message content
+  content           String             @db.Text
+  /// SMS type: verification, notification, marketing, otp
+  smsType           String             @db.VarChar(50)
+  /// Provider: twilio, alibaba, tencent, local
+  provider          String             @db.VarChar(50)
+  /// Provider message ID
+  providerMessageId String?            @db.VarChar(255)
+  /// Send status
+  status            NotificationStatus @default(PENDING)
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  failReason        String?            @db.Text
+  /// Cost in credits or currency
+  cost              Decimal?           @db.Decimal(10, 4)
+  /// Related entity (member registration, otp, campaign)
+  relatedEntityType String?            @db.VarChar(100)
+  relatedEntityId   String?            @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([smsType])
+  @@index([status])
+  @@index([provider])
+  @@index([createdAt])
+  @@map("sms_send_records")
+}
+
+// ============================================================================
+// PARKING - Parking Payment System
+// ============================================================================
+
+enum ParkingPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum ParkingPaymentMethod {
+  ALIPAY
+  WECHAT_PAY
+  CREDIT_CARD
+  STAMPS
+  MEMBER_DISCOUNT
+  FREE
+}
+
+/// ParkingRecord - Parking session records for members.
+model ParkingRecord {
+  id              String               @id @default(uuid()) @db.Uuid
+  projectId       String               @db.Uuid
+  memberId        String?              @db.Uuid
+  /// License plate number
+  licensePlate    String               @db.VarChar(20)
+  /// Entry time
+  entryTime       DateTime
+  /// Exit time (null if still parked)
+  exitTime        DateTime?
+  /// Duration in minutes
+  duration        Int?
+  /// Original fee before any discounts
+  originalFee     Decimal              @db.Decimal(10, 2)
+  /// Discount amount (member discount, stamps, etc.)
+  discountAmount  Decimal              @default(0) @db.Decimal(10, 2)
+  /// Final fee after discounts
+  finalFee        Decimal              @db.Decimal(10, 2)
+  /// Stamps used for payment
+  stampsUsed      Int                  @default(0)
+  /// Free parking hours used (from membership tier)
+  freeHoursUsed   Decimal              @default(0) @db.Decimal(4, 2)
+  /// Payment status
+  paymentStatus   ParkingPaymentStatus @default(PENDING)
+  /// Payment method
+  paymentMethod   ParkingPaymentMethod?
+  /// Payment transaction ID
+  paymentTxnId    String?              @db.VarChar(255)
+  /// Paid at
+  paidAt          DateTime?
+  /// Parking lot/zone identifier
+  parkingZone     String?              @db.VarChar(50)
+  /// Floor/level
+  floor           String?              @db.VarChar(20)
+  /// Spot number
+  spotNumber      String?              @db.VarChar(20)
+  /// Notes
+  notes           String?              @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+  member  Member? @relation(fields: [memberId], references: [id])
+
+  @@index([projectId])
+  @@index([memberId])
+  @@index([licensePlate])
+  @@index([paymentStatus])
+  @@index([entryTime])
+  @@map("parking_records")
+}
+
+/// ParkingRate - Parking rate configuration per project.
+model ParkingRate {
+  id            String   @id @default(uuid()) @db.Uuid
+  projectId     String   @db.Uuid
+  /// Rate name (e.g., "Weekday", "Weekend", "Holiday")
+  name          Json     @db.JsonB
+  /// Rate per hour in HKD
+  hourlyRate    Decimal  @db.Decimal(10, 2)
+  /// First N hours free/discounted
+  freeHours     Decimal  @default(0) @db.Decimal(4, 2)
+  /// Maximum daily charge
+  maxDailyRate  Decimal? @db.Decimal(10, 2)
+  /// Days applicable (0=Sunday, 1=Monday, etc.)
+  applicableDays Int[]
+  /// Time range start (e.g., "08:00")
+  startTime     String?  @db.VarChar(10)
+  /// Time range end (e.g., "22:00")
+  endTime       String?  @db.VarChar(10)
+  /// Member tier discounts (JSON: { "GOLD": 0.2, "PLATINUM": 0.3 })
+  tierDiscounts Json?    @db.JsonB
+  /// Stamps per HKD spent on parking
+  stampsPerDollar Decimal @default(0) @db.Decimal(5, 2)
+  /// Stamps to HKD conversion for payment (e.g., 10 stamps = 1 HKD)
+  stampsToHkdRate Decimal @default(10) @db.Decimal(5, 2)
+  isActive      Boolean  @default(true)
+  priority      Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([isActive])
+  @@map("parking_rates")
+}

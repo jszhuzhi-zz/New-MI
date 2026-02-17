@@ -33,13 +33,21 @@
         }
       },
       "server": {
-        "use": "@cloudbase/framework-plugin-container",
+        "use": "@cloudbase/framework-plugin-function",
         "inputs": {
-          "serviceName": "link-reit-backend",
-          "servicePath": "/api",
-          "containerPort": 3000,
-          "dockerfilePath": "apps/backend/Dockerfile",
-          "buildDir": "."
+          "functions": [{
+            "name": "link-reit-api",
+            "runtime": "Nodejs18.15",
+            "handler": "index.main",
+            "timeout": 60,
+            "memorySize": 512,
+            "installDependency": true,
+            "codeSecret": ""
+          }],
+          "servicePaths": {
+            "link-reit-api": "/api"
+          },
+          "functionRootPath": "apps/backend/scf"
         }
       }
     }
