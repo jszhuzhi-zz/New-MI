@@ -33,13 +33,26 @@ export default () => ({
   },
 
   sms: {
-    provider: process.env.SMS_PROVIDER || 'twilio',
+    provider: process.env.SMS_PROVIDER || 'tencent',
+    // Tencent Cloud SMS Configuration
+    tencentSdkAppId: process.env.TENCENT_SMS_SDK_APP_ID || '1401088316',
+    tencentAppKey: process.env.TENCENT_SMS_APP_KEY || '9d058acfae04eeb634827844a164fa9c',
+    tencentSecretId: process.env.TENCENT_SECRET_ID || '',
+    tencentSecretKey: process.env.TENCENT_SECRET_KEY || '',
+    tencentSignName: process.env.TENCENT_SMS_SIGN_NAME || '领展会员',
+    tencentTemplateId: process.env.TENCENT_SMS_TEMPLATE_ID || '',
+    tencentRegion: process.env.TENCENT_SMS_REGION || 'ap-guangzhou',
+    // Legacy Twilio Configuration (backup)
     accountSid: process.env.SMS_ACCOUNT_SID || '',
     authToken: process.env.SMS_AUTH_TOKEN || '',
     fromNumber: process.env.SMS_FROM_NUMBER || '',
+    // OTP Settings
     otpLength: parseInt(process.env.SMS_OTP_LENGTH || '6', 10),
     otpExpiryMinutes: parseInt(process.env.SMS_OTP_EXPIRY_MINUTES || '5', 10),
     dailyLimit: parseInt(process.env.SMS_DAILY_LIMIT || '10', 10),
+    // Rate limiting
+    rateLimitWindow: parseInt(process.env.SMS_RATE_LIMIT_WINDOW || '60', 10),
+    rateLimitMax: parseInt(process.env.SMS_RATE_LIMIT_MAX || '3', 10),
   },
 
   m365: {

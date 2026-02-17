@@ -65,6 +65,67 @@ interface ApiResponse<T> {
   };
 }
 
+// ─── Authentication APIs ────────────────────────────────────────────────────
+
+export interface AuthTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
+  tokenType: string;
+}
+
+export interface SendSmsCodeResponse {
+  message: string;
+  expiresInMinutes: number;
+  devOtp?: string; // Only in development mode
+}
+
+export const authApi = {
+  /**
+   * Send SMS verification code
+   */
+  sendSmsCode: (phone: string) =>
+    apiClient.post<SendSmsCodeResponse>('/auth/sms-code', { phone }),
+
+  /**
+   * Verify SMS code and login
+   */
+  verifySmsCode: (phone: string, code: string) =>
+    apiClient.post<AuthTokenResponse>('/auth/verify-sms', {
+      phone,
+      code,
+      portalType: 'customer',
+    }),
+
+  /**
+   * Login with password
+   */
+  login: (identifier: string, password: string) =>
+    apiClient.post<AuthTokenResponse>('/auth/login', {
+      identifier,
+      password,
+      portalType: 'customer',
+    }),
+
+  /**
+   * Get current user profile
+   */
+  getCurrentUser: () =>
+    apiClient.get<ApiResponse<any>>('/auth/me'),
+
+  /**
+   * Refresh access token
+   */
+  refreshToken: (refreshToken: string) =>
+    apiClient.post<AuthTokenResponse>('/auth/refresh', { refreshToken }),
+
+  /**
+   * Logout
+   */
+  logout: () =>
+    apiClient.post<{ message: string }>('/auth/logout'),
+};
+
 // ─── Feedback / AI Customer Service APIs ────────────────────────────────────
 
 export const feedbackApi = {
@@ -125,6 +186,7 @@ export const favoritesApi = {
 export default apiClient;
 
 export const api = {
+  auth: authApi,
   feedback: feedbackApi,
   favorites: favoritesApi,
 };

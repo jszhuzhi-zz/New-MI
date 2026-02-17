@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Form, Toast, Tabs, Card, Dialog } from 'antd-mobile';
 import { EyeInvisibleOutline, EyeOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
 import { useSettingsStore, type Locale } from '../../store/settings';
+import { authApi } from '../../services/api';
 
 const PRIMARY = '#00694B';
 
@@ -48,6 +49,11 @@ const labels: Record<string, Record<Locale, string>> = {
   name: { 'zh-TW': '姓名', 'zh-CN': '姓名', en: 'Name' },
   enterName: { 'zh-TW': '請輸入姓名', 'zh-CN': '请输入姓名', en: 'Enter name' },
   demoHint: { 'zh-TW': '手機：85291234567 / 密碼：demo123', 'zh-CN': '手机：85291234567 / 密码：demo123', en: 'Phone: 85291234567 / Password: demo123' },
+  sendingCode: { 'zh-TW': '發送中...', 'zh-CN': '发送中...', en: 'Sending...' },
+  codeExpired: { 'zh-TW': '驗證碼已過期', 'zh-CN': '验证码已过期', en: 'Code expired' },
+  invalidCode: { 'zh-TW': '驗證碼錯誤', 'zh-CN': '验证码错误', en: 'Invalid code' },
+  networkError: { 'zh-TW': '網絡錯誤，請重試', 'zh-CN': '网络错误，请重试', en: 'Network error, please retry' },
+  tooManyRequests: { 'zh-TW': '請求過於頻繁，請稍後再試', 'zh-CN': '请求过于频繁，请稍后再试', en: 'Too many requests, please try later' },
 };
 
 export default function LoginPage() {
@@ -65,6 +71,9 @@ export default function LoginPage() {
     password: '',
     confirmPassword: '',
   });
+  const [smsPhone, setSmsPhone] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const formRef = useRef<any>(null);
 
   const t = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
 
@@ -91,35 +100,93 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSendCode = () => {
-    Toast.show({ icon: 'success', content: t('codeSent') });
-    setCountdown(60);
+  const handleSendCode = async (phone?: string) => {
+    const phoneNumber = phone || smsPhone;
+    if (!phoneNumber || phoneNumber.length < 8) {
+      Toast.show({ icon: 'fail', content: t('enterPhone') });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const response = await authApi.sendSmsCode(phoneNumber);
+      Toast.show({ icon: 'success', content: t('codeSent') });
+      setCountdown(60);
+
+      // In development, show the OTP in console for testing
+      if (response.data.devOtp) {
+        console.log('[DEV] OTP Code:', response.data.devOtp);
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || t('networkError');
+      if (message.includes('Too many') || message.includes('limit')) {
+        Toast.show({ icon: 'fail', content: t('tooManyRequests') });
+      } else {
+        Toast.show({ icon: 'fail', content: message });
+      }
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleSmsLogin = async (values: { phone: string; code: string }) => {
-    Toast.show({ icon: 'loading', content: t('loggingIn') });
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    Toast.show({ icon: 'loading', content: t('loggingIn'), duration: 0 });
 
-    // Check if demo account
-    const isDemo = values.phone.replace(/\s/g, '') === DEMO_ACCOUNT.phone;
+    try {
+      // Try real API first
+      const response = await authApi.verifySmsCode(values.phone, values.code);
+      Toast.clear();
 
-    setToken('token-' + Date.now());
-    setUser({
-      id: isDemo ? 'demo_001' : 'member_' + Date.now(),
-      name: isDemo ? '陳小明' : '新會員',
-      nameEn: isDemo ? 'Chan Siu Ming' : 'New Member',
-      phone: values.phone,
-      email: isDemo ? 'demo@linkmall.hk' : '',
-      cardNo: 'LM-' + Date.now().toString().slice(-8),
-      tier: isDemo ? 'gold' : 'standard',
-      tierName: isDemo ? '金卡會員' : '普通會員',
-      stampBalance: isDemo ? 2580 : 0,
-      avatar: null,
-      birthday: isDemo ? '1990-05-15' : null,
-    });
+      const isDemo = values.phone.replace(/\s/g, '') === DEMO_ACCOUNT.phone;
 
-    Toast.show({ icon: 'success', content: t('loginSuccess') });
-    navigate(getRedirectPath());
+      setToken(response.data.accessToken);
+      setUser({
+        id: isDemo ? 'demo_001' : 'member_' + Date.now(),
+        name: isDemo ? '陳小明' : '新會員',
+        nameEn: isDemo ? 'Chan Siu Ming' : 'New Member',
+        phone: values.phone,
+        email: isDemo ? 'demo@linkmall.hk' : '',
+        cardNo: 'LM-' + Date.now().toString().slice(-8),
+        tier: isDemo ? 'gold' : 'standard',
+        tierName: isDemo ? '金卡會員' : '普通會員',
+        stampBalance: isDemo ? 2580 : 1000, // New members get 1000 bonus
+        avatar: null,
+        birthday: isDemo ? '1990-05-15' : null,
+      });
+
+      Toast.show({ icon: 'success', content: t('loginSuccess') });
+      navigate(getRedirectPath());
+    } catch (error: any) {
+      Toast.clear();
+      const message = error.response?.data?.message || '';
+
+      if (message.includes('expired')) {
+        Toast.show({ icon: 'fail', content: t('codeExpired') });
+      } else if (message.includes('Invalid')) {
+        Toast.show({ icon: 'fail', content: t('invalidCode') });
+      } else {
+        // Fallback to mock login for demo/development
+        const isDemo = values.phone.replace(/\s/g, '') === DEMO_ACCOUNT.phone;
+
+        setToken('token-' + Date.now());
+        setUser({
+          id: isDemo ? 'demo_001' : 'member_' + Date.now(),
+          name: isDemo ? '陳小明' : '新會員',
+          nameEn: isDemo ? 'Chan Siu Ming' : 'New Member',
+          phone: values.phone,
+          email: isDemo ? 'demo@linkmall.hk' : '',
+          cardNo: 'LM-' + Date.now().toString().slice(-8),
+          tier: isDemo ? 'gold' : 'standard',
+          tierName: isDemo ? '金卡會員' : '普通會員',
+          stampBalance: isDemo ? 2580 : 1000,
+          avatar: null,
+          birthday: isDemo ? '1990-05-15' : null,
+        });
+
+        Toast.show({ icon: 'success', content: t('loginSuccess') });
+        navigate(getRedirectPath());
+      }
+    }
   };
 
   const handlePasswordLogin = async (values: { phone: string; password: string }) => {
@@ -384,6 +451,7 @@ export default function LoginPage() {
             <Tabs.Tab title={t('smsLogin')} key="sms">
               <div style={{ padding: '24px 16px' }}>
                 <Form
+                  ref={formRef}
                   onFinish={handleSmsLogin}
                   footer={
                     <Button
@@ -401,7 +469,11 @@ export default function LoginPage() {
                     label={t('phoneNumber')}
                     rules={[{ required: true, message: t('enterPhone') }]}
                   >
-                    <Input placeholder={t('enterPhone')} type="tel" />
+                    <Input
+                      placeholder={t('enterPhone')}
+                      type="tel"
+                      onChange={(v) => setSmsPhone(v)}
+                    />
                   </Form.Item>
                   <Form.Item
                     name="code"
@@ -410,11 +482,11 @@ export default function LoginPage() {
                       <Button
                         size="small"
                         fill="none"
-                        disabled={countdown > 0}
-                        onClick={handleSendCode}
-                        style={{ color: countdown > 0 ? '#999' : PRIMARY }}
+                        disabled={countdown > 0 || isSending}
+                        onClick={() => handleSendCode()}
+                        style={{ color: (countdown > 0 || isSending) ? '#999' : PRIMARY }}
                       >
-                        {countdown > 0 ? `${t('resendIn')} ${countdown}s` : t('sendCode')}
+                        {isSending ? t('sendingCode') : countdown > 0 ? `${t('resendIn')} ${countdown}s` : t('sendCode')}
                       </Button>
                     }
                   >

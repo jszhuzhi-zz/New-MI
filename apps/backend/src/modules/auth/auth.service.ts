@@ -9,6 +9,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { TencentSmsService } from '../../common/services/tencent-sms.service';
+import { RedisService } from '../../common/services/redis.service';
 
 /**
  * Authentication service.
@@ -22,6 +24,8 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly smsService: TencentSmsService,
+    private readonly redisService: RedisService,
   ) {}
 
   // ─── Login ──────────────────────────────────────────────────────────────────
@@ -150,64 +154,158 @@ export class AuthService {
    * Send SMS OTP code to the specified phone number.
    */
   async sendSmsCode(phone: string) {
-    // TODO: Check rate limiting
-    // const dailyCount = await this.redis.get(`sms:daily:${phone}`);
-    // const dailyLimit = this.configService.get<number>('sms.dailyLimit', 10);
-    // if (parseInt(dailyCount || '0') >= dailyLimit) {
-    //   throw new BadRequestException('SMS daily limit exceeded. Please try again tomorrow.');
-    // }
+    // Normalize phone number
+    const normalizedPhone = this.normalizePhone(phone);
+
+    // Check rate limiting (per minute)
+    const rateLimitKey = `sms:ratelimit:${normalizedPhone}`;
+    const rateLimitWindow = this.configService.get<number>('sms.rateLimitWindow', 60);
+    const rateLimitMax = this.configService.get<number>('sms.rateLimitMax', 3);
+
+    const recentRequests = await this.redisService.get(rateLimitKey);
+    if (recentRequests && parseInt(recentRequests) >= rateLimitMax) {
+      throw new BadRequestException('Too many SMS requests. Please wait a minute before trying again.');
+    }
+
+    // Check daily limit
+    const dailyKey = `sms:daily:${normalizedPhone}`;
+    const dailyCount = await this.redisService.get(dailyKey);
+    const dailyLimit = this.configService.get<number>('sms.dailyLimit', 10);
+
+    if (dailyCount && parseInt(dailyCount) >= dailyLimit) {
+      throw new BadRequestException('SMS daily limit exceeded. Please try again tomorrow.');
+    }
 
     // Generate OTP
     const otpLength = this.configService.get<number>('sms.otpLength', 6);
     const otp = this.generateOtp(otpLength);
     const expiryMinutes = this.configService.get<number>('sms.otpExpiryMinutes', 5);
 
-    // TODO: Store OTP in Redis with expiry
-    // await this.redis.set(`otp:${phone}`, otp, 'EX', expiryMinutes * 60);
+    // Store OTP in Redis with expiry
+    const otpKey = `otp:${normalizedPhone}`;
+    await this.redisService.set(otpKey, otp, expiryMinutes * 60);
 
-    // TODO: Send SMS via provider (Twilio, etc.)
-    // await this.smsProvider.send(phone, `Your verification code is: ${otp}. Valid for ${expiryMinutes} minutes.`);
+    // Check if SMS service is configured
+    const smsProvider = this.configService.get<string>('sms.provider', 'tencent');
 
-    // TODO: Increment daily counter
-    // await this.redis.incr(`sms:daily:${phone}`);
-    // await this.redis.expire(`sms:daily:${phone}`, 86400);
+    if (smsProvider === 'tencent' && this.smsService.isConfigured()) {
+      // Send real SMS via Tencent Cloud
+      try {
+        await this.smsService.sendVerificationCode(normalizedPhone, otp, expiryMinutes);
+        this.logger.log(`SMS OTP sent via Tencent Cloud to ${this.maskPhone(normalizedPhone)}`);
+      } catch (error) {
+        // Clean up OTP on failure
+        await this.redisService.del(otpKey);
+        this.logger.error(`Failed to send SMS: ${error.message}`);
+        throw new BadRequestException('Failed to send SMS. Please try again.');
+      }
+    } else {
+      // Development mode - log OTP to console
+      this.logger.warn(`[DEV MODE] SMS OTP for ${this.maskPhone(normalizedPhone)}: ${otp}`);
+    }
 
-    this.logger.log(`SMS OTP sent to ${phone.substring(0, 4)}****`);
+    // Update rate limiting counters
+    await this.redisService.incr(rateLimitKey);
+    await this.redisService.expire(rateLimitKey, rateLimitWindow);
 
-    return { message: 'Verification code sent', expiresInMinutes: expiryMinutes };
+    // Update daily counter
+    await this.redisService.incr(dailyKey);
+    await this.redisService.expire(dailyKey, 86400);
+
+    return {
+      message: 'Verification code sent',
+      expiresInMinutes: expiryMinutes,
+      // Only include OTP in development for testing
+      ...(process.env.NODE_ENV === 'development' && { devOtp: otp }),
+    };
   }
 
   /**
    * Verify SMS OTP code and authenticate user.
    */
   async verifySmsCode(phone: string, code: string, portalType: string) {
-    // TODO: Retrieve stored OTP from Redis
-    // const storedOtp = await this.redis.get(`otp:${phone}`);
-    // if (!storedOtp) {
-    //   throw new BadRequestException('Verification code has expired. Please request a new one.');
-    // }
-    // if (storedOtp !== code) {
-    //   throw new BadRequestException('Invalid verification code.');
-    // }
+    const normalizedPhone = this.normalizePhone(phone);
+    const otpKey = `otp:${normalizedPhone}`;
 
-    // TODO: Delete used OTP
-    // await this.redis.del(`otp:${phone}`);
+    // Retrieve stored OTP from Redis
+    const storedOtp = await this.redisService.get(otpKey);
 
-    // TODO: Find or create user by phone number
-    // let user = await this.prisma.user.findFirst({ where: { phone } });
-    // if (!user) {
-    //   user = await this.prisma.user.create({ data: { phone, status: 'active', roles: ['customer'] } });
-    // }
+    if (!storedOtp) {
+      throw new BadRequestException('Verification code has expired. Please request a new one.');
+    }
+
+    if (storedOtp !== code) {
+      // Increment failed attempts
+      const failKey = `otp:fail:${normalizedPhone}`;
+      const failCount = await this.redisService.incr(failKey);
+      await this.redisService.expire(failKey, 300); // 5 minutes
+
+      if (failCount >= 5) {
+        // Too many failed attempts, delete the OTP
+        await this.redisService.del(otpKey);
+        throw new BadRequestException('Too many failed attempts. Please request a new verification code.');
+      }
+
+      throw new BadRequestException('Invalid verification code.');
+    }
+
+    // Delete used OTP
+    await this.redisService.del(otpKey);
+    await this.redisService.del(`otp:fail:${normalizedPhone}`);
+
+    // TODO: Find or create user by phone number from database
+    // For now, generate a deterministic user ID based on phone
+    const userId = this.generateUserIdFromPhone(normalizedPhone);
 
     const payload: JwtPayload = {
-      sub: 'user-id-placeholder',
+      sub: userId,
       email: '',
-      phone,
+      phone: normalizedPhone,
       roles: ['customer'],
       portalType,
     };
 
+    this.logger.log(`User ${this.maskPhone(normalizedPhone)} authenticated via SMS OTP`);
+
     return this.generateTokens(payload);
+  }
+
+  /**
+   * Normalize phone number format
+   */
+  private normalizePhone(phone: string): string {
+    // Remove all non-digit characters except +
+    let cleaned = phone.replace(/[^\d+]/g, '');
+
+    // If no country code, assume Hong Kong
+    if (!cleaned.startsWith('+')) {
+      if (cleaned.startsWith('852')) {
+        cleaned = '+' + cleaned;
+      } else if (cleaned.length === 8) {
+        cleaned = '+852' + cleaned;
+      } else {
+        cleaned = '+852' + cleaned;
+      }
+    }
+
+    return cleaned;
+  }
+
+  /**
+   * Generate deterministic user ID from phone (for demo purposes)
+   * In production, this should query the database
+   */
+  private generateUserIdFromPhone(phone: string): string {
+    const crypto = require('crypto');
+    return 'user_' + crypto.createHash('sha256').update(phone).digest('hex').substring(0, 16);
+  }
+
+  /**
+   * Mask phone number for logging
+   */
+  private maskPhone(phone: string): string {
+    if (phone.length <= 6) return '****';
+    return phone.substring(0, 4) + '****' + phone.substring(phone.length - 4);
   }
 
   // ─── M365 SSO ───────────────────────────────────────────────────────────────
