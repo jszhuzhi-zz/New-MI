@@ -2,8 +2,25 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NavBar, Card, List, Tag, Button, Divider, Toast, Image, Swiper, Modal, ProgressBar } from 'antd-mobile';
 import { HeartOutline, HeartFill, SendOutline, ClockCircleOutline, LocationFill, GiftOutline } from 'antd-mobile-icons';
+
+// Custom QR code icon
+const QrcodeIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+    <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+    <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+    <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
+    <rect x="18" y="14" width="3" height="3" fill="currentColor"/>
+    <rect x="14" y="18" width="3" height="3" fill="currentColor"/>
+    <rect x="18" y="18" width="3" height="3" fill="currentColor"/>
+    <rect x="5" y="5" width="3" height="3" fill="currentColor"/>
+    <rect x="16" y="5" width="3" height="3" fill="currentColor"/>
+    <rect x="5" y="16" width="3" height="3" fill="currentColor"/>
+  </svg>
+);
 import { useTranslation } from '../../locales';
 import { useSettingsStore, type Locale } from '../../store/settings';
+import { QRCodeSVG } from 'qrcode.react';
 
 const PRIMARY = '#00694B';
 
@@ -214,6 +231,8 @@ export default function CampaignDetail() {
   const campaignSource = campaignDataSource[id || ''] || defaultCampaignData;
   const [isFavorite, setIsFavorite] = useState(false);
   const [isJoined, setIsJoined] = useState(campaignSource.isJoined || false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [participationCode, setParticipationCode] = useState('');
 
   // Derive locale-specific campaign data
   const campaign = useMemo<Campaign>(() => ({
@@ -249,9 +268,17 @@ export default function CampaignDetail() {
     }
   };
 
+  // Generate unique participation code
+  const generateParticipationCode = () => {
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `LM-${campaign.id.toUpperCase()}-${timestamp}-${random}`;
+  };
+
   const handleJoin = () => {
     if (isJoined) {
-      Toast.show({ content: t('campaign.alreadyJoined'), icon: 'success' });
+      // If already joined, show QR code
+      setShowQRCode(true);
     } else {
       Modal.confirm({
         title: t('campaign.confirmJoin'),
@@ -259,11 +286,22 @@ export default function CampaignDetail() {
         confirmText: t('common.confirm'),
         cancelText: t('common.cancel'),
         onConfirm: () => {
+          const code = generateParticipationCode();
+          setParticipationCode(code);
           setIsJoined(true);
           Toast.show({ content: t('campaign.joinSuccess'), icon: 'success' });
+          // Show QR code after a short delay
+          setTimeout(() => setShowQRCode(true), 500);
         },
       });
     }
+  };
+
+  const handleShowQRCode = () => {
+    if (!participationCode) {
+      setParticipationCode(generateParticipationCode());
+    }
+    setShowQRCode(true);
   };
 
   const progressPercent = campaign.maxParticipants > 0
@@ -436,37 +474,126 @@ export default function CampaignDetail() {
         padding: '12px 16px', background: '#fff', borderTop: '1px solid #f0f0f0',
         display: 'flex', gap: 12
       }}>
-        <Button
-          block
-          size="large"
-          color={isJoined ? 'default' : 'primary'}
-          onClick={handleJoin}
-          style={{
-            '--background-color': isJoined ? '#f5f5f5' : PRIMARY,
-            '--border-color': isJoined ? '#d9d9d9' : PRIMARY,
-            '--text-color': isJoined ? '#999' : '#fff',
-            borderRadius: 12,
-            fontWeight: 600
-          } as React.CSSProperties}
-        >
-          {isJoined ? `✓ ${t('campaign.joined')}` : t('campaign.joinNow')}
-        </Button>
-        {!isJoined && (
-          <Button
-            size="large"
-            onClick={() => navigate('/scan')}
-            style={{
-              '--border-color': PRIMARY,
-              '--text-color': PRIMARY,
-              borderRadius: 12,
-              fontWeight: 600,
-              minWidth: 100,
-            } as React.CSSProperties}
-          >
-            {t('common.scan')}
-          </Button>
+        {isJoined ? (
+          <>
+            <Button
+              block
+              size="large"
+              color="primary"
+              onClick={handleShowQRCode}
+              style={{
+                '--background-color': PRIMARY,
+                '--border-color': PRIMARY,
+                borderRadius: 12,
+                fontWeight: 600,
+              } as React.CSSProperties}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <QrcodeIcon />
+                {t('campaign.showCredential')}
+              </span>
+            </Button>
+            <Button
+              size="large"
+              onClick={() => navigate('/scan')}
+              style={{
+                '--border-color': PRIMARY,
+                '--text-color': PRIMARY,
+                borderRadius: 12,
+                fontWeight: 600,
+                minWidth: 100,
+              } as React.CSSProperties}
+            >
+              {t('common.scan')}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              block
+              size="large"
+              color="primary"
+              onClick={handleJoin}
+              style={{
+                '--background-color': PRIMARY,
+                '--border-color': PRIMARY,
+                borderRadius: 12,
+                fontWeight: 600
+              } as React.CSSProperties}
+            >
+              {t('campaign.joinNow')}
+            </Button>
+            <Button
+              size="large"
+              onClick={() => navigate('/scan')}
+              style={{
+                '--border-color': PRIMARY,
+                '--text-color': PRIMARY,
+                borderRadius: 12,
+                fontWeight: 600,
+                minWidth: 100,
+              } as React.CSSProperties}
+            >
+              {t('common.scan')}
+            </Button>
+          </>
         )}
       </div>
+
+      {/* QR Code Modal */}
+      <Modal
+        visible={showQRCode}
+        onClose={() => setShowQRCode(false)}
+        title={t('campaign.participationCredential')}
+        content={
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{
+              background: '#fff',
+              padding: 20,
+              borderRadius: 16,
+              display: 'inline-block',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            }}>
+              <QRCodeSVG
+                value={JSON.stringify({
+                  type: 'campaign_participation',
+                  campaignId: campaign.id,
+                  campaignTitle: campaign.title,
+                  code: participationCode,
+                  validUntil: campaign.dateRange.end,
+                })}
+                size={200}
+                level="H"
+                includeMargin
+                fgColor={PRIMARY}
+              />
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#333' }}>{campaign.title}</div>
+              <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{t('campaign.credentialCode')}: {participationCode}</div>
+              <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{t('campaign.validUntil')}: {campaign.dateRange.end}</div>
+            </div>
+            <div style={{
+              marginTop: 16,
+              padding: '10px 16px',
+              background: '#f5f5f5',
+              borderRadius: 8,
+              fontSize: 12,
+              color: '#666',
+            }}>
+              {t('campaign.credentialTip')}
+            </div>
+          </div>
+        }
+        closeOnAction
+        actions={[
+          {
+            key: 'close',
+            text: t('common.confirm'),
+            primary: true,
+          },
+        ]}
+      />
     </div>
   );
 }

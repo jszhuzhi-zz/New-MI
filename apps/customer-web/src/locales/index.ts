@@ -170,6 +170,11 @@ type TranslationKeys = {
   'campaign.joinSuccess': string;
   'campaign.participantsCount': string;
   'campaign.quota': string;
+  'campaign.showCredential': string;
+  'campaign.participationCredential': string;
+  'campaign.credentialCode': string;
+  'campaign.validUntil': string;
+  'campaign.credentialTip': string;
 };
 
 const translations: Record<Locale, TranslationKeys> = {
@@ -320,6 +325,11 @@ const translations: Record<Locale, TranslationKeys> = {
     'campaign.joinSuccess': '成功參加活動！',
     'campaign.participantsCount': '已有 {count} 人參加',
     'campaign.quota': '名額',
+    'campaign.showCredential': '出示憑證',
+    'campaign.participationCredential': '活動參與憑證',
+    'campaign.credentialCode': '憑證編號',
+    'campaign.validUntil': '有效期至',
+    'campaign.credentialTip': '請於活動商戶出示此二維碼進行核銷',
   },
 
   'zh-CN': {
@@ -469,6 +479,11 @@ const translations: Record<Locale, TranslationKeys> = {
     'campaign.joinSuccess': '成功参加活动！',
     'campaign.participantsCount': '已有 {count} 人参加',
     'campaign.quota': '名额',
+    'campaign.showCredential': '出示凭证',
+    'campaign.participationCredential': '活动参与凭证',
+    'campaign.credentialCode': '凭证编号',
+    'campaign.validUntil': '有效期至',
+    'campaign.credentialTip': '请于活动商户出示此二维码进行核销',
   },
 
   en: {
@@ -618,6 +633,11 @@ const translations: Record<Locale, TranslationKeys> = {
     'campaign.joinSuccess': 'Successfully joined the campaign!',
     'campaign.participantsCount': '{count} participants',
     'campaign.quota': 'Quota',
+    'campaign.showCredential': 'Show Credential',
+    'campaign.participationCredential': 'Participation Credential',
+    'campaign.credentialCode': 'Code',
+    'campaign.validUntil': 'Valid until',
+    'campaign.credentialTip': 'Show this QR code to merchant for verification',
   },
 };
 
