@@ -113,6 +113,26 @@ type TranslationKeys = {
   'settings.blueTheme': string;
   'settings.purpleTheme': string;
   'settings.goldTheme': string;
+
+  // Messages
+  'messages.title': string;
+  'messages.noMessages': string;
+  'messages.markAllRead': string;
+  'messages.system': string;
+  'messages.promotion': string;
+  'messages.transaction': string;
+
+  // Favorites
+  'favorites.title': string;
+  'favorites.noFavorites': string;
+  'favorites.merchants': string;
+  'favorites.campaigns': string;
+  'favorites.remove': string;
+
+  // AI Customer Service
+  'support.aiService': string;
+  'support.askQuestion': string;
+  'support.placeholder': string;
 };
 
 const translations: Record<Locale, TranslationKeys> = {
@@ -216,6 +236,20 @@ const translations: Record<Locale, TranslationKeys> = {
     'settings.blueTheme': '海洋藍',
     'settings.purpleTheme': '優雅紫',
     'settings.goldTheme': '尊貴金',
+    'messages.title': '消息中心',
+    'messages.noMessages': '暫無消息',
+    'messages.markAllRead': '全部標記已讀',
+    'messages.system': '系統通知',
+    'messages.promotion': '優惠推廣',
+    'messages.transaction': '交易通知',
+    'favorites.title': '我的收藏',
+    'favorites.noFavorites': '暫無收藏',
+    'favorites.merchants': '商戶',
+    'favorites.campaigns': '活動',
+    'favorites.remove': '取消收藏',
+    'support.aiService': 'AI智能客服',
+    'support.askQuestion': '請輸入您的問題',
+    'support.placeholder': '例如：如何查詢印花餘額？',
   },
 
   'zh-CN': {
@@ -318,6 +352,20 @@ const translations: Record<Locale, TranslationKeys> = {
     'settings.blueTheme': '海洋蓝',
     'settings.purpleTheme': '优雅紫',
     'settings.goldTheme': '尊贵金',
+    'messages.title': '消息中心',
+    'messages.noMessages': '暂无消息',
+    'messages.markAllRead': '全部标记已读',
+    'messages.system': '系统通知',
+    'messages.promotion': '优惠推广',
+    'messages.transaction': '交易通知',
+    'favorites.title': '我的收藏',
+    'favorites.noFavorites': '暂无收藏',
+    'favorites.merchants': '商户',
+    'favorites.campaigns': '活动',
+    'favorites.remove': '取消收藏',
+    'support.aiService': 'AI智能客服',
+    'support.askQuestion': '请输入您的问题',
+    'support.placeholder': '例如：如何查询印花余额？',
   },
 
   en: {
@@ -420,6 +468,20 @@ const translations: Record<Locale, TranslationKeys> = {
     'settings.blueTheme': 'Ocean Blue',
     'settings.purpleTheme': 'Elegant Purple',
     'settings.goldTheme': 'Premium Gold',
+    'messages.title': 'Messages',
+    'messages.noMessages': 'No messages',
+    'messages.markAllRead': 'Mark all as read',
+    'messages.system': 'System',
+    'messages.promotion': 'Promotions',
+    'messages.transaction': 'Transactions',
+    'favorites.title': 'My Favorites',
+    'favorites.noFavorites': 'No favorites yet',
+    'favorites.merchants': 'Merchants',
+    'favorites.campaigns': 'Campaigns',
+    'favorites.remove': 'Remove',
+    'support.aiService': 'AI Assistant',
+    'support.askQuestion': 'Ask a question',
+    'support.placeholder': 'e.g., How do I check my stamp balance?',
   },
 };
 

@@ -84,11 +84,11 @@ export default function ProfilePage() {
     { label: t('profile.editProfile'), icon: <EditIcon color={colors.primary} />, path: '/profile/edit', badge: 0 },
     { label: t('profile.stampHistory'), icon: <TrophyIcon color={colors.primary} />, path: '/tier', badge: 0 },
     { label: t('gifts.stampMall'), icon: <GiftIcon color={colors.primary} />, path: '/gifts', badge: 0 },
-    { label: '消息中心', icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3 },
-    { label: '收藏商鋪', icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0 },
+    { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3 },
+    { label: t('favorites.title'), icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0 },
     { label: t('settings.languageSettings'), icon: <LanguageIcon color={colors.primary} />, path: '/settings', badge: 0 },
     { label: t('settings.themeSettings'), icon: <PaletteIcon color={colors.primary} />, path: '/settings', badge: 0 },
-    { label: 'AI客服', icon: <ChatIcon color={colors.primary} />, path: '/support', badge: 0 },
+    { label: t('support.aiService'), icon: <ChatIcon color={colors.primary} />, path: '/support', badge: 0 },
     { label: t('profile.about'), icon: <InfoIcon color={colors.primary} />, path: '', badge: 0 },
   ];
 
