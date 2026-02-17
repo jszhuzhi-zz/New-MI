@@ -10,6 +10,7 @@ import ScanPage from './pages/scan';
 import OffersPage from './pages/offers';
 import CampaignDetail from './pages/offers/campaign-detail';
 import CouponDetail from './pages/offers/coupon-detail';
+import LotteryDetail from './pages/offers/lottery';
 import ProfilePage from './pages/profile';
 import TierPage from './pages/profile/tier';
 import SettingsPage from './pages/settings';
@@ -151,6 +152,7 @@ export default function App() {
           <Route path="/stamp/:id" element={<StampDetail />} />
           <Route path="/campaign/:id" element={<CampaignDetail />} />
           <Route path="/coupon/:id" element={<CouponDetail />} />
+          <Route path="/lottery/:id" element={<LotteryDetail />} />
           <Route path="/tier" element={<TierPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />

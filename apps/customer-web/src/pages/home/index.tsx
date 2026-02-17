@@ -39,6 +39,15 @@ const GiftIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
+const CarIcon = ({ color }: { color: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M19 17h1c.6 0 1-.4 1-1v-3c0-.6-.4-1-1-1h-1l-3-5c-.3-.6-1-1-1.6-1H8.6c-.6 0-1.3.4-1.6 1l-3 5H3c-.6 0-1 .4-1 1v3c0 .6.4 1 1 1h1" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="7" cy="17" r="2" stroke={color} strokeWidth="2"/>
+    <circle cx="17" cy="17" r="2" stroke={color} strokeWidth="2"/>
+    <path d="M5 12l2-4h10l2 4" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
 const BellIcon = ({ color }: { color: string }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
     <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -180,10 +189,10 @@ export default function Home() {
   const goldTierLabel = { 'zh-TW': 'Gold 金卡', 'zh-CN': 'Gold 金卡', en: 'Gold Member' }[locale];
 
   const quickActions = [
-    { icon: <ScanIcon color={colors.primary} />, label: t('common.scan'), path: '/scan' },
-    { icon: <CouponIcon color={colors.primary} />, label: t('home.coupons'), path: '/offers' },
     { icon: <MallIcon color={colors.primary} />, label: t('home.mall'), path: '/mall' },
+    { icon: <CouponIcon color={colors.primary} />, label: t('home.coupons'), path: '/offers' },
     { icon: <GiftIcon color={colors.primary} />, label: t('home.gifts'), path: '/gifts' },
+    { icon: <CarIcon color={colors.primary} />, label: t('parking.title'), path: '/parking' },
   ];
 
   return (

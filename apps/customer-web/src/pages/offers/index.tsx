@@ -237,7 +237,7 @@ export default function OffersPage() {
         {activeTab === 'draws' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {luckyDraws.map((ld) => (
-              <Card key={ld.id} style={{ borderRadius: 12 }}>
+              <Card key={ld.id} style={{ borderRadius: 12, cursor: 'pointer' }} onClick={() => navigate(`/lottery/${ld.id}`)}>
                 <div style={{
                   height: 100, background: `linear-gradient(135deg, ${ld.color}, ${ld.color}BB)`,
                   margin: '-12px -12px 12px', display: 'flex', flexDirection: 'column',
@@ -254,6 +254,7 @@ export default function OffersPage() {
                     <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('offers.deadline')}: {ld.endDate}</div>
                   </div>
                   <Button color="primary" size="small"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/lottery/${ld.id}`); }}
                     style={{ '--background-color': PRIMARY, '--border-color': PRIMARY, borderRadius: 20 } as React.CSSProperties}
                     disabled={ld.entries >= ld.maxEntries}
                   >{ld.entries >= ld.maxEntries ? t('offers.noMoreDraws') : t('offers.drawNow')}</Button>
