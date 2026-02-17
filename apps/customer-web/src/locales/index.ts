@@ -133,6 +133,13 @@ type TranslationKeys = {
   'support.aiService': string;
   'support.askQuestion': string;
   'support.placeholder': string;
+
+  // Profile extras
+  'profile.logoutConfirm': string;
+  'profile.logoutSuccess': string;
+  'profile.featureInDev': string;
+  'profile.defaultName': string;
+  'profile.goldMember': string;
 };
 
 const translations: Record<Locale, TranslationKeys> = {
@@ -250,6 +257,11 @@ const translations: Record<Locale, TranslationKeys> = {
     'support.aiService': 'AI智能客服',
     'support.askQuestion': '請輸入您的問題',
     'support.placeholder': '例如：如何查詢印花餘額？',
+    'profile.logoutConfirm': '確定要退出登入嗎？',
+    'profile.logoutSuccess': '已退出登入',
+    'profile.featureInDev': '功能開發中',
+    'profile.defaultName': '會員',
+    'profile.goldMember': 'Gold 金卡會員',
   },
 
   'zh-CN': {
@@ -366,6 +378,11 @@ const translations: Record<Locale, TranslationKeys> = {
     'support.aiService': 'AI智能客服',
     'support.askQuestion': '请输入您的问题',
     'support.placeholder': '例如：如何查询印花余额？',
+    'profile.logoutConfirm': '确定要退出登录吗？',
+    'profile.logoutSuccess': '已退出登录',
+    'profile.featureInDev': '功能开发中',
+    'profile.defaultName': '会员',
+    'profile.goldMember': 'Gold 金卡会员',
   },
 
   en: {
@@ -482,6 +499,11 @@ const translations: Record<Locale, TranslationKeys> = {
     'support.aiService': 'AI Assistant',
     'support.askQuestion': 'Ask a question',
     'support.placeholder': 'e.g., How do I check my stamp balance?',
+    'profile.logoutConfirm': 'Are you sure you want to logout?',
+    'profile.logoutSuccess': 'Logged out successfully',
+    'profile.featureInDev': 'Feature in development',
+    'profile.defaultName': 'Member',
+    'profile.goldMember': 'Gold Member',
   },
 };
 

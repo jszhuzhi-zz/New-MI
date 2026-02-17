@@ -1,41 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, List, Badge, Empty, Tabs, SwipeAction } from 'antd-mobile';
 import { useTranslation } from '../../locales';
-import { useSettingsStore } from '../../store/settings';
+import { useSettingsStore, type Locale } from '../../store/settings';
 
-interface Message {
+interface MessageData {
   id: string;
   type: 'system' | 'promotion' | 'transaction';
-  title: string;
-  content: string;
-  time: string;
+  title: Record<Locale, string>;
+  content: Record<Locale, string>;
+  time: Record<Locale, string>;
   read: boolean;
 }
 
-const mockMessages: Message[] = [
+const messagesData: MessageData[] = [
   {
     id: '1',
     type: 'promotion',
-    title: { 'zh-TW': '雙倍印花日！', 'zh-CN': '双倍印花日！', en: 'Double Stamps Day!' }[localStorage.getItem('locale') || 'zh-TW'] || '雙倍印花日！',
-    content: { 'zh-TW': '本週六全場消費可獲雙倍印花', 'zh-CN': '本周六全场消费可获双倍印花', en: 'Earn double stamps on all purchases this Saturday' }[localStorage.getItem('locale') || 'zh-TW'] || '本週六全場消費可獲雙倍印花',
-    time: '2h ago',
+    title: { 'zh-TW': '雙倍印花日！', 'zh-CN': '双倍印花日！', en: 'Double Stamps Day!' },
+    content: { 'zh-TW': '本週六全場消費可獲雙倍印花', 'zh-CN': '本周六全场消费可获双倍印花', en: 'Earn double stamps on all purchases this Saturday' },
+    time: { 'zh-TW': '2小時前', 'zh-CN': '2小时前', en: '2h ago' },
     read: false,
   },
   {
     id: '2',
     type: 'transaction',
-    title: { 'zh-TW': '印花到賬通知', 'zh-CN': '印花到账通知', en: 'Stamps Credited' }[localStorage.getItem('locale') || 'zh-TW'] || '印花到賬通知',
-    content: { 'zh-TW': '您在星巴克消費獲得 +50 印花', 'zh-CN': '您在星巴克消费获得 +50 印花', en: 'You earned +50 stamps at Starbucks' }[localStorage.getItem('locale') || 'zh-TW'] || '您在星巴克消費獲得 +50 印花',
-    time: '1d ago',
+    title: { 'zh-TW': '印花到賬通知', 'zh-CN': '印花到账通知', en: 'Stamps Credited' },
+    content: { 'zh-TW': '您在星巴克消費獲得 +50 印花', 'zh-CN': '您在星巴克消费获得 +50 印花', en: 'You earned +50 stamps at Starbucks' },
+    time: { 'zh-TW': '1天前', 'zh-CN': '1天前', en: '1d ago' },
     read: false,
   },
   {
     id: '3',
     type: 'system',
-    title: { 'zh-TW': '系統維護通知', 'zh-CN': '系统维护通知', en: 'System Maintenance' }[localStorage.getItem('locale') || 'zh-TW'] || '系統維護通知',
-    content: { 'zh-TW': '系統將於今晚 2:00-4:00 進行維護', 'zh-CN': '系统将于今晚 2:00-4:00 进行维护', en: 'System maintenance scheduled tonight 2:00-4:00 AM' }[localStorage.getItem('locale') || 'zh-TW'] || '系統將於今晚 2:00-4:00 進行維護',
-    time: '2d ago',
+    title: { 'zh-TW': '系統維護通知', 'zh-CN': '系统维护通知', en: 'System Maintenance' },
+    content: { 'zh-TW': '系統將於今晚 2:00-4:00 進行維護', 'zh-CN': '系统将于今晚 2:00-4:00 进行维护', en: 'System maintenance scheduled tonight 2:00-4:00 AM' },
+    time: { 'zh-TW': '2天前', 'zh-CN': '2天前', en: '2d ago' },
+    read: true,
+  },
+  {
+    id: '4',
+    type: 'promotion',
+    title: { 'zh-TW': '新年優惠來襲', 'zh-CN': '新年优惠来袭', en: 'New Year Special Offers' },
+    content: { 'zh-TW': '春節期間消費滿 $500 即送精美禮品', 'zh-CN': '春节期间消费满 $500 即送精美礼品', en: 'Spend $500 during CNY and receive a special gift' },
+    time: { 'zh-TW': '3天前', 'zh-CN': '3天前', en: '3d ago' },
+    read: true,
+  },
+  {
+    id: '5',
+    type: 'transaction',
+    title: { 'zh-TW': '優惠券即將到期', 'zh-CN': '优惠券即将到期', en: 'Coupon Expiring Soon' },
+    content: { 'zh-TW': '您有 2 張優惠券將於 3 天內到期', 'zh-CN': '您有 2 张优惠券将于 3 天内到期', en: 'You have 2 coupons expiring in 3 days' },
+    time: { 'zh-TW': '5天前', 'zh-CN': '5天前', en: '5d ago' },
     read: true,
   },
 ];
@@ -45,23 +61,41 @@ export default function MessagesPage() {
   const { t, locale } = useTranslation();
   const { getThemeColors } = useSettingsStore();
   const colors = getThemeColors();
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [readStatus, setReadStatus] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    messagesData.forEach((m) => { initial[m.id] = m.read; });
+    return initial;
+  });
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+
+  const messages = useMemo(() => {
+    return messagesData
+      .filter((m) => !deletedIds.includes(m.id))
+      .map((m) => ({
+        id: m.id,
+        type: m.type,
+        title: m.title[locale],
+        content: m.content[locale],
+        time: m.time[locale],
+        read: readStatus[m.id] ?? m.read,
+      }));
+  }, [locale, readStatus, deletedIds]);
 
   const unreadCount = messages.filter((m) => !m.read).length;
 
   const markAsRead = (id: string) => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, read: true } : m))
-    );
+    setReadStatus((prev) => ({ ...prev, [id]: true }));
   };
 
   const deleteMessage = (id: string) => {
-    setMessages((prev) => prev.filter((m) => m.id !== id));
+    setDeletedIds((prev) => [...prev, id]);
   };
 
   const markAllAsRead = () => {
-    setMessages((prev) => prev.map((m) => ({ ...m, read: true })));
+    const newStatus: Record<string, boolean> = {};
+    messagesData.forEach((m) => { newStatus[m.id] = true; });
+    setReadStatus(newStatus);
   };
 
   const filteredMessages =
@@ -95,6 +129,9 @@ export default function MessagesPage() {
     }
   };
 
+  const allLabel = { 'zh-TW': '全部', 'zh-CN': '全部', en: 'All' }[locale];
+  const deleteLabel = { 'zh-TW': '刪除', 'zh-CN': '删除', en: 'Delete' }[locale];
+
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
       <NavBar
@@ -121,7 +158,7 @@ export default function MessagesPage() {
         onChange={setActiveTab}
         style={{ background: '#fff' }}
       >
-        <Tabs.Tab title={locale === 'en' ? 'All' : '全部'} key="all" />
+        <Tabs.Tab title={allLabel} key="all" />
         <Tabs.Tab title={t('messages.system')} key="system" />
         <Tabs.Tab title={t('messages.promotion')} key="promotion" />
         <Tabs.Tab title={t('messages.transaction')} key="transaction" />
@@ -140,7 +177,7 @@ export default function MessagesPage() {
               rightActions={[
                 {
                   key: 'delete',
-                  text: locale === 'en' ? 'Delete' : '刪除',
+                  text: deleteLabel,
                   color: 'danger',
                   onClick: () => deleteMessage(msg.id),
                 },

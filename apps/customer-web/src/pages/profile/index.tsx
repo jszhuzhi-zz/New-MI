@@ -94,12 +94,12 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     Dialog.confirm({
-      content: '確定要退出登入嗎？',
+      content: t('profile.logoutConfirm'),
       confirmText: t('common.confirm'),
       cancelText: t('common.cancel'),
       onConfirm: () => {
         logout();
-        Toast.show({ content: '已退出登入', icon: 'success' });
+        Toast.show({ content: t('profile.logoutSuccess'), icon: 'success' });
       },
     });
   };
@@ -108,7 +108,7 @@ export default function ProfilePage() {
     if (item.path) {
       navigate(item.path);
     } else {
-      Toast.show({ content: '功能開發中', icon: 'fail' });
+      Toast.show({ content: t('profile.featureInDev'), icon: 'fail' });
     }
   };
 
@@ -142,10 +142,10 @@ export default function ProfilePage() {
               fontSize: 28,
             } as React.CSSProperties}
           >
-            {user?.name?.charAt(0) || '陳'}
+            {user?.name?.charAt(0) || t('profile.defaultName').charAt(0)}
           </Avatar>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{user?.name || '陳小明'}</div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>{user?.name || t('profile.defaultName')}</div>
             <div
               style={{
                 display: 'inline-block',
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                 marginTop: 4,
               }}
             >
-              {user?.tierName || 'Gold 金卡會員'}
+              {user?.tierName || t('profile.goldMember')}
             </div>
           </div>
           <RightOutline style={{ fontSize: 18, opacity: 0.6 }} />

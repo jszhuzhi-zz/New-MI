@@ -1,63 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, Tabs, Card, Empty, Dialog, Toast, Image, Tag } from 'antd-mobile';
 import { HeartFill } from 'antd-mobile-icons';
 import { useTranslation } from '../../locales';
-import { useSettingsStore } from '../../store/settings';
+import { useSettingsStore, type Locale } from '../../store/settings';
 
-interface FavoriteMerchant {
+interface MerchantData {
   id: string;
   name: string;
-  category: string;
+  category: Record<Locale, string>;
   logo: string;
   floor: string;
 }
 
-interface FavoriteCampaign {
+interface CampaignData {
   id: string;
-  title: string;
+  title: Record<Locale, string>;
   image: string;
   validUntil: string;
   stampMultiplier?: number;
 }
 
-const mockMerchants: FavoriteMerchant[] = [
+const merchantsData: MerchantData[] = [
   {
     id: '1',
     name: 'Starbucks',
-    category: 'F&B',
+    category: { 'zh-TW': '餐飲', 'zh-CN': '餐饮', en: 'F&B' },
     logo: 'https://logo.clearbit.com/starbucks.com',
     floor: 'G/F',
   },
   {
     id: '2',
     name: 'UNIQLO',
-    category: 'Fashion',
+    category: { 'zh-TW': '時裝', 'zh-CN': '时装', en: 'Fashion' },
     logo: 'https://logo.clearbit.com/uniqlo.com',
     floor: '2/F',
   },
   {
     id: '3',
     name: 'Apple Store',
-    category: 'Electronics',
+    category: { 'zh-TW': '電子產品', 'zh-CN': '电子产品', en: 'Electronics' },
     logo: 'https://logo.clearbit.com/apple.com',
     floor: '1/F',
   },
+  {
+    id: '4',
+    name: 'H&M',
+    category: { 'zh-TW': '時裝', 'zh-CN': '时装', en: 'Fashion' },
+    logo: 'https://logo.clearbit.com/hm.com',
+    floor: '3/F',
+  },
 ];
 
-const mockCampaigns: FavoriteCampaign[] = [
+const campaignsData: CampaignData[] = [
   {
     id: '1',
-    title: 'Double Stamps Weekend',
+    title: { 'zh-TW': '週末雙倍印花', 'zh-CN': '周末双倍印花', en: 'Double Stamps Weekend' },
     image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400',
     validUntil: '2026-02-28',
     stampMultiplier: 2,
   },
   {
     id: '2',
-    title: 'Chinese New Year Special',
+    title: { 'zh-TW': '新春特別優惠', 'zh-CN': '新春特别优惠', en: 'Chinese New Year Special' },
     image: 'https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=400',
     validUntil: '2026-02-15',
+  },
+  {
+    id: '3',
+    title: { 'zh-TW': '情人節限定活動', 'zh-CN': '情人节限定活动', en: "Valentine's Day Special" },
+    image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400',
+    validUntil: '2026-02-14',
+    stampMultiplier: 3,
   },
 ];
 
@@ -67,30 +81,78 @@ export default function FavoritesPage() {
   const { getThemeColors } = useSettingsStore();
   const colors = getThemeColors();
   const [activeTab, setActiveTab] = useState('merchants');
-  const [merchants, setMerchants] = useState<FavoriteMerchant[]>(mockMerchants);
-  const [campaigns, setCampaigns] = useState<FavoriteCampaign[]>(mockCampaigns);
+  const [deletedMerchantIds, setDeletedMerchantIds] = useState<string[]>([]);
+  const [deletedCampaignIds, setDeletedCampaignIds] = useState<string[]>([]);
+
+  const merchants = useMemo(() => {
+    return merchantsData
+      .filter((m) => !deletedMerchantIds.includes(m.id))
+      .map((m) => ({
+        id: m.id,
+        name: m.name,
+        category: m.category[locale],
+        logo: m.logo,
+        floor: m.floor,
+      }));
+  }, [locale, deletedMerchantIds]);
+
+  const campaigns = useMemo(() => {
+    return campaignsData
+      .filter((c) => !deletedCampaignIds.includes(c.id))
+      .map((c) => ({
+        id: c.id,
+        title: c.title[locale],
+        image: c.image,
+        validUntil: c.validUntil,
+        stampMultiplier: c.stampMultiplier,
+      }));
+  }, [locale, deletedCampaignIds]);
+
+  const confirmRemoveText = {
+    'zh-TW': '確定取消收藏？',
+    'zh-CN': '确定取消收藏？',
+    en: 'Remove from favorites?',
+  }[locale];
+
+  const removedText = {
+    'zh-TW': '已取消收藏',
+    'zh-CN': '已取消收藏',
+    en: 'Removed',
+  }[locale];
+
+  const validUntilText = {
+    'zh-TW': '有效期至',
+    'zh-CN': '有效期至',
+    en: 'Valid until',
+  }[locale];
+
+  const stampsText = {
+    'zh-TW': '印花',
+    'zh-CN': '印花',
+    en: 'Stamps',
+  }[locale];
 
   const removeMerchant = async (id: string) => {
     const result = await Dialog.confirm({
-      content: locale === 'en' ? 'Remove from favorites?' : '確定取消收藏？',
+      content: confirmRemoveText,
       confirmText: t('common.confirm'),
       cancelText: t('common.cancel'),
     });
     if (result) {
-      setMerchants((prev) => prev.filter((m) => m.id !== id));
-      Toast.show({ content: locale === 'en' ? 'Removed' : '已取消收藏', icon: 'success' });
+      setDeletedMerchantIds((prev) => [...prev, id]);
+      Toast.show({ content: removedText, icon: 'success' });
     }
   };
 
   const removeCampaign = async (id: string) => {
     const result = await Dialog.confirm({
-      content: locale === 'en' ? 'Remove from favorites?' : '確定取消收藏？',
+      content: confirmRemoveText,
       confirmText: t('common.confirm'),
       cancelText: t('common.cancel'),
     });
     if (result) {
-      setCampaigns((prev) => prev.filter((c) => c.id !== id));
-      Toast.show({ content: locale === 'en' ? 'Removed' : '已取消收藏', icon: 'success' });
+      setDeletedCampaignIds((prev) => [...prev, id]);
+      Toast.show({ content: removedText, icon: 'success' });
     }
   };
 
@@ -208,7 +270,7 @@ export default function FavoritesPage() {
                               marginTop: 4,
                             }}
                           >
-                            {locale === 'en' ? 'Valid until' : '有效期至'}: {campaign.validUntil}
+                            {validUntilText}: {campaign.validUntil}
                           </div>
                           {campaign.stampMultiplier && (
                             <Tag
@@ -218,7 +280,7 @@ export default function FavoritesPage() {
                                 background: colors.primary,
                               }}
                             >
-                              {campaign.stampMultiplier}x {locale === 'en' ? 'Stamps' : '印花'}
+                              {campaign.stampMultiplier}x {stampsText}
                             </Tag>
                           )}
                         </div>
