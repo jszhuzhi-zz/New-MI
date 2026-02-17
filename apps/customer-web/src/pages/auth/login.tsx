@@ -1,12 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Form, Toast, Tabs, Card, Dialog } from 'antd-mobile';
-import { EyeInvisibleOutline, EyeOutline } from 'antd-mobile-icons';
+import { Button, Input, Form, Toast, Tabs, Card, Dialog, Picker, Space } from 'antd-mobile';
+import { EyeInvisibleOutline, EyeOutline, DownOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
 import { useSettingsStore, type Locale } from '../../store/settings';
 import { authApi } from '../../services/api';
 
 const PRIMARY = '#00694B';
+
+// Country codes with phone validation rules
+const COUNTRY_CODES = [
+  { code: '+852', country: 'HK', flag: '🇭🇰', name: { 'zh-TW': '香港', 'zh-CN': '香港', en: 'Hong Kong' }, minLength: 8, maxLength: 8 },
+  { code: '+86', country: 'CN', flag: '🇨🇳', name: { 'zh-TW': '中國大陸', 'zh-CN': '中国大陆', en: 'Mainland China' }, minLength: 11, maxLength: 11 },
+  { code: '+853', country: 'MO', flag: '🇲🇴', name: { 'zh-TW': '澳門', 'zh-CN': '澳门', en: 'Macau' }, minLength: 8, maxLength: 8 },
+  { code: '+886', country: 'TW', flag: '🇹🇼', name: { 'zh-TW': '台灣', 'zh-CN': '台湾', en: 'Taiwan' }, minLength: 9, maxLength: 10 },
+  { code: '+65', country: 'SG', flag: '🇸🇬', name: { 'zh-TW': '新加坡', 'zh-CN': '新加坡', en: 'Singapore' }, minLength: 8, maxLength: 8 },
+  { code: '+60', country: 'MY', flag: '🇲🇾', name: { 'zh-TW': '馬來西亞', 'zh-CN': '马来西亚', en: 'Malaysia' }, minLength: 9, maxLength: 10 },
+  { code: '+81', country: 'JP', flag: '🇯🇵', name: { 'zh-TW': '日本', 'zh-CN': '日本', en: 'Japan' }, minLength: 10, maxLength: 11 },
+  { code: '+82', country: 'KR', flag: '🇰🇷', name: { 'zh-TW': '韓國', 'zh-CN': '韩国', en: 'South Korea' }, minLength: 9, maxLength: 11 },
+  { code: '+1', country: 'US', flag: '🇺🇸', name: { 'zh-TW': '美國/加拿大', 'zh-CN': '美国/加拿大', en: 'US/Canada' }, minLength: 10, maxLength: 10 },
+  { code: '+44', country: 'GB', flag: '🇬🇧', name: { 'zh-TW': '英國', 'zh-CN': '英国', en: 'United Kingdom' }, minLength: 10, maxLength: 11 },
+];
 
 // Demo account credentials
 const DEMO_ACCOUNT = {
@@ -54,6 +68,10 @@ const labels: Record<string, Record<Locale, string>> = {
   invalidCode: { 'zh-TW': '驗證碼錯誤', 'zh-CN': '验证码错误', en: 'Invalid code' },
   networkError: { 'zh-TW': '網絡錯誤，請重試', 'zh-CN': '网络错误，请重试', en: 'Network error, please retry' },
   tooManyRequests: { 'zh-TW': '請求過於頻繁，請稍後再試', 'zh-CN': '请求过于频繁，请稍后再试', en: 'Too many requests, please try later' },
+  selectCountry: { 'zh-TW': '選擇國家/地區', 'zh-CN': '选择国家/地区', en: 'Select Country/Region' },
+  invalidPhoneFormat: { 'zh-TW': '手機號碼格式不正確', 'zh-CN': '手机号码格式不正确', en: 'Invalid phone number format' },
+  phoneTooShort: { 'zh-TW': '手機號碼太短', 'zh-CN': '手机号码太短', en: 'Phone number too short' },
+  phoneTooLong: { 'zh-TW': '手機號碼太長', 'zh-CN': '手机号码太长', en: 'Phone number too long' },
 };
 
 export default function LoginPage() {
@@ -74,8 +92,58 @@ export default function LoginPage() {
   const [smsPhone, setSmsPhone] = useState('');
   const [isSending, setIsSending] = useState(false);
   const formRef = useRef<any>(null);
+  const [countryCode, setCountryCode] = useState('+852'); // Default to Hong Kong
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [registerCountryCode, setRegisterCountryCode] = useState('+852');
+  const [passwordCountryCode, setPasswordCountryCode] = useState('+852');
 
   const t = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
+
+  // Get current country info
+  const getCountryInfo = (code: string) => COUNTRY_CODES.find(c => c.code === code) || COUNTRY_CODES[0];
+
+  // Validate phone number based on country
+  const validatePhone = (phone: string, code: string): { valid: boolean; message: string } => {
+    const country = getCountryInfo(code);
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    if (!cleanPhone) {
+      return { valid: false, message: t('enterPhone') };
+    }
+
+    if (cleanPhone.length < country.minLength) {
+      return { valid: false, message: `${t('phoneTooShort')} (${country.minLength} ${locale === 'en' ? 'digits required' : '位數字'})` };
+    }
+
+    if (cleanPhone.length > country.maxLength) {
+      return { valid: false, message: `${t('phoneTooLong')} (${country.maxLength} ${locale === 'en' ? 'digits max' : '位數字'})` };
+    }
+
+    // Additional validation for specific countries
+    if (code === '+86' && !cleanPhone.startsWith('1')) {
+      return { valid: false, message: t('invalidPhoneFormat') };
+    }
+
+    if (code === '+852' && !/^[2-9]/.test(cleanPhone)) {
+      return { valid: false, message: t('invalidPhoneFormat') };
+    }
+
+    return { valid: true, message: '' };
+  };
+
+  // Format full phone number with country code
+  const getFullPhoneNumber = (phone: string, code: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    return code + cleanPhone;
+  };
+
+  // Country code picker columns
+  const countryPickerColumns = [
+    COUNTRY_CODES.map(c => ({
+      label: `${c.flag} ${c.name[locale]} (${c.code})`,
+      value: c.code,
+    })),
+  ];
 
   // Get redirect path after login
   const getRedirectPath = () => {
@@ -100,16 +168,22 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSendCode = async (phone?: string) => {
+  const handleSendCode = async (phone?: string, code?: string) => {
     const phoneNumber = phone || smsPhone;
-    if (!phoneNumber || phoneNumber.length < 8) {
-      Toast.show({ icon: 'fail', content: t('enterPhone') });
+    const phoneCode = code || countryCode;
+
+    // Validate phone number
+    const validation = validatePhone(phoneNumber, phoneCode);
+    if (!validation.valid) {
+      Toast.show({ icon: 'fail', content: validation.message });
       return;
     }
 
+    const fullPhone = getFullPhoneNumber(phoneNumber, phoneCode);
+
     setIsSending(true);
     try {
-      const response = await authApi.sendSmsCode(phoneNumber);
+      const response = await authApi.sendSmsCode(fullPhone);
       Toast.show({ icon: 'success', content: t('codeSent') });
       setCountdown(60);
 
@@ -130,21 +204,29 @@ export default function LoginPage() {
   };
 
   const handleSmsLogin = async (values: { phone: string; code: string }) => {
+    // Validate phone number first
+    const validation = validatePhone(values.phone, countryCode);
+    if (!validation.valid) {
+      Toast.show({ icon: 'fail', content: validation.message });
+      return;
+    }
+
+    const fullPhone = getFullPhoneNumber(values.phone, countryCode);
     Toast.show({ icon: 'loading', content: t('loggingIn'), duration: 0 });
 
     try {
       // Try real API first
-      const response = await authApi.verifySmsCode(values.phone, values.code);
+      const response = await authApi.verifySmsCode(fullPhone, values.code);
       Toast.clear();
 
-      const isDemo = values.phone.replace(/\s/g, '') === DEMO_ACCOUNT.phone;
+      const isDemo = fullPhone.replace(/\D/g, '') === DEMO_ACCOUNT.phone;
 
       setToken(response.data.accessToken);
       setUser({
         id: isDemo ? 'demo_001' : 'member_' + Date.now(),
         name: isDemo ? '陳小明' : '新會員',
         nameEn: isDemo ? 'Chan Siu Ming' : 'New Member',
-        phone: values.phone,
+        phone: fullPhone,
         email: isDemo ? 'demo@linkmall.hk' : '',
         cardNo: 'LM-' + Date.now().toString().slice(-8),
         tier: isDemo ? 'gold' : 'standard',
@@ -166,14 +248,14 @@ export default function LoginPage() {
         Toast.show({ icon: 'fail', content: t('invalidCode') });
       } else {
         // Fallback to mock login for demo/development
-        const isDemo = values.phone.replace(/\s/g, '') === DEMO_ACCOUNT.phone;
+        const isDemo = fullPhone.replace(/\D/g, '') === DEMO_ACCOUNT.phone;
 
         setToken('token-' + Date.now());
         setUser({
           id: isDemo ? 'demo_001' : 'member_' + Date.now(),
           name: isDemo ? '陳小明' : '新會員',
           nameEn: isDemo ? 'Chan Siu Ming' : 'New Member',
-          phone: values.phone,
+          phone: fullPhone,
           email: isDemo ? 'demo@linkmall.hk' : '',
           cardNo: 'LM-' + Date.now().toString().slice(-8),
           tier: isDemo ? 'gold' : 'standard',
@@ -190,19 +272,25 @@ export default function LoginPage() {
   };
 
   const handlePasswordLogin = async (values: { phone: string; password: string }) => {
+    // Validate phone number first
+    const validation = validatePhone(values.phone, passwordCountryCode);
+    if (!validation.valid) {
+      Toast.show({ icon: 'fail', content: validation.message });
+      return;
+    }
+
+    const fullPhone = getFullPhoneNumber(values.phone, passwordCountryCode);
     Toast.show({ icon: 'loading', content: t('loggingIn') });
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const phone = values.phone.replace(/\s/g, '');
-
     // Check demo account credentials
-    if (phone === DEMO_ACCOUNT.phone && values.password === DEMO_ACCOUNT.password) {
+    if (fullPhone.replace(/\D/g, '') === DEMO_ACCOUNT.phone && values.password === DEMO_ACCOUNT.password) {
       setToken('demo-token-' + Date.now());
       setUser({
         id: 'demo_001',
         name: '陳小明',
         nameEn: 'Chan Siu Ming',
-        phone: values.phone,
+        phone: fullPhone,
         email: 'demo@linkmall.hk',
         cardNo: 'LM-2024-0088',
         tier: 'gold',
@@ -469,11 +557,34 @@ export default function LoginPage() {
                     label={t('phoneNumber')}
                     rules={[{ required: true, message: t('enterPhone') }]}
                   >
-                    <Input
-                      placeholder={t('enterPhone')}
-                      type="tel"
-                      onChange={(v) => setSmsPhone(v)}
-                    />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {/* Country Code Selector */}
+                      <div
+                        onClick={() => setShowCountryPicker(true)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '8px 12px',
+                          background: '#f5f5f5',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          minWidth: 90,
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span>{getCountryInfo(countryCode).flag}</span>
+                        <span style={{ fontSize: 14, fontWeight: 500 }}>{countryCode}</span>
+                        <DownOutline style={{ fontSize: 10, color: '#999' }} />
+                      </div>
+                      {/* Phone Input */}
+                      <Input
+                        placeholder={t('enterPhone')}
+                        type="tel"
+                        onChange={(v) => setSmsPhone(v)}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
                   </Form.Item>
                   <Form.Item
                     name="code"
@@ -524,7 +635,29 @@ export default function LoginPage() {
                     label={t('phoneNumber')}
                     rules={[{ required: true, message: t('enterPhone') }]}
                   >
-                    <Input placeholder={t('enterPhone')} type="tel" />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {/* Country Code Selector */}
+                      <div
+                        onClick={() => setShowCountryPicker(true)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '8px 12px',
+                          background: '#f5f5f5',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          minWidth: 90,
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span>{getCountryInfo(passwordCountryCode).flag}</span>
+                        <span style={{ fontSize: 14, fontWeight: 500 }}>{passwordCountryCode}</span>
+                        <DownOutline style={{ fontSize: 10, color: '#999' }} />
+                      </div>
+                      {/* Phone Input */}
+                      <Input placeholder={t('enterPhone')} type="tel" style={{ flex: 1 }} />
+                    </div>
                   </Form.Item>
                   <Form.Item
                     name="password"
@@ -606,6 +739,23 @@ export default function LoginPage() {
           <span style={{ color: PRIMARY }}> {t('privacyPolicy')}</span>
         </div>
       </div>
+
+      {/* Country Code Picker */}
+      <Picker
+        columns={countryPickerColumns}
+        visible={showCountryPicker}
+        onClose={() => setShowCountryPicker(false)}
+        value={[activeTab === 'sms' ? countryCode : passwordCountryCode]}
+        onConfirm={(val) => {
+          const selectedCode = val[0] as string;
+          if (activeTab === 'sms') {
+            setCountryCode(selectedCode);
+          } else {
+            setPasswordCountryCode(selectedCode);
+          }
+        }}
+        title={t('selectCountry')}
+      />
     </div>
   );
 }
