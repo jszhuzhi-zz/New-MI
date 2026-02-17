@@ -99,13 +99,103 @@ const StampIcon = ({ color = '#00694B' }: { color?: string }) => (
   </svg>
 );
 
+// Login prompt labels
+const loginLabels: Record<string, Record<Locale, string>> = {
+  title: { 'zh-TW': '登入使用泊車服務', 'zh-CN': '登录使用泊车服务', en: 'Login to Use Parking' },
+  subtitle: { 'zh-TW': '請登入會員帳戶以管理車輛及繳費', 'zh-CN': '请登录会员账户以管理车辆及缴费', en: 'Please login to manage vehicles and payments' },
+  login: { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' },
+  benefits: { 'zh-TW': '服務功能', 'zh-CN': '服务功能', en: 'Features' },
+  benefit1: { 'zh-TW': '管理您的車牌號碼', 'zh-CN': '管理您的车牌号码', en: 'Manage your license plates' },
+  benefit2: { 'zh-TW': '查看實時泊車費用', 'zh-CN': '查看实时泊车费用', en: 'View real-time parking fees' },
+  benefit3: { 'zh-TW': '使用印花兌換泊車優惠', 'zh-CN': '使用印花兑换泊车优惠', en: 'Redeem stamps for parking' },
+};
+
 export default function ParkingPage() {
   const navigate = useNavigate();
   const { t, locale } = useTranslation();
   const { getThemeColors } = useSettingsStore();
   const colors = getThemeColors();
   const user = useAuthStore((s) => s.user);
-  const stampBalance = user?.stampBalance || 2580;
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const stampBalance = user?.stampBalance || 0;
+
+  const tl = (key: string) => loginLabels[key]?.[locale] || loginLabels[key]?.['zh-TW'] || key;
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
+        <NavBar onBack={() => navigate(-1)} style={{ background: colors.primary }}>
+          <span style={{ color: '#fff' }}>{t('parking.title')}</span>
+        </NavBar>
+
+        {/* Header */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
+            padding: '28px 20px 80px', color: '#fff', textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 20, fontWeight: 700 }}>{tl('title')}</div>
+          <div style={{ fontSize: 13, opacity: 0.8, marginTop: 8 }}>{tl('subtitle')}</div>
+        </div>
+
+        {/* Login Card */}
+        <div style={{ margin: '-50px 16px 0', position: 'relative', zIndex: 1 }}>
+          <div
+            style={{
+              background: '#fff', borderRadius: 16, padding: 24,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)', textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 60, marginBottom: 16 }}>🚗</div>
+            <Button
+              block
+              color="primary"
+              size="large"
+              onClick={() => navigate('/login')}
+              style={{
+                '--background-color': colors.primary,
+                '--border-color': colors.primary,
+                borderRadius: 12,
+                height: 48,
+                fontSize: 16,
+                fontWeight: 600,
+              } as React.CSSProperties}
+            >
+              {tl('login')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div style={{ padding: 16, marginTop: 16 }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#333', marginBottom: 12 }}>
+            {tl('benefits')}
+          </div>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 16 }}>
+            {[
+              { icon: '🚙', text: tl('benefit1') },
+              { icon: '💳', text: tl('benefit2') },
+              { icon: '⭐', text: tl('benefit3') },
+            ].map((benefit, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 0',
+                  borderBottom: idx < 2 ? '1px solid #f0f0f0' : 'none',
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{benefit.icon}</span>
+                <span style={{ fontSize: 14, color: '#333' }}>{benefit.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const [plates, setPlates] = useState<LicensePlate[]>(mockPlates);
   const [records, setRecords] = useState<ParkingRecord[]>(mockRecordsData);

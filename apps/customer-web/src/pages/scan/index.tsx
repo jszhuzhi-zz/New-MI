@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, List, Tag, NavBar, Tabs, Button, Toast, Dialog, ImageUploader } from 'antd-mobile';
+import { Card, List, Tag, NavBar, Button, Toast, Dialog } from 'antd-mobile';
 import { QRCodeSVG } from 'qrcode.react';
 import { ScanCodeOutline, ReceivePaymentOutline, PictureOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
@@ -18,10 +18,22 @@ const recentRecords = [
 
 type CollectMethod = 'qrcode' | 'scan' | 'photo';
 
+// Login prompt labels
+const loginLabels: Record<string, Record<string, string>> = {
+  title: { 'zh-TW': '登入後使用', 'zh-CN': '登录后使用', en: 'Login Required' },
+  subtitle: { 'zh-TW': '請登入會員帳戶以使用印花收集功能', 'zh-CN': '请登录会员账户以使用印花收集功能', en: 'Please login to use stamp collection features' },
+  login: { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' },
+  benefits: { 'zh-TW': '功能介紹', 'zh-CN': '功能介绍', en: 'Features' },
+  benefit1: { 'zh-TW': '展示會員二維碼收集印花', 'zh-CN': '展示会员二维码收集印花', en: 'Show member QR code to earn stamps' },
+  benefit2: { 'zh-TW': '掃描單據二維碼', 'zh-CN': '扫描单据二维码', en: 'Scan receipt QR code' },
+  benefit3: { 'zh-TW': 'AI 智能識別單據', 'zh-CN': 'AI 智能识别单据', en: 'AI receipt recognition' },
+};
+
 export default function ScanPage() {
   const navigate = useNavigate();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeMethod, setActiveMethod] = useState<CollectMethod>('qrcode');
   const [scanning, setScanning] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -29,13 +41,16 @@ export default function ScanPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const memberQRValue = JSON.stringify({
+  const tl = (key: string) => loginLabels[key]?.[locale] || loginLabels[key]?.['zh-TW'] || key;
+
+  // Only generate member QR value if authenticated
+  const memberQRValue = isAuthenticated ? JSON.stringify({
     type: 'MEMBER',
-    memberId: user?.id || 'demo-user',
-    cardNo: user?.cardNo || 'LM-2024-0088',
-    tier: user?.tierName || 'Gold',
+    memberId: user?.id,
+    cardNo: user?.cardNo,
+    tier: user?.tierName,
     timestamp: Date.now(),
-  });
+  }) : '';
 
   // Start camera for scanning receipt QR code
   const startScanner = async () => {
@@ -122,6 +137,89 @@ export default function ScanPage() {
       desc: t('customerApp.aiRecognition'),
     },
   ];
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
+        <NavBar
+          onBack={() => navigate(-1)}
+          style={{
+            '--height': '44px',
+            background: PRIMARY,
+            color: '#fff',
+          } as React.CSSProperties}
+        >
+          {t('customerApp.stampCollection')}
+        </NavBar>
+
+        {/* Header */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${PRIMARY}, #004D36)`,
+            padding: '28px 20px 80px', color: '#fff', textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 20, fontWeight: 700 }}>{tl('title')}</div>
+          <div style={{ fontSize: 13, opacity: 0.8, marginTop: 8 }}>{tl('subtitle')}</div>
+        </div>
+
+        {/* Login Card */}
+        <div style={{ margin: '-50px 16px 0', position: 'relative', zIndex: 1 }}>
+          <div
+            style={{
+              background: '#fff', borderRadius: 16, padding: 24,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)', textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 60, marginBottom: 16 }}>🔐</div>
+            <Button
+              block
+              color="primary"
+              size="large"
+              onClick={() => navigate('/login')}
+              style={{
+                '--background-color': PRIMARY,
+                '--border-color': PRIMARY,
+                borderRadius: 12,
+                height: 48,
+                fontSize: 16,
+                fontWeight: 600,
+              } as React.CSSProperties}
+            >
+              {tl('login')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div style={{ padding: 16, marginTop: 16 }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#333', marginBottom: 12 }}>
+            {tl('benefits')}
+          </div>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 16 }}>
+            {[
+              { icon: '📱', text: tl('benefit1') },
+              { icon: '📷', text: tl('benefit2') },
+              { icon: '🤖', text: tl('benefit3') },
+            ].map((benefit, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 0',
+                  borderBottom: idx < 2 ? '1px solid #f0f0f0' : 'none',
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{benefit.icon}</span>
+                <span style={{ fontSize: 14, color: '#333' }}>{benefit.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 80 }}>

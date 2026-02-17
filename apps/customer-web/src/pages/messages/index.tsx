@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { NavBar, List, Badge, Empty, Tabs, SwipeAction, Popup, TextArea, Button, Toast, Avatar, Dialog } from 'antd-mobile';
 import { useTranslation } from '../../locales';
 import { useSettingsStore, type Locale } from '../../store/settings';
+import { useAuthStore } from '../../store/auth';
+
+// Login prompt labels
+const loginLabels: Record<string, Record<Locale, string>> = {
+  title: { 'zh-TW': '登入查看消息', 'zh-CN': '登录查看消息', en: 'Login to View Messages' },
+  subtitle: { 'zh-TW': '請登入會員帳戶以查看您的消息', 'zh-CN': '请登录会员账户以查看您的消息', en: 'Please login to view your messages' },
+  login: { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' },
+  benefits: { 'zh-TW': '消息類型', 'zh-CN': '消息类型', en: 'Message Types' },
+  benefit1: { 'zh-TW': '系統通知及維護公告', 'zh-CN': '系统通知及维护公告', en: 'System notifications & announcements' },
+  benefit2: { 'zh-TW': '專屬優惠活動推送', 'zh-CN': '专属优惠活动推送', en: 'Exclusive offer notifications' },
+  benefit3: { 'zh-TW': '印花交易記錄提醒', 'zh-CN': '印花交易记录提醒', en: 'Stamp transaction alerts' },
+};
 
 // Multilingual labels
 const labels: Record<string, Record<Locale, string>> = {
@@ -144,8 +156,86 @@ export default function MessagesPage() {
   const { t, locale } = useTranslation();
   const { getThemeColors } = useSettingsStore();
   const colors = getThemeColors();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const tl = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
+  const tll = (key: string) => loginLabels[key]?.[locale] || loginLabels[key]?.['zh-TW'] || key;
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
+        <NavBar onBack={() => navigate(-1)} style={{ background: '#fff' }}>
+          {t('messages.title')}
+        </NavBar>
+
+        {/* Header */}
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
+            padding: '28px 20px 80px', color: '#fff', textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 20, fontWeight: 700 }}>{tll('title')}</div>
+          <div style={{ fontSize: 13, opacity: 0.8, marginTop: 8 }}>{tll('subtitle')}</div>
+        </div>
+
+        {/* Login Card */}
+        <div style={{ margin: '-50px 16px 0', position: 'relative', zIndex: 1 }}>
+          <div
+            style={{
+              background: '#fff', borderRadius: 16, padding: 24,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)', textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 60, marginBottom: 16 }}>📬</div>
+            <Button
+              block
+              color="primary"
+              size="large"
+              onClick={() => navigate('/login')}
+              style={{
+                '--background-color': colors.primary,
+                '--border-color': colors.primary,
+                borderRadius: 12,
+                height: 48,
+                fontSize: 16,
+                fontWeight: 600,
+              } as React.CSSProperties}
+            >
+              {tll('login')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div style={{ padding: 16, marginTop: 16 }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#333', marginBottom: 12 }}>
+            {tll('benefits')}
+          </div>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 16 }}>
+            {[
+              { icon: '🔔', text: tll('benefit1') },
+              { icon: '🎁', text: tll('benefit2') },
+              { icon: '💰', text: tll('benefit3') },
+            ].map((benefit, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 0',
+                  borderBottom: idx < 2 ? '1px solid #f0f0f0' : 'none',
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{benefit.icon}</span>
+                <span style={{ fontSize: 14, color: '#333' }}>{benefit.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Persist read status
   const [readStatus, setReadStatus] = useState<Record<string, boolean>>(() => {
