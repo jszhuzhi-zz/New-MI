@@ -23,10 +23,12 @@ const TrophyIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-const GiftIcon = ({ color }: { color: string }) => (
+const ShopIcon = ({ color }: { color: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 7H7.5a2.5 2.5 0 110-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 9l1.5-5h15L21 9" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 9a3 3 0 003 3 3 3 0 003-3M9 9a3 3 0 003 3 3 3 0 003-3M15 9a3 3 0 003 3 3 3 0 003-3" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 22v-6h6v6" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -83,7 +85,7 @@ export default function ProfilePage() {
   const menuItems = [
     { label: t('profile.editProfile'), icon: <EditIcon color={colors.primary} />, path: '/profile/edit', badge: 0 },
     { label: t('profile.stampHistory'), icon: <TrophyIcon color={colors.primary} />, path: '/tier', badge: 0 },
-    { label: t('gifts.stampMall'), icon: <GiftIcon color={colors.primary} />, path: '/gifts', badge: 0 },
+    { label: t('home.mall'), icon: <ShopIcon color={colors.primary} />, path: '/mall', badge: 0 },
     { label: t('messages.title'), icon: <BellIcon color={colors.primary} />, path: '/messages', badge: 3 },
     { label: t('favorites.title'), icon: <HeartIcon color={colors.primary} />, path: '/favorites', badge: 0 },
     { label: t('settings.languageSettings'), icon: <LanguageIcon color={colors.primary} />, path: '/settings', badge: 0 },
@@ -176,7 +178,7 @@ export default function ProfilePage() {
           {[
             { label: t('common.stamp'), value: (user?.stampBalance || 2580).toLocaleString(), path: '/stamp' },
             { label: t('offers.myCoupons'), value: '5', path: '/offers' },
-            { label: t('gifts.title'), value: '🎁', path: '/gifts' },
+            { label: t('home.mall'), value: '🏬', path: '/mall' },
           ].map((stat, i) => (
             <div
               key={i}

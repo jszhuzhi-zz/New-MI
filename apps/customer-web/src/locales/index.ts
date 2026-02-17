@@ -76,12 +76,21 @@ type TranslationKeys = {
 
   // Offers
   'offers.title': string;
+  'offers.exploreOffers': string;
+  'offers.campaigns': string;
   'offers.myCoupons': string;
+  'offers.draws': string;
+  'offers.giftRedemption': string;
   'offers.available': string;
   'offers.used': string;
   'offers.expired': string;
   'offers.validUntil': string;
   'offers.useNow': string;
+  'offers.drawnTimes': string;
+  'offers.deadline': string;
+  'offers.noMoreDraws': string;
+  'offers.drawNow': string;
+  'offers.soldOut': string;
 
   // Gifts
   'gifts.title': string;
@@ -230,13 +239,22 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.registerBirthday': '登記生日',
     'profile.completed': '已完成',
     'profile.earnStamps': '完善資料賺印花',
-    'offers.title': '優惠',
+    'offers.title': '優惠專區',
+    'offers.exploreOffers': '探索精彩優惠活動',
+    'offers.campaigns': '活動',
     'offers.myCoupons': '我的優惠券',
+    'offers.draws': '抽獎',
+    'offers.giftRedemption': '禮品兌換',
     'offers.available': '可用',
     'offers.used': '已使用',
     'offers.expired': '已過期',
     'offers.validUntil': '有效期至',
     'offers.useNow': '立即使用',
+    'offers.drawnTimes': '已抽 {times}/{max} 次',
+    'offers.deadline': '截止日期',
+    'offers.noMoreDraws': '已達上限',
+    'offers.drawNow': '立即抽獎',
+    'offers.soldOut': '已售罄',
     'gifts.title': '禮品',
     'gifts.stampMall': '印花商城',
     'gifts.search': '搜尋禮品',
@@ -370,13 +388,22 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.registerBirthday': '登记生日',
     'profile.completed': '已完成',
     'profile.earnStamps': '完善资料赚印花',
-    'offers.title': '优惠',
+    'offers.title': '优惠专区',
+    'offers.exploreOffers': '探索精彩优惠活动',
+    'offers.campaigns': '活动',
     'offers.myCoupons': '我的优惠券',
+    'offers.draws': '抽奖',
+    'offers.giftRedemption': '礼品兑换',
     'offers.available': '可用',
     'offers.used': '已使用',
     'offers.expired': '已过期',
     'offers.validUntil': '有效期至',
     'offers.useNow': '立即使用',
+    'offers.drawnTimes': '已抽 {times}/{max} 次',
+    'offers.deadline': '截止日期',
+    'offers.noMoreDraws': '已达上限',
+    'offers.drawNow': '立即抽奖',
+    'offers.soldOut': '已售罄',
     'gifts.title': '礼品',
     'gifts.stampMall': '印花商城',
     'gifts.search': '搜索礼品',
@@ -510,13 +537,22 @@ const translations: Record<Locale, TranslationKeys> = {
     'profile.registerBirthday': 'Register Birthday',
     'profile.completed': 'Completed',
     'profile.earnStamps': 'Complete profile to earn stamps',
-    'offers.title': 'Offers',
+    'offers.title': 'Offers Zone',
+    'offers.exploreOffers': 'Explore exciting offers and campaigns',
+    'offers.campaigns': 'Campaigns',
     'offers.myCoupons': 'My Coupons',
+    'offers.draws': 'Lucky Draws',
+    'offers.giftRedemption': 'Gift Redemption',
     'offers.available': 'Available',
     'offers.used': 'Used',
     'offers.expired': 'Expired',
     'offers.validUntil': 'Valid until',
     'offers.useNow': 'Use Now',
+    'offers.drawnTimes': 'Drawn {times}/{max} times',
+    'offers.deadline': 'Deadline',
+    'offers.noMoreDraws': 'Max reached',
+    'offers.drawNow': 'Draw Now',
+    'offers.soldOut': 'Sold Out',
     'gifts.title': 'Gifts',
     'gifts.stampMall': 'Stamp Mall',
     'gifts.search': 'Search gifts',
