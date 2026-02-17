@@ -18,6 +18,11 @@ import ShopInfo from './pages/settings/ShopInfo';
 import StaffManagement from './pages/settings/StaffManagement';
 import OfferList from './pages/offers/OfferList';
 import OfferForm from './pages/offers/OfferForm';
+import MemberManagement from './pages/mall/MemberManagement';
+import MemberTags from './pages/mall/MemberTags';
+import CampaignManagement from './pages/mall/CampaignManagement';
+import CouponManagement from './pages/mall/CouponManagement';
+import MallManagement from './pages/mall/MallManagement';
 
 // Auth guard component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -84,6 +89,13 @@ const App: React.FC = () => {
           {/* Settings */}
           <Route path="/settings/shop" element={<ShopInfo />} />
           <Route path="/settings/staff" element={<StaffManagement />} />
+
+          {/* Mall Management */}
+          <Route path="/mall/members" element={<MemberManagement />} />
+          <Route path="/mall/tags" element={<MemberTags />} />
+          <Route path="/mall/campaigns" element={<CampaignManagement />} />
+          <Route path="/mall/coupons" element={<CouponManagement />} />
+          <Route path="/mall/management" element={<MallManagement />} />
         </Route>
 
         {/* Default redirect */}

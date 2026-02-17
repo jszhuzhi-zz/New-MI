@@ -22,6 +22,10 @@ import {
   TagsOutlined,
   PlusCircleOutlined,
   FileTextOutlined,
+  CrownOutlined,
+  ApartmentOutlined,
+  UsergroupAddOutlined,
+  NotificationOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import type { MenuProps } from 'antd';
@@ -53,6 +57,12 @@ const menuLabels: Record<string, Record<string, string>> = {
   staffMgmt: { 'zh-CN': '员工管理', 'zh-TW': '員工管理', en: 'Staff Management' },
   logout: { 'zh-CN': '退出登录', 'zh-TW': '退出登錄', en: 'Logout' },
   profile: { 'zh-CN': '个人信息', 'zh-TW': '個人信息', en: 'Profile' },
+  mallMgmt: { 'zh-CN': '商场管理', 'zh-TW': '商場管理', en: 'Mall Management' },
+  memberMgmt: { 'zh-CN': '会员管理', 'zh-TW': '會員管理', en: 'Member Management' },
+  memberTags: { 'zh-CN': '会员标签', 'zh-TW': '會員標籤', en: 'Member Tags' },
+  campaignMgmt: { 'zh-CN': '活动配置', 'zh-TW': '活動配置', en: 'Campaign Config' },
+  couponMgmt: { 'zh-CN': '优惠券配置', 'zh-TW': '優惠券配置', en: 'Coupon Config' },
+  mallConfig: { 'zh-CN': '商场配置', 'zh-TW': '商場配置', en: 'Mall Config' },
 };
 
 const MainLayout: React.FC = () => {
@@ -159,6 +169,39 @@ const MainLayout: React.FC = () => {
           key: '/settings/staff',
           icon: <UserSwitchOutlined />,
           label: getLabel('staffMgmt'),
+        },
+      ],
+    },
+    { type: 'divider' as const },
+    {
+      key: '/mall',
+      icon: <CrownOutlined />,
+      label: getLabel('mallMgmt'),
+      children: [
+        {
+          key: '/mall/members',
+          icon: <UsergroupAddOutlined />,
+          label: getLabel('memberMgmt'),
+        },
+        {
+          key: '/mall/tags',
+          icon: <TagsOutlined />,
+          label: getLabel('memberTags'),
+        },
+        {
+          key: '/mall/campaigns',
+          icon: <NotificationOutlined />,
+          label: getLabel('campaignMgmt'),
+        },
+        {
+          key: '/mall/coupons',
+          icon: <GiftOutlined />,
+          label: getLabel('couponMgmt'),
+        },
+        {
+          key: '/mall/management',
+          icon: <ApartmentOutlined />,
+          label: getLabel('mallConfig'),
         },
       ],
     },
