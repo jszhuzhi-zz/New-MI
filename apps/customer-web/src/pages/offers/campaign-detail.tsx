@@ -23,8 +23,6 @@ import { useSettingsStore, type Locale } from '../../store/settings';
 import { useAuthStore } from '../../store/auth';
 import { QRCodeSVG } from 'qrcode.react';
 
-const PRIMARY = '#00694B';
-
 // Helper to get joined campaigns from localStorage (user-specific)
 const getJoinedCampaigns = (): Record<string, { code: string; joinedAt: string }> => {
   try {
@@ -399,7 +397,7 @@ const defaultCampaignData: CampaignData = {
   date: { 'zh-TW': '進行中', 'zh-CN': '进行中', en: 'Ongoing' },
   dateRange: { start: '2026-01-01', end: '2026-12-31' },
   type: { 'zh-TW': '活動', 'zh-CN': '活动', en: 'Campaign' },
-  color: PRIMARY,
+  color: '#00694B',
   image: '',
   desc: { 'zh-TW': '歡迎參加領展會員活動，享受專屬優惠。', 'zh-CN': '欢迎参加领展会员活动，享受专属优惠。', en: 'Join Link member campaigns and enjoy exclusive offers.' },
   fullDesc: { 'zh-TW': '歡迎參加領展會員活動，享受專屬優惠。', 'zh-CN': '欢迎参加领展会员活动，享受专属优惠。', en: 'Join Link member campaigns and enjoy exclusive offers.' },
@@ -423,7 +421,8 @@ export default function CampaignDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { t } = useTranslation();
-  const locale = useSettingsStore((s) => s.locale);
+  const { locale, getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const campaignSource = campaignDataSource[id || ''] || defaultCampaignData;
@@ -592,11 +591,11 @@ export default function CampaignDetail() {
         borderBottom: '1px solid #f0f0f0', gap: 24
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#666' }}>
-          <ClockCircleOutline fontSize={16} color={PRIMARY} />
+          <ClockCircleOutline fontSize={16} color={colors.primary} />
           <span>{campaign.date}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#666' }}>
-          <LocationFill fontSize={16} color={PRIMARY} />
+          <LocationFill fontSize={16} color={colors.primary} />
           <span>{campaign.mall}</span>
         </div>
       </div>
@@ -615,7 +614,7 @@ export default function CampaignDetail() {
             )}
           </div>
           {campaign.maxParticipants > 0 && (
-            <ProgressBar percent={progressPercent} style={{ '--fill-color': PRIMARY, '--track-width': '6px' } as React.CSSProperties} />
+            <ProgressBar percent={progressPercent} style={{ '--fill-color': colors.primary, '--track-width': '6px' } as React.CSSProperties} />
           )}
         </div>
       )}
@@ -638,7 +637,7 @@ export default function CampaignDetail() {
               alignItems: 'center'
             }}>
               <div style={{
-                width: 44, height: 44, borderRadius: 22, background: `${PRIMARY}15`,
+                width: 44, height: 44, borderRadius: 22, background: `${colors.primary}15`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0,
               }}>{item.icon}</div>
               <div>
@@ -655,7 +654,7 @@ export default function CampaignDetail() {
         <div style={{ padding: 16 }}>
           <Card style={{ borderRadius: 12 }}>
             <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <GiftOutline fontSize={18} color={PRIMARY} />
+              <GiftOutline fontSize={18} color={colors.primary} />
               {t('campaign.rewards')}
             </div>
             {campaign.rewards.map((reward, i) => (
@@ -670,7 +669,7 @@ export default function CampaignDetail() {
                   </div>
                 </div>
                 <Button size="mini" color="primary" fill="outline"
-                  style={{ '--border-color': PRIMARY, '--text-color': PRIMARY } as React.CSSProperties}
+                  style={{ '--border-color': colors.primary, '--text-color': colors.primary } as React.CSSProperties}
                   onClick={() => navigate('/offers')}
                 >
                   {t('campaign.redeem')}
@@ -703,7 +702,7 @@ export default function CampaignDetail() {
           <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 12 }}>{t('campaign.terms')}</div>
           {campaign.rules.map((rule, i) => (
             <div key={i} style={{ fontSize: 13, color: '#666', marginBottom: 8, display: 'flex', gap: 8, lineHeight: 1.5 }}>
-              <span style={{ color: PRIMARY, fontWeight: 600 }}>{i + 1}.</span>
+              <span style={{ color: colors.primary, fontWeight: 600 }}>{i + 1}.</span>
               <span>{rule}</span>
             </div>
           ))}
@@ -723,8 +722,8 @@ export default function CampaignDetail() {
             color="primary"
             onClick={handleJoin}
             style={{
-              '--background-color': PRIMARY,
-              '--border-color': PRIMARY,
+              '--background-color': colors.primary,
+              '--border-color': colors.primary,
               borderRadius: 12,
               fontWeight: 600
             } as React.CSSProperties}
@@ -739,8 +738,8 @@ export default function CampaignDetail() {
             color="primary"
             onClick={handleShowQRCode}
             style={{
-              '--background-color': PRIMARY,
-              '--border-color': PRIMARY,
+              '--background-color': colors.primary,
+              '--border-color': colors.primary,
               borderRadius: 12,
               fontWeight: 600,
             } as React.CSSProperties}
@@ -758,8 +757,8 @@ export default function CampaignDetail() {
             color="primary"
             onClick={handleJoin}
             style={{
-              '--background-color': PRIMARY,
-              '--border-color': PRIMARY,
+              '--background-color': colors.primary,
+              '--border-color': colors.primary,
               borderRadius: 12,
               fontWeight: 600
             } as React.CSSProperties}
@@ -794,7 +793,7 @@ export default function CampaignDetail() {
                 size={200}
                 level="H"
                 includeMargin
-                fgColor={PRIMARY}
+                fgColor={colors.primary}
               />
             </div>
             <div style={{ marginTop: 16 }}>

@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NavBar, Card, List, Tag, Result } from 'antd-mobile';
-
-const PRIMARY = '#00694B';
+import { useSettingsStore } from '../../store/settings';
 
 export default function StampDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
