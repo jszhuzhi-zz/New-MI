@@ -17,6 +17,7 @@ import { FavoriteModule } from './modules/favorite/favorite.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ParkingModule } from './modules/parking/parking.module';
 import { LuckyDrawModule } from './modules/lucky-draw/lucky-draw.module';
+import { SmartMarketingModule } from './modules/smart-marketing/smart-marketing.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { LuckyDrawModule } from './modules/lucky-draw/lucky-draw.module';
     FeedbackModule,
     ParkingModule,
     LuckyDrawModule,
+    SmartMarketingModule,
   ],
 })
 export class AppModule {}

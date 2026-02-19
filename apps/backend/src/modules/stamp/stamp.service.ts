@@ -766,12 +766,15 @@ export class StampService {
     amount: number,
     projectId: string,
   ): Promise<{ allowed: boolean; reason?: string }> {
+    const now = new Date();
     const rules = await tx.stampUpperLimitRule.findMany({
       where: {
-        OR: [{ projectId }, { projectId: null }],
+        AND: [
+          { OR: [{ projectId }, { projectId: null }] },
+          { OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+        ],
         status: StampRuleStatus.ACTIVE,
-        effectiveFrom: { lte: new Date() },
-        OR: [{ effectiveTo: null }, { effectiveTo: { gte: new Date() } }],
+        effectiveFrom: { lte: now },
       },
     });
 
