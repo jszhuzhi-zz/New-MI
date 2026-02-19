@@ -84,6 +84,33 @@ enum MemberAccountAction {
 enum SpecialListType {
   WHITELIST
   BLACKLIST
+  WATCHLIST
+}
+
+enum RiskAlertType {
+  VELOCITY
+  AMOUNT_ANOMALY
+  PATTERN
+  DEVICE
+  LOCATION
+  MERCHANT_ANOMALY
+  MEMBER_ANOMALY
+  SYSTEM
+}
+
+enum RiskAlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskAlertStatus {
+  ACTIVE
+  REVIEWING
+  RESOLVED
+  DISMISSED
+  ESCALATED
 }
 
 enum StampTransactionType {
@@ -711,6 +738,7 @@ model Member {
   changeRecords      MemberChangeRecord[]
   accountRecords     MemberAccountRecord[]
   specialListEntries SpecialListMember[]
+  riskAlerts         RiskAlert[]
   couponInstances    CouponInstance[]
   luckyDrawEntries   LuckyDrawEntry[]
   giftRedemptions    GiftRedemption[]
@@ -832,8 +860,9 @@ model MemberLabel {
   deletedAt DateTime?
 
   // Relations
-  group   Group               @relation(fields: [groupId], references: [id])
-  members MemberMemberLabel[]
+  group        Group               @relation(fields: [groupId], references: [id])
+  members      MemberMemberLabel[]
+  autoTagRules AutoTagRule[]
 
   @@unique([groupId, code])
   @@index([groupId])
@@ -926,6 +955,86 @@ model SpecialListMember {
   @@index([listType])
   @@index([isActive])
   @@map("special_list_members")
+}
+
+// ============================================================================
+// RISK CONTROL (风控中心) - Alerts, Rules
+// ============================================================================
+
+/// RiskAlert - Risk alert entries for anomaly detection and fraud monitoring.
+model RiskAlert {
+  id            String            @id @default(uuid()) @db.Uuid
+  groupId       String            @db.Uuid
+  projectId     String?           @db.Uuid
+  type          RiskAlertType
+  severity      RiskAlertSeverity
+  status        RiskAlertStatus   @default(ACTIVE)
+  memberId      String?           @db.Uuid
+  merchantId    String?           @db.Uuid
+  transactionId String?           @db.Uuid
+  /// Multi-language description
+  description   Json              @db.JsonB
+  /// Detailed alert data (anomaly details, thresholds, etc.)
+  details       Json?             @db.JsonB
+  /// Risk score (0-100)
+  score         Decimal?          @db.Decimal(5, 2)
+  /// Reviewer user ID
+  reviewedBy    String?           @db.Uuid
+  /// Review notes
+  reviewNotes   String?           @db.Text
+  reviewedAt    DateTime?
+  resolvedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  member   Member?  @relation(fields: [memberId], references: [id])
+  merchant Merchant? @relation(fields: [merchantId], references: [id])
+
+  @@index([groupId])
+  @@index([projectId])
+  @@index([type])
+  @@index([severity])
+  @@index([status])
+  @@index([memberId])
+  @@index([merchantId])
+  @@index([createdAt])
+  @@map("risk_alerts")
+}
+
+/// RiskRule - Risk control rule definitions for automated anomaly detection.
+model RiskRule {
+  id              String   @id @default(uuid()) @db.Uuid
+  groupId         String   @db.Uuid
+  projectId       String?  @db.Uuid
+  code            String   @db.VarChar(100)
+  /// Multi-language rule name
+  name            Json     @db.JsonB
+  /// Rule type: velocity, amount, pattern, device, location, time
+  type            String   @db.VarChar(50)
+  /// Rule conditions (JSON array of condition objects)
+  conditions      Json     @db.JsonB
+  /// Action to take: flag, block, suspend-member, notify-staff, escalate
+  action          String   @db.VarChar(50)
+  /// Severity: LOW, MEDIUM, HIGH, CRITICAL
+  severity        String   @db.VarChar(20)
+  isActive        Boolean  @default(true)
+  priority        Int      @default(0)
+  /// Cooldown period in minutes before rule can trigger again for same entity
+  cooldownMinutes Int      @default(0)
+  /// Additional rule metadata
+  metadata        Json?    @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([type])
+  @@index([isActive])
+  @@map("risk_rules")
 }
 
 // ============================================================================
@@ -1347,6 +1456,7 @@ model Merchant {
   project           Project            @relation(fields: [projectId], references: [id])
   merchantAccounts  MerchantAccount[]
   stampTransactions StampTransaction[]
+  riskAlerts        RiskAlert[]
   users             User[]
   favoritedBy       MemberFavorite[]
 
@@ -2403,4 +2513,155 @@ model ParkingRate {
   @@index([projectId])
   @@index([isActive])
   @@map("parking_rates")
+}
+
+// ============================================================================
+// SMART MARKETING - Auto-Tag Rules / Triggers / Segments / Journeys
+// ============================================================================
+
+enum JourneyStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+/// AutoTagRule - Automatic member tagging rules based on configurable conditions.
+model AutoTagRule {
+  id             String    @id @default(uuid()) @db.Uuid
+  groupId        String    @db.Uuid
+  projectId      String?   @db.Uuid
+  code           String    @db.VarChar(50)
+  /// Multi-language rule name
+  name           Json      @db.JsonB
+  /// Tag to apply when conditions are met
+  tagId          String    @db.Uuid
+  /// Evaluation conditions (JSON array of TagCondition objects)
+  conditions     Json      @db.JsonB
+  isActive       Boolean   @default(true)
+  priority       Int       @default(0)
+  lastExecutedAt DateTime?
+  executionCount Int       @default(0)
+  /// Additional metadata (conditionLogic, autoRemove, evaluationFrequency, stats, etc.)
+  metadata       Json      @default("{}") @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  tag MemberLabel @relation(fields: [tagId], references: [id])
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([tagId])
+  @@index([isActive])
+  @@map("auto_tag_rules")
+}
+
+/// MarketingTrigger - Event/schedule/condition-based marketing trigger rules.
+model MarketingTrigger {
+  id                   String    @id @default(uuid()) @db.Uuid
+  groupId              String    @db.Uuid
+  projectId            String?   @db.Uuid
+  code                 String    @db.VarChar(50)
+  /// Multi-language trigger name
+  name                 Json      @db.JsonB
+  /// Event type that this trigger listens for
+  eventType            String    @db.VarChar(100)
+  /// Conditions for trigger evaluation (JSON)
+  conditions           Json      @default("{}") @db.JsonB
+  /// Actions to execute when triggered (JSON array of MarketingAction)
+  actions              Json      @default("[]") @db.JsonB
+  isActive             Boolean   @default(true)
+  /// Min minutes between triggers for same member
+  cooldownMinutes      Int       @default(0)
+  /// Max times this trigger can fire for a single member
+  maxTriggersPerMember Int?
+  /// Audience filter (JSON)
+  audienceFilter       Json      @default("{}") @db.JsonB
+  /// Schedule configuration (JSON, for schedule-based triggers)
+  schedule             Json      @default("{}") @db.JsonB
+  /// A/B test configuration (JSON)
+  abTestConfig         Json      @default("{}") @db.JsonB
+  /// Additional metadata (triggerType, description, validDateRange, etc.)
+  metadata             Json      @default("{}") @db.JsonB
+  executionCount       Int       @default(0)
+  lastTriggeredAt      DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([eventType])
+  @@index([isActive])
+  @@map("marketing_triggers")
+}
+
+/// MemberSegment - Dynamic or static member segments for targeting.
+model MemberSegment {
+  id          String    @id @default(uuid()) @db.Uuid
+  groupId     String    @db.Uuid
+  projectId   String?   @db.Uuid
+  code        String    @db.VarChar(50)
+  /// Multi-language segment name
+  name        Json      @db.JsonB
+  /// Multi-language description
+  description Json      @default("{}") @db.JsonB
+  /// Segment rules (JSON array of TagCondition objects)
+  rules       Json      @default("[]") @db.JsonB
+  /// Current member count matching this segment
+  memberCount Int       @default(0)
+  isActive    Boolean   @default(true)
+  refreshedAt DateTime?
+  /// Additional metadata (ruleLogic, isDynamic, etc.)
+  metadata    Json      @default("{}") @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([isActive])
+  @@map("member_segments")
+}
+
+/// MemberJourney - Automated multi-step member journey workflows.
+model MemberJourney {
+  id                String        @id @default(uuid()) @db.Uuid
+  groupId           String        @db.Uuid
+  projectId         String?       @db.Uuid
+  code              String        @db.VarChar(50)
+  /// Multi-language journey name
+  name              Json          @db.JsonB
+  /// Multi-language description
+  description       Json          @default("{}") @db.JsonB
+  status            JourneyStatus @default(DRAFT)
+  /// Trigger conditions for journey entry (JSON)
+  triggerConditions Json          @default("{}") @db.JsonB
+  /// Journey steps (JSON array of JourneyStep)
+  steps             Json          @default("[]") @db.JsonB
+  /// Number of members who have entered the journey
+  entryCount        Int           @default(0)
+  /// Number of members who have completed the journey
+  completionCount   Int           @default(0)
+  /// Additional metadata (exitConditions, maxConcurrentMembers, validDateRange, stats, etc.)
+  metadata          Json          @default("{}") @db.JsonB
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([groupId, code])
+  @@index([groupId])
+  @@index([projectId])
+  @@index([status])
+  @@map("member_journeys")
 }
