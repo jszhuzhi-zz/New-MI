@@ -5,7 +5,6 @@ import { LeftOutline, GiftOutline } from 'antd-mobile-icons';
 import { useSettingsStore, type Locale } from '../../store/settings';
 import { useAuthStore } from '../../store/auth';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 // Multilingual labels
@@ -129,6 +128,8 @@ export default function LotteryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const locale = useSettingsStore((s) => s.locale);
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -459,7 +460,7 @@ export default function LotteryDetailPage() {
       <div style={{ padding: '0 16px 16px', textAlign: 'center' }}>
         <span
           onClick={() => setShowTerms(true)}
-          style={{ fontSize: 13, color: PRIMARY, cursor: 'pointer' }}
+          style={{ fontSize: 13, color: colors.primary, cursor: 'pointer' }}
         >
           {t('terms')}
         </span>

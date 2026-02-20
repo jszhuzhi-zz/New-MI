@@ -26,6 +26,85 @@ import FavoritesPage from './pages/favorites';
 import ParkingPage from './pages/parking';
 import NewsDetail from './pages/news/detail';
 import { useAuthStore } from './store/auth';
+import { useSettingsStore } from './store/settings';
+
+// Dynamic theme styles - re-renders when theme changes
+function ThemeStyles() {
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
+
+  const styles = `
+    .adm-tab-bar {
+      --adm-color-primary: ${colors.primary} !important;
+    }
+    .adm-tabs-tab-active {
+      color: ${colors.primary} !important;
+    }
+    .adm-tabs-tab-line {
+      background: ${colors.primary} !important;
+    }
+    .adm-button-primary {
+      --background-color: ${colors.primary} !important;
+      --border-color: ${colors.primary} !important;
+    }
+    .adm-pull-to-refresh-head-content {
+      color: ${colors.primary} !important;
+    }
+    .link-page {
+      min-height: 100vh;
+      background: #F5F5F5;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .link-page-with-tabs {
+      padding-bottom: 50px;
+    }
+    .link-nav-bar {
+      background: ${colors.primary} !important;
+      color: #fff !important;
+      --height: 45px;
+    }
+    .link-nav-bar .adm-nav-bar-back-arrow,
+    .link-nav-bar .adm-nav-bar-title,
+    .link-nav-bar .adm-nav-bar-right {
+      color: #fff !important;
+    }
+    .link-card {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .link-section {
+      padding: 12px 16px;
+    }
+    .link-section-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .link-section-title .more {
+      font-size: 13px;
+      font-weight: 400;
+      color: #999;
+    }
+    .gold-text {
+      color: #C4A962;
+    }
+    .theme-text {
+      color: ${colors.primary};
+    }
+    .theme-bg {
+      background: ${colors.primary};
+    }
+    .gold-bg {
+      background: #C4A962;
+    }
+  `;
+
+  return <style>{styles}</style>;
+}
 
 // Handle SPA redirect from 404.html
 function RedirectHandler() {
@@ -62,80 +141,10 @@ function ProtectedRoute({ element }: { element: React.ReactElement }) {
   return <AuthGuard>{element}</AuthGuard>;
 }
 
-const globalStyles = `
-  .adm-tab-bar {
-    --adm-color-primary: #00694B !important;
-  }
-  .adm-tabs-tab-active {
-    color: #00694B !important;
-  }
-  .adm-tabs-tab-line {
-    background: #00694B !important;
-  }
-  .adm-button-primary {
-    --background-color: #00694B !important;
-    --border-color: #00694B !important;
-  }
-  .adm-pull-to-refresh-head-content {
-    color: #00694B !important;
-  }
-  .link-page {
-    min-height: 100vh;
-    background: #F5F5F5;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .link-page-with-tabs {
-    padding-bottom: 50px;
-  }
-  .link-nav-bar {
-    background: #00694B !important;
-    color: #fff !important;
-    --height: 45px;
-  }
-  .link-nav-bar .adm-nav-bar-back-arrow,
-  .link-nav-bar .adm-nav-bar-title,
-  .link-nav-bar .adm-nav-bar-right {
-    color: #fff !important;
-  }
-  .link-card {
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .link-section {
-    padding: 12px 16px;
-  }
-  .link-section-title {
-    font-size: 17px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .link-section-title .more {
-    font-size: 13px;
-    font-weight: 400;
-    color: #999;
-  }
-  .gold-text {
-    color: #C4A962;
-  }
-  .green-text {
-    color: #00694B;
-  }
-  .green-bg {
-    background: #00694B;
-  }
-  .gold-bg {
-    background: #C4A962;
-  }
-`;
-
 export default function App() {
   return (
     <ConfigProvider locale={zhTW}>
-      <style>{globalStyles}</style>
+      <ThemeStyles />
       <BrowserRouter>
         <RedirectHandler />
         <Routes>

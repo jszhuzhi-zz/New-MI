@@ -5,8 +5,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { ScanCodeOutline, ReceivePaymentOutline, PictureOutline } from 'antd-mobile-icons';
 import { useAuthStore } from '../../store/auth';
 import { useLocale } from '../../hooks/useLocale';
+import { useSettingsStore } from '../../store/settings';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 const recentRecords = [
@@ -32,6 +32,8 @@ const loginLabels: Record<string, Record<string, string>> = {
 export default function ScanPage() {
   const navigate = useNavigate();
   const { t, locale } = useLocale();
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [activeMethod, setActiveMethod] = useState<CollectMethod>('qrcode');
@@ -109,7 +111,7 @@ export default function ScanPage() {
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
           <div style={{ color: '#666', marginBottom: 8 }}>{t('customerApp.earnedVia', { method })}</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: PRIMARY }}>+{stamps}</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: colors.primary }}>+{stamps}</div>
           <div style={{ fontSize: 14, color: GOLD }}>{t('customerApp.stamps')}</div>
         </div>
       ),
@@ -146,7 +148,7 @@ export default function ScanPage() {
           onBack={() => navigate(-1)}
           style={{
             '--height': '44px',
-            background: PRIMARY,
+            background: colors.primary,
             color: '#fff',
           } as React.CSSProperties}
         >
@@ -156,7 +158,7 @@ export default function ScanPage() {
         {/* Header */}
         <div
           style={{
-            background: `linear-gradient(135deg, ${PRIMARY}, #004D36)`,
+            background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
             padding: '28px 20px 80px', color: '#fff', textAlign: 'center',
           }}
         >
@@ -179,8 +181,8 @@ export default function ScanPage() {
               size="large"
               onClick={() => navigate('/login')}
               style={{
-                '--background-color': PRIMARY,
-                '--border-color': PRIMARY,
+                '--background-color': colors.primary,
+                '--border-color': colors.primary,
                 borderRadius: 12,
                 height: 48,
                 fontSize: 16,
@@ -227,7 +229,7 @@ export default function ScanPage() {
         onBack={() => navigate(-1)}
         style={{
           '--height': '44px',
-          background: PRIMARY,
+          background: colors.primary,
           color: '#fff',
         } as React.CSSProperties}
       >
@@ -256,18 +258,18 @@ export default function ScanPage() {
                 borderRadius: 10,
                 textAlign: 'center',
                 cursor: 'pointer',
-                background: activeMethod === m.key ? `${PRIMARY}10` : 'transparent',
-                border: activeMethod === m.key ? `2px solid ${PRIMARY}` : '2px solid transparent',
+                background: activeMethod === m.key ? `${colors.primary}10` : 'transparent',
+                border: activeMethod === m.key ? `2px solid ${colors.primary}` : '2px solid transparent',
                 transition: 'all 0.2s',
               }}
             >
-              <div style={{ color: activeMethod === m.key ? PRIMARY : '#999' }}>
+              <div style={{ color: activeMethod === m.key ? colors.primary : '#999' }}>
                 {m.icon}
               </div>
               <div style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: activeMethod === m.key ? PRIMARY : '#333',
+                color: activeMethod === m.key ? colors.primary : '#333',
                 marginTop: 6,
               }}>
                 {m.title}
@@ -291,14 +293,14 @@ export default function ScanPage() {
                 padding: 16,
                 background: '#fff',
                 borderRadius: 12,
-                border: `3px solid ${PRIMARY}`,
+                border: `3px solid ${colors.primary}`,
                 boxShadow: '0 4px 20px rgba(0,105,75,0.15)',
               }}>
                 <QRCodeSVG
                   value={memberQRValue}
                   size={180}
                   level="H"
-                  fgColor={PRIMARY}
+                  fgColor={colors.primary}
                 />
               </div>
 
@@ -367,7 +369,7 @@ export default function ScanPage() {
                       transform: 'translate(-50%, -50%)',
                       width: 180,
                       height: 180,
-                      border: `3px solid ${PRIMARY}`,
+                      border: `3px solid ${colors.primary}`,
                       borderRadius: 12,
                     }} />
                   </div>
@@ -387,13 +389,13 @@ export default function ScanPage() {
                     width: 120,
                     height: 120,
                     borderRadius: 60,
-                    background: `${PRIMARY}10`,
+                    background: `${colors.primary}10`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     margin: '0 auto 20px',
                   }}>
-                    <ScanCodeOutline fontSize={56} color={PRIMARY} />
+                    <ScanCodeOutline fontSize={56} color={colors.primary} />
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>
                     {t('customerApp.scanReceiptQR')}
@@ -406,8 +408,8 @@ export default function ScanPage() {
                     size="large"
                     onClick={startScanner}
                     style={{
-                      '--background-color': PRIMARY,
-                      '--border-color': PRIMARY,
+                      '--background-color': colors.primary,
+                      '--border-color': colors.primary,
                       width: 200,
                     } as React.CSSProperties}
                   >
@@ -425,13 +427,13 @@ export default function ScanPage() {
                 width: 120,
                 height: 120,
                 borderRadius: 60,
-                background: `${PRIMARY}10`,
+                background: `${colors.primary}10`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 20px',
               }}>
-                <PictureOutline fontSize={56} color={PRIMARY} />
+                <PictureOutline fontSize={56} color={colors.primary} />
               </div>
               <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>
                 {t('customerApp.photoRecognition')}
@@ -456,8 +458,8 @@ export default function ScanPage() {
                 onClick={handlePhotoCapture}
                 loading={processing}
                 style={{
-                  '--background-color': PRIMARY,
-                  '--border-color': PRIMARY,
+                  '--background-color': colors.primary,
+                  '--border-color': colors.primary,
                   width: 200,
                 } as React.CSSProperties}
               >
@@ -481,7 +483,7 @@ export default function ScanPage() {
         <Card style={{ borderRadius: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-around', padding: '8px 0' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: PRIMARY }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>
                 {(user?.stampBalance || 2580).toLocaleString()}
               </div>
               <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{t('customerApp.availableStamps')}</div>
@@ -509,7 +511,7 @@ export default function ScanPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{t('customerApp.recentRecords')}</span>
           <span
-            style={{ fontSize: 12, color: PRIMARY, cursor: 'pointer' }}
+            style={{ fontSize: 12, color: colors.primary, cursor: 'pointer' }}
             onClick={() => navigate('/stamp')}
           >
             {t('customerApp.viewAll')}
@@ -524,7 +526,7 @@ export default function ScanPage() {
                 description={<span style={{ fontSize: 12 }}>{record.mall} · {record.time}</span>}
                 extra={
                   <span style={{
-                    color: record.type === 'earn' ? PRIMARY : '#ff6b6b',
+                    color: record.type === 'earn' ? colors.primary : '#ff6b6b',
                     fontWeight: 600,
                   }}>
                     {record.stamps}

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NavBar, Card, List, Tag, Button, Divider, Toast, Modal, Input, SpinLoading } from 'antd-mobile';
 import { ClockCircleOutline, LocationFill, CheckCircleFill, CloseCircleFill } from 'antd-mobile-icons';
+import { useSettingsStore } from '../../store/settings';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 interface Coupon {
@@ -78,7 +78,7 @@ const QRCodeDisplay: React.FC<{ value: string; size?: number; isActive?: boolean
       padding: 8,
       background: '#fff',
       borderRadius: 8,
-      border: `2px solid ${isActive ? PRIMARY : '#ccc'}`,
+      border: `2px solid ${isActive ? colors.primary : '#ccc'}`,
     }}>
       <svg width={size - 16} height={size - 16} viewBox="0 0 25 25">
         {pattern.map((row, y) =>
@@ -217,6 +217,8 @@ export default function CouponDetail() {
   const [verifyCode, setVerifyCode] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [qrRefreshKey, setQrRefreshKey] = useState(0);
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
 
   const status = statusConfig[coupon.status] || statusConfig.unused;
   const isActive = coupon.status === 'unused';
@@ -265,7 +267,7 @@ export default function CouponDetail() {
       title: '核銷成功！',
       content: (
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
-          <CheckCircleFill fontSize={48} color={PRIMARY} />
+          <CheckCircleFill fontSize={48} color={colors.primary} />
           <div style={{ marginTop: 12, fontSize: 16, color: '#333' }}>
             優惠券已成功使用
           </div>
@@ -290,7 +292,7 @@ export default function CouponDetail() {
           {/* Status Banner */}
           <div style={{
             background: isActive
-              ? `linear-gradient(135deg, ${PRIMARY}, #004D36)`
+              ? `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`
               : status.bgColor,
             margin: '-12px -12px 0', padding: '20px', color: isActive ? '#fff' : status.color,
           }}>
@@ -398,7 +400,7 @@ export default function CouponDetail() {
           <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 12 }}>使用規則</div>
           {coupon.rules.map((rule, i) => (
             <div key={i} style={{ fontSize: 13, color: '#666', marginBottom: 8, display: 'flex', gap: 8, lineHeight: 1.5 }}>
-              <span style={{ color: PRIMARY }}>•</span>
+              <span style={{ color: colors.primary }}>•</span>
               <span>{rule}</span>
             </div>
           ))}
@@ -417,8 +419,8 @@ export default function CouponDetail() {
             size="large"
             onClick={handleUse}
             style={{
-              '--background-color': PRIMARY,
-              '--border-color': PRIMARY,
+              '--background-color': colors.primary,
+              '--border-color': colors.primary,
               borderRadius: 12,
               fontWeight: 600
             } as React.CSSProperties}

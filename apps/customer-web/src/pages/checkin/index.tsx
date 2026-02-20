@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { NavBar, Card, Button, Toast, Tag, Grid, ProgressBar, Modal } from 'antd-mobile';
 import { GiftOutline, FireFill, CheckCircleFill } from 'antd-mobile-icons';
 import { useLocale } from '../../hooks/useLocale';
+import { useSettingsStore } from '../../store/settings';
 
-const PRIMARY = '#00694B';
 const GOLD = '#C4A962';
 
 interface CheckInDay {
@@ -19,6 +19,8 @@ interface CheckInDay {
 export default function CheckInPage() {
   const navigate = useNavigate();
   const { t } = useLocale();
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
   const today = new Date();
   const [checkedInDays, setCheckedInDays] = useState<number[]>([1, 2, 3, 4, 5]); // Demo: already checked in 5 days
   const [consecutiveDays, setConsecutiveDays] = useState(5);
@@ -105,13 +107,13 @@ export default function CheckInPage() {
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 100 }}>
-      <NavBar onBack={() => navigate(-1)} style={{ background: PRIMARY, color: '#fff' }}>
+      <NavBar onBack={() => navigate(-1)} style={{ background: colors.primary, color: '#fff' }}>
         {t('customerApp.dailyCheckIn')}
       </NavBar>
 
       {/* Header Stats */}
       <div style={{
-        background: `linear-gradient(135deg, ${PRIMARY} 0%, #004D36 100%)`,
+        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
         padding: '20px 16px 60px', color: '#fff', position: 'relative'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
@@ -137,13 +139,13 @@ export default function CheckInPage() {
         <Card style={{ borderRadius: 16, textAlign: 'center', padding: '24px 16px' }}>
           <div style={{ marginBottom: 16 }}>
             {isTodayCheckedIn ? (
-              <CheckCircleFill fontSize={64} color={PRIMARY} />
+              <CheckCircleFill fontSize={64} color={colors.primary} />
             ) : (
               <div style={{
-                width: 80, height: 80, borderRadius: 40, background: `${PRIMARY}15`,
+                width: 80, height: 80, borderRadius: 40, background: `${colors.primary}15`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto'
               }}>
-                <GiftOutline fontSize={40} color={PRIMARY} />
+                <GiftOutline fontSize={40} color={colors.primary} />
               </div>
             )}
           </div>
@@ -151,7 +153,7 @@ export default function CheckInPage() {
             {isTodayCheckedIn ? t('customerApp.checkedInToday') : t('customerApp.canEarnToday')}
           </div>
           {!isTodayCheckedIn && (
-            <div style={{ fontSize: 28, fontWeight: 700, color: PRIMARY, marginBottom: 16 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: colors.primary, marginBottom: 16 }}>
               +{calendarDays.find((d) => d && d.day === today.getDate())?.reward || 10} {t('customerApp.stamps')}
             </div>
           )}
@@ -162,8 +164,8 @@ export default function CheckInPage() {
             disabled={isTodayCheckedIn}
             onClick={handleCheckIn}
             style={{
-              '--background-color': isTodayCheckedIn ? '#e0e0e0' : PRIMARY,
-              '--border-color': isTodayCheckedIn ? '#e0e0e0' : PRIMARY,
+              '--background-color': isTodayCheckedIn ? '#e0e0e0' : colors.primary,
+              '--border-color': isTodayCheckedIn ? '#e0e0e0' : colors.primary,
               borderRadius: 24,
               fontWeight: 600,
               fontSize: 16,
@@ -186,14 +188,14 @@ export default function CheckInPage() {
               <div key={i} style={{ textAlign: 'center', flex: 1 }}>
                 <div style={{
                   width: 44, height: 44, borderRadius: 22, margin: '0 auto 8px',
-                  background: consecutiveDays >= r.days ? PRIMARY : '#f0f0f0',
+                  background: consecutiveDays >= r.days ? colors.primary : '#f0f0f0',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: consecutiveDays >= r.days ? '#fff' : '#999',
                   fontSize: 12, fontWeight: 600,
                 }}>
                   {consecutiveDays >= r.days ? '✓' : r.days}
                 </div>
-                <div style={{ fontSize: 11, color: consecutiveDays >= r.days ? PRIMARY : '#999' }}>
+                <div style={{ fontSize: 11, color: consecutiveDays >= r.days ? colors.primary : '#999' }}>
                   +{r.reward} {t('customerApp.stamps')}
                 </div>
               </div>
@@ -201,7 +203,7 @@ export default function CheckInPage() {
           </div>
           <ProgressBar
             percent={Math.min((consecutiveDays / 30) * 100, 100)}
-            style={{ '--fill-color': PRIMARY, '--track-width': '8px' } as React.CSSProperties}
+            style={{ '--fill-color': colors.primary, '--track-width': '8px' } as React.CSSProperties}
           />
           <div style={{ fontSize: 12, color: '#999', textAlign: 'center', marginTop: 8 }}>
             {t('customerApp.nextRewardIn', { days: Math.max(7 - (consecutiveDays % 7), 0) })}
@@ -236,9 +238,9 @@ export default function CheckInPage() {
                   aspectRatio: '1', display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center',
                   borderRadius: 8, fontSize: 14, position: 'relative',
-                  background: day?.isCheckedIn ? `${PRIMARY}15` : day?.isFuture ? '#fafafa' : '#fff',
-                  border: day && day.day === today.getDate() ? `2px solid ${PRIMARY}` : '1px solid #f0f0f0',
-                  color: day?.isFuture ? '#ccc' : day?.isCheckedIn ? PRIMARY : '#333',
+                  background: day?.isCheckedIn ? `${colors.primary}15` : day?.isFuture ? '#fafafa' : '#fff',
+                  border: day && day.day === today.getDate() ? `2px solid ${colors.primary}` : '1px solid #f0f0f0',
+                  color: day?.isFuture ? '#ccc' : day?.isCheckedIn ? colors.primary : '#333',
                   fontWeight: day && day.day === today.getDate() ? 700 : 400,
                 }}
               >
@@ -248,7 +250,7 @@ export default function CheckInPage() {
                     {day.isCheckedIn && (
                       <CheckCircleFill
                         fontSize={14}
-                        color={PRIMARY}
+                        color={colors.primary}
                         style={{ position: 'absolute', top: 2, right: 2 }}
                       />
                     )}
@@ -273,7 +275,7 @@ export default function CheckInPage() {
           {/* Legend */}
           <div style={{ display: 'flex', gap: 16, marginTop: 12, justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#999' }}>
-              <div style={{ width: 12, height: 12, borderRadius: 6, background: `${PRIMARY}15`, border: `1px solid ${PRIMARY}` }} />
+              <div style={{ width: 12, height: 12, borderRadius: 6, background: `${colors.primary}15`, border: `1px solid ${colors.primary}` }} />
               {t('customerApp.checkedIn')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#999' }}>
@@ -306,7 +308,7 @@ export default function CheckInPage() {
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
             <div style={{ fontSize: 18, fontWeight: 600, color: '#333', marginBottom: 8 }}>{t('customerApp.checkInSuccess')}</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: PRIMARY }}>+{earnedReward} {t('customerApp.stamps')}</div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: colors.primary }}>+{earnedReward} {t('customerApp.stamps')}</div>
             <div style={{ fontSize: 14, color: '#999', marginTop: 12 }}>
               {t('customerApp.consecutiveCheckIn')} {consecutiveDays} {t('customerApp.consecutiveDays')}
             </div>

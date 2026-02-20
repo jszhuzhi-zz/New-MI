@@ -5,8 +5,6 @@ import { useAuthStore } from '../store/auth';
 import { useSettingsStore, type Locale } from '../store/settings';
 import { malls } from '../data/malls';
 
-const PRIMARY = '#00694B';
-
 // Multilingual labels
 const labels: Record<string, Record<Locale, string>> = {
   selectMall: { 'zh-TW': '選擇商場', 'zh-CN': '选择商场', en: 'Select Mall' },
@@ -36,6 +34,8 @@ export default function MallSelector({ style, showLabel = true }: MallSelectorPr
   const [searchText, setSearchText] = useState('');
   const { currentMallId, setCurrentMall } = useAuthStore();
   const locale = useSettingsStore((s) => s.locale);
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
 
   const t = (key: string) => labels[key]?.[locale] || labels[key]?.['zh-TW'] || key;
   const getRegionName = (region: string) => regionNames[region]?.[locale] || region;
@@ -129,7 +129,7 @@ export default function MallSelector({ style, showLabel = true }: MallSelectorPr
                 setVisible(false);
                 setSearchText('');
               }}
-              style={{ color: PRIMARY, fontSize: 14, cursor: 'pointer' }}
+              style={{ color: colors.primary, fontSize: 14, cursor: 'pointer' }}
             >
               {t('close')}
             </span>
@@ -160,7 +160,7 @@ export default function MallSelector({ style, showLabel = true }: MallSelectorPr
                     onClick={() => handleSelect(mall.id)}
                     arrow={false}
                     style={{
-                      background: mall.id === currentMallId ? `${PRIMARY}10` : 'transparent',
+                      background: mall.id === currentMallId ? `${colors.primary}10` : 'transparent',
                       borderRadius: 8,
                       marginBottom: 4,
                     }}
@@ -174,7 +174,7 @@ export default function MallSelector({ style, showLabel = true }: MallSelectorPr
                       <div style={{
                         fontSize: 15,
                         fontWeight: mall.id === currentMallId ? 600 : 400,
-                        color: mall.id === currentMallId ? PRIMARY : '#333',
+                        color: mall.id === currentMallId ? colors.primary : '#333',
                       }}>
                         {getMallName(mall)}
                       </div>

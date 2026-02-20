@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, Radio, Button, Toast, Card, Space } from 'antd-mobile';
 import { useAuthStore, Locale } from '../../store/auth';
-
-const PRIMARY = '#00694B';
+import { useSettingsStore } from '../../store/settings';
 
 const languages = [
   { value: 'zh-TW' as Locale, label: '繁體中文', desc: 'Traditional Chinese' },
@@ -16,6 +15,8 @@ export default function SettingsPage() {
   const currentLocale = useAuthStore((s) => s.locale);
   const setLocale = useAuthStore((s) => s.setLocale);
   const [selected, setSelected] = useState<Locale>(currentLocale);
+  const { getThemeColors } = useSettingsStore();
+  const colors = getThemeColors();
 
   const handleSave = () => {
     setLocale(selected);
@@ -69,8 +70,8 @@ export default function SettingsPage() {
           onClick={handleSave}
           style={{
             marginTop: 24,
-            '--background-color': PRIMARY,
-            '--border-color': PRIMARY,
+            '--background-color': colors.primary,
+            '--border-color': colors.primary,
             borderRadius: 12,
             fontWeight: 600,
           } as React.CSSProperties}
