@@ -9,7 +9,7 @@ import { LocaleInterceptor } from './common/interceptors/locale.interceptor';
 import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor';
 import * as express from 'express';
 
-const expressApp = express();
+const expressApp: any = express();
 let nestApp: any;
 
 async function bootstrap() {

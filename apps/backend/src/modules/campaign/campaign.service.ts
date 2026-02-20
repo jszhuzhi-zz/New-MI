@@ -247,7 +247,7 @@ export class CampaignService {
     }
 
     // Only allow editing if campaign is in DRAFT or PENDING_APPROVAL status
-    if (![CampaignStatus.DRAFT, CampaignStatus.PENDING_APPROVAL].includes(campaign.status)) {
+    if (![CampaignStatus.DRAFT, CampaignStatus.PENDING_APPROVAL].includes(campaign.status as any)) {
       throw new BadRequestException(
         `Cannot modify campaigns in '${campaign.status}' status. Only DRAFT or PENDING_APPROVAL campaigns can be edited.`,
       );
@@ -347,7 +347,7 @@ export class CampaignService {
     }
 
     // Cannot cancel already ended or cancelled campaigns
-    if ([CampaignStatus.ENDED, CampaignStatus.CANCELLED].includes(campaign.status)) {
+    if ([CampaignStatus.ENDED, CampaignStatus.CANCELLED].includes(campaign.status as any)) {
       throw new BadRequestException(`Campaign is already ${campaign.status}.`);
     }
 
@@ -758,7 +758,7 @@ export class CampaignService {
         const code = data.code || this.generateCode(8, 'LD');
         luckyDraw = await tx.luckyDraw.create({
           data: {
-            projectId: campaign.projectId,
+            projectId: campaign.projectId!,
             campaignId,
             code,
             name: data.name as any || campaign.name,
