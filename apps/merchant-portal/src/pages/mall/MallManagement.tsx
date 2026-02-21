@@ -351,10 +351,10 @@ export default function MallManagement() {
   const totalMembers = mockMalls.reduce((sum, m) => sum + m.memberCount, 0);
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       {/* Statistics Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={12} sm={6}>
           <Card>
             <Statistic
               title={tl('totalMalls')}
@@ -364,7 +364,7 @@ export default function MallManagement() {
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={12} sm={6}>
           <Card>
             <Statistic
               title={tl('totalMerchants')}
@@ -374,7 +374,7 @@ export default function MallManagement() {
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={12} sm={6}>
           <Card>
             <Statistic
               title={tl('totalMembers')}
@@ -384,7 +384,7 @@ export default function MallManagement() {
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={12} sm={6}>
           <Card>
             <Statistic
               title={tl('totalAdmins')}
@@ -426,6 +426,7 @@ export default function MallManagement() {
                   columns={mallColumns}
                   dataSource={mockMalls}
                   rowKey="id"
+                  scroll={{ x: 1000 }}
                   pagination={{ pageSize: 10 }}
                 />
               ),
@@ -443,6 +444,7 @@ export default function MallManagement() {
                   columns={userColumns}
                   dataSource={mockAdminUsers}
                   rowKey="id"
+                  scroll={{ x: 1000 }}
                   pagination={{ pageSize: 10 }}
                 />
               ),

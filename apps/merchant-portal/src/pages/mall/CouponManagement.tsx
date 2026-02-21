@@ -337,10 +337,10 @@ export default function CouponManagement() {
   const totalRedeemed = mockCoupons.reduce((sum, c) => sum + c.usedQuantity, 0);
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       {/* Statistics Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('totalCoupons')}
@@ -350,7 +350,7 @@ export default function CouponManagement() {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('activeCoupons')}
@@ -360,7 +360,7 @@ export default function CouponManagement() {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('totalRedeemed')}

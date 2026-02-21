@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Menu, Avatar, Dropdown, Space, Typography, theme } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Space, Typography, theme, Drawer, Grid } from 'antd';
 import {
   HomeOutlined,
   GiftOutlined,
@@ -73,6 +73,8 @@ const MainLayout: React.FC = () => {
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const { token: themeToken } = theme.useToken();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
 
   const getLabel = (key: string) => menuLabels[key]?.[locale] || menuLabels[key]?.en || key;
 
@@ -242,64 +244,88 @@ const MainLayout: React.FC = () => {
     return acc;
   }, []);
 
-  return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        width={240}
+  const siderContent = (
+    <>
+      <div
         style={{
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          background: themeToken.colorBgContainer,
-          borderRight: `1px solid ${themeToken.colorBorderSecondary}`,
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 16px',
+          borderBottom: `1px solid ${themeToken.colorBorderSecondary}`,
         }}
       >
-        <div
+        <ShopOutlined style={{ fontSize: 24, color: themeToken.colorPrimary }} />
+        {(!collapsed || isMobile) && (
+          <Text
+            strong
+            style={{
+              marginLeft: 12,
+              fontSize: 16,
+              whiteSpace: 'nowrap',
+              color: themeToken.colorPrimary,
+            }}
+          >
+            {locale === 'en' ? 'Merchant Portal' : '商户端'}
+          </Text>
+        )}
+      </div>
+
+      <Menu
+        mode="inline"
+        selectedKeys={[selectedKey]}
+        defaultOpenKeys={openKeys}
+        items={menuItems}
+        onClick={(info) => {
+          handleMenuClick(info);
+          if (isMobile && !collapsed) {
+            toggleSidebar();
+          }
+        }}
+        style={{ borderRight: 0, paddingTop: 8 }}
+      />
+    </>
+  );
+
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      {isMobile ? (
+        <Drawer
+          placement="left"
+          open={!collapsed}
+          onClose={toggleSidebar}
+          width={260}
+          styles={{ body: { padding: 0 } }}
+          closable={false}
+        >
+          {siderContent}
+        </Drawer>
+      ) : (
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          width={240}
           style={{
-            height: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 16px',
-            borderBottom: `1px solid ${themeToken.colorBorderSecondary}`,
+            overflow: 'auto',
+            height: '100vh',
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            background: themeToken.colorBgContainer,
+            borderRight: `1px solid ${themeToken.colorBorderSecondary}`,
           }}
         >
-          <ShopOutlined style={{ fontSize: 24, color: themeToken.colorPrimary }} />
-          {!collapsed && (
-            <Text
-              strong
-              style={{
-                marginLeft: 12,
-                fontSize: 16,
-                whiteSpace: 'nowrap',
-                color: themeToken.colorPrimary,
-              }}
-            >
-              {locale === 'en' ? 'Merchant Portal' : '商户端'}
-            </Text>
-          )}
-        </div>
+          {siderContent}
+        </Sider>
+      )}
 
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          defaultOpenKeys={openKeys}
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ borderRight: 0, paddingTop: 8 }}
-        />
-      </Sider>
-
-      <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'margin-left 0.2s' }}>
+      <Layout style={{ marginLeft: isMobile ? 0 : (collapsed ? 80 : 240), transition: 'margin-left 0.2s' }}>
         <Header
           style={{
-            padding: '0 24px',
+            padding: isMobile ? '0 12px' : '0 24px',
             background: themeToken.colorBgContainer,
             borderBottom: `1px solid ${themeToken.colorBorderSecondary}`,
             display: 'flex',
@@ -312,13 +338,13 @@ const MainLayout: React.FC = () => {
         >
           <Space>
             {React.createElement(
-              collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+              isMobile ? (collapsed ? MenuUnfoldOutlined : MenuFoldOutlined) : (collapsed ? MenuUnfoldOutlined : MenuFoldOutlined),
               {
                 style: { fontSize: 18, cursor: 'pointer' },
                 onClick: toggleSidebar,
               }
             )}
-            {user && (
+            {user && !isMobile && (
               <Text type="secondary" style={{ marginLeft: 12 }}>
                 <ShopOutlined style={{ marginRight: 4 }} />
                 {user.shopName}
@@ -329,7 +355,7 @@ const MainLayout: React.FC = () => {
             )}
           </Space>
 
-          <Space size="middle">
+          <Space size={isMobile ? 'small' : 'middle'}>
             <LocaleSwitcher compact />
             <Dropdown
               menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
@@ -342,7 +368,7 @@ const MainLayout: React.FC = () => {
                   src={user?.avatar}
                   style={{ backgroundColor: themeToken.colorPrimary }}
                 />
-                <Text>{user?.displayName}</Text>
+                {!isMobile && <Text>{user?.displayName}</Text>}
               </Space>
             </Dropdown>
           </Space>
@@ -350,7 +376,7 @@ const MainLayout: React.FC = () => {
 
         <Content
           style={{
-            margin: 24,
+            margin: isMobile ? 12 : 24,
             minHeight: 280,
           }}
         >

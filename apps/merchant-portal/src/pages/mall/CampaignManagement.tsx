@@ -295,10 +295,10 @@ export default function CampaignManagement() {
   const totalParticipants = mockCampaigns.reduce((sum, c) => sum + c.participantCount, 0);
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       {/* Statistics Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('totalCampaigns')}
@@ -308,7 +308,7 @@ export default function CampaignManagement() {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('activeCampaigns')}
@@ -318,7 +318,7 @@ export default function CampaignManagement() {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('totalParticipants')}
@@ -365,6 +365,7 @@ export default function CampaignManagement() {
           columns={columns}
           dataSource={filteredCampaigns}
           rowKey="id"
+          scroll={{ x: 1000 }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

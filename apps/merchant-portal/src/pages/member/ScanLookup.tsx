@@ -298,6 +298,7 @@ const ScanLookup: React.FC = () => {
                 rowKey="id"
                 pagination={false}
                 size="small"
+                scroll={{ x: 500 }}
               />
             ) : (
               <Empty description={getLabel('noMember')} />

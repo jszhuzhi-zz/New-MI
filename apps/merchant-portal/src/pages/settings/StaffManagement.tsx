@@ -288,7 +288,7 @@ const StaffManagement: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <Title level={4} style={{ margin: 0 }}>
           <UserSwitchOutlined style={{ marginRight: 8 }} />
           {getLabel('title')}

@@ -233,10 +233,10 @@ export default function MemberManagement() {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       {/* Statistics Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('totalMembers')}
@@ -246,7 +246,7 @@ export default function MemberManagement() {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('activeMembers')}
@@ -256,7 +256,7 @@ export default function MemberManagement() {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title={tl('newThisMonth')}
@@ -276,7 +276,7 @@ export default function MemberManagement() {
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
+            style={{ width: '100%', maxWidth: 300 }}
             allowClear
           />
         </Space>
