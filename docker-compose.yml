@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: link_reit_membership
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - '5432:5432'
     volumes:
@@ -46,9 +46,10 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/link_reit_membership
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/link_reit_membership
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,15 +59,25 @@ services:
       - upload_data:/app/uploads
 
   # ============================================
-  # Admin Portals (served via Nginx)
+  # Frontend Apps (served via Nginx)
   # ============================================
+  customer-web:
+    build:
+      context: .
+      dockerfile: apps/customer-web/Dockerfile
+    container_name: link-reit-customer-web
+    expose:
+      - '80'
+    depends_on:
+      - backend
+
   group-admin:
     build:
       context: .
       dockerfile: apps/group-admin/Dockerfile
     container_name: link-reit-group-admin
-    ports:
-      - '3001:80'
+    expose:
+      - '80'
     depends_on:
       - backend
 
@@ -75,8 +86,8 @@ services:
       context: .
       dockerfile: apps/mall-admin/Dockerfile
     container_name: link-reit-mall-admin
-    ports:
-      - '3002:80'
+    expose:
+      - '80'
     depends_on:
       - backend
 
@@ -85,13 +96,13 @@ services:
       context: .
       dockerfile: apps/merchant-portal/Dockerfile
     container_name: link-reit-merchant-portal
-    ports:
-      - '3003:80'
+    expose:
+      - '80'
     depends_on:
       - backend
 
   # ============================================
-  # Nginx Reverse Proxy
+  # Nginx Reverse Proxy (unified entry)
   # ============================================
   nginx:
     image: nginx:alpine
@@ -100,10 +111,11 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - backend
+      - customer-web
       - group-admin
       - mall-admin
       - merchant-portal

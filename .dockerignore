@@ -1,0 +1,13 @@
+node_modules
+.git
+.gitignore
+*.log
+.turbo
+coverage
+screenshots
+docs
+apps/customer-mobile
+apps/mini-program
+.env
+.env.local
+*.tar.gz
