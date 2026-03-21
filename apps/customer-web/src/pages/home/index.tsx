@@ -208,11 +208,18 @@ export default function Home() {
   const loginHint = { 'zh-TW': '登入查看印花', 'zh-CN': '登录查看印花', en: 'Login to view stamps' }[locale];
   const loginButton = { 'zh-TW': '登入 / 註冊', 'zh-CN': '登录 / 注册', en: 'Login / Register' }[locale];
 
+  const FinanceIcon = ({ color }: { color: string }) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
   const quickActions = [
     { icon: <MallIcon color={colors.primary} />, label: t('home.mall'), path: '/mall' },
     { icon: <CouponIcon color={colors.primary} />, label: t('home.coupons'), path: '/offers' },
     { icon: <GiftIcon color={colors.primary} />, label: t('home.gifts'), path: '/gifts' },
     { icon: <CarIcon color={colors.primary} />, label: t('parking.title'), path: '/parking' },
+    { icon: <FinanceIcon color={colors.primary} />, label: '金融分析', path: '/financial-ai' },
   ];
 
   return (

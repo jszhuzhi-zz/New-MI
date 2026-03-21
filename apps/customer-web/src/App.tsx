@@ -21,6 +21,7 @@ import CheckInPage from './pages/checkin';
 import LoginPage from './pages/auth/login';
 import GiftsPage from './pages/gifts';
 import AICustomerServicePage from './pages/support/ai-customer-service';
+import FinancialAIPage from './pages/financial-ai';
 import MessagesPage from './pages/messages';
 import FavoritesPage from './pages/favorites';
 import ParkingPage from './pages/parking';
@@ -165,6 +166,7 @@ export default function App() {
           <Route path="/checkin" element={<ProtectedRoute element={<CheckInPage />} />} />
           <Route path="/gifts" element={<ProtectedRoute element={<GiftsPage />} />} />
           <Route path="/support" element={<ProtectedRoute element={<AICustomerServicePage />} />} />
+          <Route path="/financial-ai" element={<FinancialAIPage />} />
           <Route path="/messages" element={<ProtectedRoute element={<MessagesPage />} />} />
           <Route path="/favorites" element={<ProtectedRoute element={<FavoritesPage />} />} />
           <Route path="/parking" element={<ProtectedRoute element={<ParkingPage />} />} />
