@@ -4,7 +4,7 @@ import { NavBar, Input, Button, SpinLoading, Tag } from 'antd-mobile';
 import { LeftOutline, SendOutline } from 'antd-mobile-icons';
 import { useSettingsStore } from '../../store/settings';
 
-const GEMINI_API_KEY = 'AIzaSyA1mGt9TdbzAFr2NNb6Ty-nKtn1LA-q2WA';
+const GEMINI_API_KEY = 'AIzaSyB1vZV0SWmLLYdOS8ykrd7brLnYgVYRxLw';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 const SYSTEM_PROMPT = `你是一位专业的金融分析师AI助手，专注于为用户提供深度金融分析服务。你的能力包括：
